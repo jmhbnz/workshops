@@ -1,0 +1,189 @@
+---
+title: Getting familiar with OpenShift application platform
+exercise: 1
+date: '2023-12-04'
+tags: ['openshift','containers','kubernetes']
+draft: false
+authors: ['default']
+summary: "In this first exercise we'll get familiar with OpenShift."
+---
+
+In this first exercise we'll sign a container image using Sigstore. Specifically in this example, we're going to use "keyless" signing, one of the workflows supported by Sigstore.
+
+Sigstore keyless signing associates identities, rather than keys, with an artifact signature. The Sigstore 'Fulcio' service issues short-lived certificates binding an ephemeral key to an OpenID Connect identity. Signing events are logged in Rekor, a signature transparency log, providing an auditable record of when a signature was created.
+
+Sigstore’s root of trust, which includes Fulcio’s root CA certificate and Rekor’s public key, are distributed by The Update Framework (TUF). TUF is a framework to provide secure software and file updates. TUF defines a set of protocols to protect against various types of attacks.
+
+This "keyless" signing workflow provides a number of benefits:
+- There is no need for users to store and protect private keys used during signing. The Fulcio service destroys the private key  shortly after and the short-lived identity certificate expires. Users who wish to verify the software will use the transparency log entry, rather than relying on the signer to store and manage the private key.
+- The signature transparency log provides a complete audit trail of signature actions.
+
+Let's get started!
+
+## Lab environment
+Navigate to your project and find the `tssc-terminal` container. Create a terminal session within OpenShift:
+
+<Zoom>
+![terminal](/static/images/terminal.png)
+</Zoom>
+
+Login to the registry using your lab credentials:
+```bash
+podman login -u tssc -p $(oc whoami -t) registry.blueradish.net
+```
+Set the project for your username:
+```
+oc project userX
+```
+Pull down the test app, and re-tag it using your OpenShift project:
+```bash
+OC_PROJECT=$(oc project -q) 
+
+podman pull \
+  quay.io/smileyfritz/demo-app:v0.1.1
+
+podman tag \
+  quay.io/smileyfritz/demo-app:v0.1.1 \
+  registry.blueradish.net/$OC_PROJECT/demo-app:v1
+
+podman push \
+  registry.blueradish.net/$OC_PROJECT/demo-app:v1
+```
+
+## Sign the container image
+Firstly, grab the digest for your new image:
+```bash
+OC_PROJECT=$(oc project -q)
+
+IMAGE_REF=registry.blueradish.net/$OC_PROJECT/demo-app
+
+IMAGE_DIGEST=$(crane digest $IMAGE_REF:v1)
+```
+Now sign the container with cosign:
+```bash
+cosign sign $IMAGE_REF@$IMAGE_DIGEST
+```
+You'll be presented with a screen to authenticate Sigstore:
+
+<Zoom>
+![Sigstore auth](/static/images/exercise1/code1.png)
+</Zoom>
+
+Copy the `oauth2.sigstore.dev` link into your browser. Log into Sigstore with GitHub.
+
+<Zoom>
+![Sigstore auth 2](/static/images/exercise1/code2.png)
+</Zoom>
+
+Copy the code and paste it back into your OpenShift terminal session. The Sigstore signing action will continue, and the transparency log will be updated.
+
+<Zoom>
+![Sigstore auth 3](/static/images/exercise1/code3.png)
+</Zoom>
+
+Note the tlog entry that is created:
+```
+tlog entry created with index: 35809256
+```
+Use `crane` to list the registry contents, and verify that you have a signature created in the registry:
+```bash
+OC_PROJECT=$(oc project -q)
+
+crane ls \
+  registry.blueradish.net/$OC_PROJECT/demo-app
+```
+You should see a tag and the signature file are now created:
+```
+sha256-5e350542cb6501b78549701996fc8d22e86d9a8bc51434092d35698d0073b667.sig
+v1
+```
+
+## Verifying the signature
+We can also use the `cosign` to verify container signatures. You can do this knowing the identity that was used to sign the container as well as the certificate issuer. For example, we can validate our upstream image by running:
+```
+cosign verify --certificate-identity shane.boulden@gmail.com --certificate-oidc-issuer https://github.com/login/oauth quay.io/smileyfritz/demo-app:v0.1.1
+
+Verification for quay.io/smileyfritz/demo-app:v0.1.1 --
+The following checks were performed on each of these signatures:
+  - The cosign claims were validated
+  - Existence of the claims in the transparency log was verified offline
+  - The code-signing certificate was verified using trusted certificate authority certificates
+
+[{"critical":{"identity":{"docker-reference":"quay.io/smileyfritz/demo-app"},"image":{"docker-manifest-digest":"sha256:63c1117db19d56296150993c4f4eb78d54b386cbf35f4a2116b821e6b34ed53e"},"type":"cosign container image signature"},
+...
+```
+Now lets use the `cosign` to verify the signature you created:
+```bash
+OC_PROJECT=$(oc project -q)
+
+ cosign verify \
+   --certificate-oidc-issuer https://github.com/login/oauth \
+   --certificate-identity <your-github-identity> \
+   registry.blueradish.net/$OC_PROJECT/demo-app:v1
+```
+
+## Inspecting the transparency log
+We can also inspect the information that's been published to the Rekor transparency log, using the `tlog` entry number that was recorded initially. If you don't have one, just sign the image again with `cosign`.
+
+Let's see what the record looks like:
+```json
+rekor-cli get --log-index 35809256
+
+LogID: c0d23d6ad406973f9559f3ba2d1ca01f84147d8ffc5b8445c224f98b9591801d
+Index: 35809256
+IntegratedTime: 2023-09-12T06:03:46Z
+UUID: 24296fb24b8ad77a8b3ac548fc64ce4da8544381d36c2176cf84975da85aa05ee9e92efea91224a7
+Body: {
+  "HashedRekordObj": {
+    "data": {
+      "hash": {
+        "algorithm": "sha256",
+        "value": "628a902b63f6224376503e7169af80a2f03f522734b42e0dd768440b0359bfd0"
+      }
+    },
+    "signature": {
+      "content": "MEUCIAEdOaVgD3xzYiX9yibIU2vr2fAa3dpZzZ6fZAEJOwa7AiEA2204D/Pg91BLRVtqR9t0DQpEivbrxwuJ3zhEjdDvJ3U=",
+      "publicKey": {
+        "content": "LS0tLS1CRUdJTiBDRVJUSUZJQ0FURS0tLS0tCk1JSUMxekNDQWwyZ0F3SUJBZ0lVVGE0eHh1b1dadjNlcTBVbTQ5Nm9xQmhXeStJd0NnWUlLb1pJemowRUF3TXcKTnpFVk1CTUdBMVVFQ2hNTWMybG5jM1J2Y21VdVpHVjJNUjR3SEFZRFZRUURFeFZ6YVdkemRHOXlaUzFwYm5SbApjbTFsWkdsaGRHVXdIaGNOTWpNd09URXlNRFl3TXpReldoY05Nak13T1RFeU1EWXhNelF6V2pBQU1Ga3dFd1lICktvWkl6ajBDQVFZSUtvWkl6ajBEQVFjRFFnQUV1dG5mRmpHNFZ3MnUxNFBOVjJ4OFQrL1pRUGZNVVhWS0tSMWcKU2RhTml3bzllQ2FMdlNrRk10b2RlRGdjM3JHa2NLV09BbGJOUktKdThvOWFnWFN0MXFPQ0FYd3dnZ0Y0TUE0RwpBMVVkRHdFQi93UUVBd0lIZ0RBVEJnTlZIU1VFRERBS0JnZ3JCZ0VGQlFjREF6QWRCZ05WSFE0RUZnUVVFdmoyClhaOFZQU0R5ZmFtRkIyT0poTlQyMUJvd0h3WURWUjBqQkJnd0ZvQVUzOVBwejFZa0VaYjVxTmpwS0ZXaXhpNFkKWkQ4d0pRWURWUjBSQVFIL0JCc3dHWUVYYzJoaGJtVXVZbTkxYkdSbGJrQm5iV0ZwYkM1amIyMHdMQVlLS3dZQgpCQUdEdnpBQkFRUWVhSFIwY0hNNkx5OW5hWFJvZFdJdVkyOXRMMnh2WjJsdUwyOWhkWFJvTUM0R0Npc0dBUVFCCmc3OHdBUWdFSUF3ZWFIUjBjSE02THk5bmFYUm9kV0l1WTI5dEwyeHZaMmx1TDI5aGRYUm9NSUdMQmdvckJnRUUKQWRaNUFnUUNCSDBFZXdCNUFIY0EzVDB3YXNiSEVUSmpHUjRjbVdjM0FxSktYcmplUEszL2g0cHlnQzhwN280QQpBQUdLaC8wUlFnQUFCQU1BU0RCR0FpRUFreDNqVHJxMXplcFpaQm5wUjlzL1ZDRzcyU2hCVW5nQTVCeitDd21nCnJrUUNJUUNxYnRqaVFkMndxNE5NTmkvOG0ycXVNVlVrQ2tXMDVEVGR3RHIvNDljZTh6QUtCZ2dxaGtqT1BRUUQKQXdOb0FEQmxBakVBay9TZ0pOcmpXc1B3WXl2bTBNNnVMMFQwSVVuVjlPeE1WRDQyTjh0M09wTTNGdUZHR3lyNgpkR2crYVpOQ25zdXRBakEyTGpicjN4UHIrdDloa2VadG9lZFhWM2VJeTJPdmdERnJRbUI1dFFwNEJyajZjZHdOCmRsUXN0b2dHdkdVZ0lqRT0KLS0tLS1FTkQgQ0VSVElGSUNBVEUtLS0tLQo="
+      }
+    }
+  }
+}
+```
+Since this is a json document we can extract the information with `jq`. For example, we can look at the certificates that were generated by Cosign and signed by the Fulcio CA:
+```bash
+# Fetch the record from Rekor by log index in JSON format
+REKOR_RECORD=$(rekor-cli get --log-index 35809256 --format json)
+
+# Extract the public key content from the Rekor record using jq
+PUBLIC_KEY=$(echo "$REKOR_RECORD" |\
+ jq -r '.Body.HashedRekordObj.signature.publicKey.content')
+
+# Decode the base64-encoded content of the public key
+DECODED_KEY=$(echo "$PUBLIC_KEY" | base64 -d)
+
+# Display the X.509 certificate information of the decoded key
+openssl x509 -noout -text <<< "$DECODED_KEY"
+```
+```yaml
+
+Certificate:
+    Data:
+        Version: 3 (0x2)
+        Serial Number:
+            4d:ae:31:c6:ea:16:66:fd:de:ab:45:26:e3:de:a8:a8:18:56:cb:e2
+        Signature Algorithm: ecdsa-with-SHA384
+        Issuer: O = sigstore.dev, CN = sigstore-intermediate
+        Validity
+            Not Before: Sep 12 06:03:43 2023 GMT
+            Not After : Sep 12 06:13:43 2023 GMT
+        Subject: 
+        Subject Public Key Info:
+            Public Key Algorithm: id-ecPublicKey
+                Public-Key: (256 bit)
+```
+## Stretch goals
+Let's investigate data stored in Rekor. See if you can use the `rekor-cli` commands to find out more about the image `cgr.dev/chainguard/jre:latest`:
+- Which version of `openssl-config` is used in this image?
+- How was this image signed? Was it interactively signed, or was a build system used?
+- When was this image last signed?
