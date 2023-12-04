@@ -4,7 +4,7 @@ const siteMetadata = {
   headerTitle: 'Red Hat',
   description: 'Red Hat OpenShift Application Delivery Workshop',
   language: 'en-us',
-  siteUrl: 'https://oadw.rhdemo.win',
+  siteUrl: 'https://jmhbnz.github.io/ocp-app-delivery-workshop',
   siteRepo: 'https://github.com/jmhbnz/ocp-app-delivery-workshop',
   siteLogo: '/static/images/redhat.png',
   image: '/static/images/avatar.png',
