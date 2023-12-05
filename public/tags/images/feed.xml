@@ -14,7 +14,7 @@
     <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise2</guid>
     <title>Deploying your first application</title>
     <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise2</link>
-    <description>Time to deploy our first app!</description>
+    <description>Time to deploy your first app!</description>
     <pubDate>Tue, 05 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
     <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>images</category>

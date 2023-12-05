@@ -1,0 +1,38 @@
+---
+title: Scaling and autohealing applications
+exercise: 3
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','deployments','autoscaling']
+draft: false
+authors: ['default']
+summary: "Let's scale our application up 📈"
+---
+
+We have our application deployed, let's scale it up.
+
+While **Services** provide routing and load balancing for **Pods**, the higher level **Deployment** resource specifies how many replicas of our application will be created and is a simplistic way to configure scaling for the application.
+
+> Note: To learn more about **Deployments** refer to this [documentation](https://docs.openshift.com/container-platform/4.14/applications/deployments/what-deployments-are.html).
+
+
+## 3.1 - Reviewing the parksmap deployment
+
+Let's start by confirming how many `replicas` we currently specify for our ParksMap application. We'll also use this exercise step to take a look at how all resources within OpenShift can be viewed and managed as [YAML](https://www.redhat.com/en/topics/automation/what-is-yaml) formatted text files which is extremely useful for more advanced automation and GitOps concepts. 
+
+Start in the **Topology** view of the **Developer** perspective.
+
+Click on your "Parksmap" application icon and click on the **D parksmap** deployment name at the top of the right hand panel.
+
+From the **Deployment details** view we can click on the **YAML** tab and scroll down to find the following:
+
+```yaml
+spec:
+  replicas: 1
+```
+
+<Zoom>
+|![parksmap-replicas](/ocp-app-delivery-workshop/static/images/app-replicas.gif) | 
+|:-------------------------------------------------------------------:|
+| *ParksMap application deployment replicas*                          |
+</Zoom>
+
