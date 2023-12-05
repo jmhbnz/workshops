@@ -8,9 +8,11 @@ authors: ['default']
 summary: "In this first exercise we'll get familiar with OpenShift."
 ---
 
-Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. In this first excercise we'll get logged into our cluster and familarise ourselves with the OpenShift web console.
+Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. In this first excercise we'll get logged into our cluster and familarise ourselves with the OpenShift web console and web terminal.
 
-The OpenShift Container Platform web console is a user interface accessible from a web browser. You can use the web console to visualize, browse, and manage your OpenShift cluster and the applications running on it.
+The OpenShift Container Platform web console is a feature-rich web console with both an Administrator perspective and a Developer perspective accessible through any modern web browser. You can use the web console to visualize, browse, and manage your OpenShift cluster and the applications running on it.
+
+In addition to the web console, OpenShift includes command line tools to provide users with a nice interface to work with applications deployed to the platform. The `oc` command line tool is available for Linux, macOS or Windows.
 
 Let's get started!
 
@@ -20,13 +22,35 @@ An OpenShift `4.14` cluster has already been provisioned for you to complete the
 
 Once the page loads you can login with the details provided by your workshop facilitator.
 
+<zoom>
 ![workshop](/ocp-app-delivery-workshop/static/images/workshop.png)
+</zoom>
 
 
-## 1.2 - Login to the cluster console
+## 1.2 - Login to the cluster web console
 
 Once you're logged into the lab environnment we can open up the OpenShift web console and login with the credentials provided. 
 
-The cluster console has a menu on the left to quickly access categories such as `Storage`, `Networking` or `Workloads`. We'll dive into these sections in more detail shortly.
+When first logging in you will be prompted to take a tour of the "Development" console view, let's do that now. 
 
-![cluster](/ocp-app-delivery-workshop/static/images/cluster.png)
+<zoom>
+![cluster](/ocp-app-delivery-workshop/static/images/tour.gif)
+</zoom>
+
+
+## 1.3 - Using a project
+
+Projects are a logical boundary to help you organize your applications. An OpenShift project allows a community of users (or a single user) to organize and manage their work in isolation from other projects. 
+
+Each project has its own resources, role based access control (who can or cannot perform actions), and constraints (quotas and limits on resources, etc). 
+
+Projects act as a "wrapper" around all the application services you (or your teams) are using for your work.
+
+In this lab environment, you already have access to single project: `userX` (Where X is the number of your user allocted for the workshop.)
+
+Let's click into our `Project` from the left hand panel of the "Developer" web console view. We should be able to see that our project has no `Deployments` and there are no compute cpu or memory resources currently being consumed.
+
+<zoom>
+![cluster](/ocp-app-delivery-workshop/static/images/project.png)
+</zoom>
+
