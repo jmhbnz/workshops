@@ -7,19 +7,9 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Mon, 04 Dec 2023 00:00:00 GMT</lastBuildDate>
-      <atom:link href="https://jmhbnz.github.io/ocp-app-delivery-workshop/tags/openshift/feed.xml" rel="self" type="application/rss+xml"/>
+      <lastBuildDate>Tue, 05 Dec 2023 00:00:00 GMT</lastBuildDate>
+      <atom:link href="https://jmhbnz.github.io/ocp-app-delivery-workshop/tags/images/feed.xml" rel="self" type="application/rss+xml"/>
       
-  <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise1</guid>
-    <title>Getting familiar with OpenShift</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise1</link>
-    <description>In this first exercise we&#39;ll get familiar with OpenShift.</description>
-    <pubDate>Mon, 04 Dec 2023 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category>
-  </item>
-
   <item>
     <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise2</guid>
     <title>Deploying your first application</title>
