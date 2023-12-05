@@ -1,0 +1,39 @@
+---
+title: Deploying our first application
+exercise: 2
+date: '2023-12-05'
+tags: ['openshift','containers','kubernetes','deployments','images']
+draft: false
+authors: ['default']
+summary: "Time to deploy our first app!"
+---
+
+
+Now that we have had a tour of the OpenShift web console to get familar, let's use the web console to deploy our first application.
+
+Let’s start by doing the simplest thing possible - get a plain old Docker-formatted container image to run on OpenShift. This is incredibly simple to do. With OpenShift it can be done directly from the web console.
+
+Before we begin, if you would like a bit more background on what a container is or why they are important click the following link to learn more: https://www.redhat.com/en/topics/containers#overview
+
+
+## 2.1 - Deploying the container image
+
+Within the **Developer** perspective, click the **+Add** entry on the left hand menu.
+
+Once on the **+Add** page, click **Container images** to open a dialog that will allow you to quickly deploy an image.
+
+In the **Image name** field enter the following:
+
+```text
+quay.io/openshiftroadshow/parksmap:latest
+```
+
+Leave all other fields at their defaults (but take your time to scroll down and review each one to familarise yourself! 🎓)
+
+Click **Create** to deploy the application.
+
+OpenShift will pull this container image if it does not exist already on the cluster and then deploy a container based on this image. You will be taken back to the **Topology** view in the **Developer** perspective which will show the new "Parksmap" application.
+
+<Zoom>
+![first-app](/ocp-app-delivery-workshop/static/images/first-app.gif)
+</Zoom>
