@@ -85,3 +85,92 @@ Let's launch a web terminal now by clicking the terminal button in the top right
 </Zoom>
 
 
+## 1.6 - Running oc commands
+
+The [`oc` command line utility](https://docs.openshift.com/container-platform/4.14/cli_reference/openshift_cli/getting-started-cli.html#creating-a-new-app) is a superset of the upstream kubernetes `kubectl` command line utility. This means it can do everything that `kubectl` can do, plus some additional OpenShift specific commands.
+
+Let's try a few commands now:
+
+
+### Checking our current project
+
+Most actions we take in OpenShift will be in relation to a particular project. We can check which project we are currently actively using by running the `oc project` command.
+
+We should see output similar to below showing we are currently using our `userX` project:
+
+```bash
+bash-4.4 ~ $ oc project
+Using project "user1" from context named "user1-context" on server "https://172.31.0.1:443".
+```
+
+### Getting help and explaining concepts
+
+As with any command line utility, there can be complexity that quickly surfaces. Thankfully the `oc` command line utility has excellent built in help. 
+
+Let's take a look at that now.
+
+To get an understanding of all the options available, try running `oc help`. You should see options similar to the below sample:
+
+```bash
+bash-4.4 ~ $ oc help
+OpenShift Client
+
+This client helps you develop, build, deploy, and run your applications on any
+OpenShift or Kubernetes cluster. It also includes the administrative
+commands for managing a cluster under the 'adm' subcommand.
+
+Basic Commands:
+  login             Log in to a server
+  new-project       Request a new project
+  new-app           Create a new application
+  status            Show an overview of the current project
+  project           Switch to another project
+  projects          Display existing projects
+  explain           Get documentation for a resource
+
+Build and Deploy Commands:
+  rollout           Manage a Kubernetes deployment or OpenShift deployment config
+  rollback          Revert part of an application back to a previous deployment
+  new-build         Create a new build configuration
+  start-build       Start a new build
+  cancel-build      Cancel running, pending, or new builds
+  import-image      Import images from a container image registry
+  tag               Tag existing images into image streams
+
+```
+
+
+To get a more detailed explanataion about a specific concept we can use the `oc explain` command.
+
+Let's run `oc explain project` now to learn more about the concept of a project we introduced earlier:
+
+```bash
+bash-4.4 ~ $ oc explain project
+KIND:     Project
+VERSION:  project.openshift.io/v1
+
+DESCRIPTION:
+     Projects are the unit of isolation and collaboration in OpenShift. A
+     project has one or more members, a quota on the resources that the project
+     may consume, and the security controls on the resources in the project.
+     Within a project, members may have different roles - project administrators
+     can set membership, editors can create and manage the resources, and
+     viewers can see but not access running containers. In a normal cluster
+     project administrators are not able to alter their quotas - that is
+     restricted to cluster administrators.
+
+     Listing or watching projects will return only projects the user has the
+     reader role on.
+
+     An OpenShift project is an alternative representation of a Kubernetes
+     namespace. Projects are exposed as editable to end users while namespaces
+     are not. Direct creation of a project is typically restricted to
+     administrators, while end users should use the requestproject resource.
+```
+
+
+That's a quick introduction to the `oc` command line utility. Let's close our web terminal now so we can move on to the next excercise.
+
+<Zoom>
+![close-terminal](/ocp-app-delivery-workshop/static/images/close-terminal.gif)
+</Zoom>
