@@ -18,7 +18,7 @@ Before we begin, if you would like a bit more background on what a container is 
 
 ## 2.1 - Deploying the container image
 
-In this exercise, we’re going to deploy the **web** component of the ParksMap application which is also called parksmap and uses OpenShift’s service discovery mechanism to discover the backend services deployed and shows their data on the map. Below is a visual overview of the complete ParksMap application.
+In this exercise, we’re going to deploy the **web** component of the ParksMap application which uses OpenShift's service discovery mechanism to discover any accompanying backend services deployed and shows their data on the map. Below is a visual overview of the complete ParksMap application.
 
 <Zoom>
 |![parksmap-architecture](/ocp-app-delivery-workshop/static/images/parksmap-architecture.png) | 
@@ -49,11 +49,11 @@ OpenShift will pull this container image if it does not exist already on the clu
 </Zoom>
 
 
-## 2.2 - Observing our deployed application
+## 2.2 - Reviewing our deployed application
 
 If you click on the **parksmap** entry in the **Topology** view, you will see some information about that deployed application. 
 
-The Resources tab may be displayed by default. If so, click on the Details tab. On that panel, you will see that there is a single **Pod** that was created by your actions.
+The **Resources** tab may be displayed by default. If so, click on the **Details** tab. On that tab, you will see that there is a single **Pod** that was created by your actions.
 
 <Zoom>
 |![app-details](/ocp-app-delivery-workshop/static/images/app-details.gif) | 
@@ -82,10 +82,34 @@ You may remember that when we deployed the ParksMap application, there was a che
 
 Clicking the link you should now see the ParksMap application frontend 🎉
 
+> Note: If this is the first time opening this page, the browser will ask permission to get your position. This is needed by the Frontend app to center the world map to your location, if you don’t allow it, it will just use a default location.
+
 <Zoom>
-|![app-details](/ocp-app-delivery-workshop/static/images/app-frontend.png) | 
+|![app-frontend](/ocp-app-delivery-workshop/static/images/app-frontend.png) | 
 |:-------------------------------------------------------------------:|
 | *ParksMap application frontend*                                     |
 </Zoom>
 
-> Note: If this is the first time opening this page, the browser will ask permission to get your position. This is needed by the Frontend app to center the world map to your location, if you don’t allow it, it will just use a default location.
+
+## 2.3 - Checking application logs
+
+If we deploy an application and something isn't working the way we expect, reviewing the application logs can often be helpful. OpenShift includes built in support features for reviewing application logs.
+
+Let's try it now for our ParksMap frontend.
+
+In the **Developer** perspective, open the **Topology** view.
+
+Click your "Parksmap" application icon then click on the **Resources** tab.
+
+From the **Resources** tab click **View logs**
+
+<Zoom>
+|![app-logs](/ocp-app-delivery-workshop/static/images/app-logs.gif) | 
+|:-------------------------------------------------------------------:|
+| *Accessing the ParksMap application logs*                           |
+</Zoom>
+
+
+
+
+
