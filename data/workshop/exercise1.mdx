@@ -14,7 +14,7 @@ The OpenShift Container Platform web console is a feature-rich web console with 
 
 In addition to the web console, OpenShift includes command line tools to provide users with a nice interface to work with applications deployed to the platform. The `oc` command line tool is available for Linux, macOS or Windows.
 
-Let's get started!
+**Let's get started!**
 
 ## 1.1 - Login to lab environment
 
@@ -22,23 +22,23 @@ An OpenShift `4.14` cluster has already been provisioned for you to complete the
 
 Once the page loads you can login with the details provided by your workshop facilitator.
 
-<zoom>
+<Zoom>
 ![workshop](/ocp-app-delivery-workshop/static/images/workshop.png)
-</zoom>
+</Zoom>
 
 
 ## 1.2 - Login to the cluster web console
 
 Once you're logged into the lab environnment we can open up the OpenShift web console and login with the credentials provided. 
 
-When first logging in you will be prompted to take a tour of the "Development" console view, let's do that now. 
+When first logging in you will be prompted to take a tour of the **Developer** console view, let's do that now. 
 
-<zoom>
-![cluster](/ocp-app-delivery-workshop/static/images/tour.gif)
-</zoom>
+<Zoom>
+![tour](/ocp-app-delivery-workshop/static/images/tour.gif)
+</Zoom>
 
 
-## 1.3 - Using a project
+## 1.3 - Understanding projects
 
 Projects are a logical boundary to help you organize your applications. An OpenShift project allows a community of users (or a single user) to organize and manage their work in isolation from other projects. 
 
@@ -50,7 +50,25 @@ In this lab environment, you already have access to single project: `userX` (Whe
 
 Let's click into our `Project` from the left hand panel of the "Developer" web console view. We should be able to see that our project has no `Deployments` and there are no compute cpu or memory resources currently being consumed.
 
-<zoom>
-![cluster](/ocp-app-delivery-workshop/static/images/project.png)
-</zoom>
+<Zoom>
+![project](/ocp-app-delivery-workshop/static/images/project.png)
+</Zoom>
+
+
+## 1.4 - Switching between perspectives
+
+Different roles have different needs when it comes to viewing details within the OpenShift web console. At the top of the left navigation menu, you can toggle between the Administrator perspective and the Developer perspective.
+
+Select **Administrator** to switch to the Administrator perspective. 
+
+Once the Administrator perspective loads, you should be in the "Home" view and see a wider array of menu sections in the left hand navigation panel.
+
+Switch back to the **Developer** perspective. Once the Developer perspective loads, select the **Topology** view.
+
+Right now, there are no applications or components to view in your `userX`  project, but once you begin working on the lab, you’ll be able to visualize and interact with the components in your application here.
+
+<Zoom>
+![perspectives](/ocp-app-delivery-workshop/static/images/perspectives.gif)
+</Zoom>
+
 
