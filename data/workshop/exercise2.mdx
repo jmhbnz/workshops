@@ -18,6 +18,14 @@ Before we begin, if you would like a bit more background on what a container is 
 
 ## 2.1 - Deploying the container image
 
+In this exercise, we’re going to deploy the **web** component of the ParksMap application which is also called parksmap and uses OpenShift’s service discovery mechanism to discover the backend services deployed and shows their data on the map. Below is a visual overview of the complete ParksMap application.
+
+<Zoom>
+|![parksmap-architecture](/ocp-app-delivery-workshop/static/images/parksmap-architecture.png) | 
+|:-------------------------------------------------------------------:|
+| *ParksMap application architecture*                                 |
+</Zoom>
+
 Within the **Developer** perspective, click the **+Add** entry on the left hand menu.
 
 Once on the **+Add** page, click **Container images** to open a dialog that will allow you to quickly deploy an image.
@@ -45,5 +53,39 @@ OpenShift will pull this container image if it does not exist already on the clu
 
 If you click on the **parksmap** entry in the **Topology** view, you will see some information about that deployed application. 
 
-The Resources tab may be displayed by default. If so, click on the Details tab. On that panel, you will see that there is a single Pod that was created by your actions.
+The Resources tab may be displayed by default. If so, click on the Details tab. On that panel, you will see that there is a single **Pod** that was created by your actions.
 
+<Zoom>
+|![app-details](/ocp-app-delivery-workshop/static/images/app-details.gif) | 
+|:-------------------------------------------------------------------:|
+| *Deploying the container image*                                     |
+</Zoom>
+
+> Note: A pod is the smallest deployable unit in Kubernetes and is effectively a grouping of one or more individual containers. Any containers deployed within a pod are guaranteed to run on the same machine. It is very common for pods in kubernetes to only hold a single container, although sometimes auxiliary services can be included as additional containers in a pod when we want them to run alongside our application.
+
+
+## 2.2 - Accessing the application
+
+Now that we have the ParksMap application deployed. How do we access it??
+
+This is where OpenShift **Routes** and **Services** come in.
+
+While **Services** provide internal abstraction and load balancing within an OpenShift cluster, sometimes clients outside of the OpenShift cluster need to access an application. The way that external clients are able to access applications running in OpenShift is through an OpenShift **Route**. 
+
+You may remember that when we deployed the ParksMap application, there was a checkbox ticked to automatically create a **Route**. Thanks to this, all we need to do to access the application is go the **Resources** tab of the application details pane and click the url shown under the **Routes** header.
+
+<Zoom>
+|![app-details](/ocp-app-delivery-workshop/static/images/app-route.gif) | 
+|:-------------------------------------------------------------------:|
+| *Opening ParksMap application Route*                                |
+</Zoom>
+
+Clicking the link you should now see the ParksMap application frontend 🎉
+
+<Zoom>
+|![app-details](/ocp-app-delivery-workshop/static/images/app-frontend.png) | 
+|:-------------------------------------------------------------------:|
+| *ParksMap application frontend*                                     |
+</Zoom>
+
+> Note: If this is the first time opening this page, the browser will ask permission to get your position. This is needed by the Frontend app to center the world map to your location, if you don’t allow it, it will just use a default location.
