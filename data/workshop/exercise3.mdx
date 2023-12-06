@@ -1,5 +1,5 @@
 ---
-title: Scaling and autohealing applications
+title: Scaling and self-healing applications
 exercise: 3
 date: '2023-12-06'
 tags: ['openshift','containers','kubernetes','deployments','autoscaling']
@@ -64,7 +64,7 @@ The pod will automatically be restarted by OpenShift however if you refresh your
 </Zoom>
 
 
-## 3.2 - Scaling up the application
+## 3.3 - Scaling up the application
 
 As a best practice, wherever possible we should try to run multiple replicas of our pods so that if one pod is unavailable our application will continue to be available to users.
 
@@ -85,3 +85,31 @@ Once the new pod is ready, repeat the steps from task `3.2` to crash one of the 
 </Zoom>
 
 
+## 3.4 - Self healing to desired state
+
+In the previous example we saw what happened when we intentionally crashed our application. Let's see what happens if we just outright delete one of our ParksMap applications two **Pods**.
+
+For this step we'll use the `oc` command line utility to build some more familarity.
+
+Let's start by launching back into our web terminal now by clicking the terminal button in the top right hand corner and then clicking **Start** with our `userX` project selected.
+
+Once our terminal opens let's check our list of **Pods** with `oc get pods`. You should see something similar to the output below:
+
+```bash
+bash-4.4 ~ $ oc get pods
+NAME                                         READY   STATUS    RESTARTS   AGE
+parksmap-ff7477dc4-2nxd2                     1/1     Running   0          79s
+parksmap-ff7477dc4-n26jl                     1/1     Running   0          31m
+workspace45c88f4d4f2b4885-74b6d4898f-57dgh   2/2     Running   0          108s
+```
+
+Copy one of the pod names and delete it via `oc delete pods <podname>`, i.e `oc delete pod parksmap-ff7477dc4-2nxd2`.
+
+```bash
+bash-4.4 ~ $ oc delete pod parksmap-ff7477dc4-2nxd2
+pod "parksmap-ff7477dc4-2nxd2" deleted
+```
+
+If we now run `oc get pods` again we will see a new **Pod** has automatically been created by OpenShift to replace the one we fully deleted. This is because OpenShift is a container orchestration engine that will always try and enforce the desired state that we declare.
+
+In our ParksMap **Deployment** we have declared we always want two replicas of our application running at all times. Even if we (possibly accidentally) delete one, OpenShift will always attempt to self heal to return to our desired state.
