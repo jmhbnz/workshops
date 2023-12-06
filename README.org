@@ -67,3 +67,21 @@ spec:
   sourceNamespace: openshift-marketplace
   #startingCSV: web-terminal.v1.8.0-0.1692219820.p
 #+end_src
+
+
+*** Create an operatorgroup for each user
+
+#+begin_src bash
+cat << EOF > operatorgroup.yaml
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: grafana-og
+  namespace: userX
+spec:
+  targetNamespaces:
+    - userX
+  upgradeStrategy: Default
+EOF
+for user in $(seq 1 30); do oc apply ...; done
+#+end_src

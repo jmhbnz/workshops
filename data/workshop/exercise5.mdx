@@ -1,0 +1,58 @@
+---
+title: Deploying an application via operator
+exercise: 5
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','operator-framework']
+draft: false
+authors: ['default']
+summary: "Exploring alternative deployment approaches."
+---
+
+Another alternative approach for deploying and managing the lifecycle of more complex applications is via the [Operator Framework](https://operatorframework.io).
+
+The goal of an **Operator** is to put operational knowledge into software. Previously this knowledge only resided in the minds of administrators, various combinations of shell scripts or automation software like Ansible. It was outside of your Kubernetes cluster and hard to integrate. **Operators** change that.
+
+**Operators** are the missing piece of the puzzle in Kubernetes to implement and automate common Day-1 (installation, configuration, etc.) and Day-2 (re-configuration, update, backup, failover, restore, etc.) activities in a piece of software running inside your Kubernetes cluster, by integrating natively with Kubernetes concepts and APIs. 
+
+With Operators you can stop treating an application as a collection␃of primitives like **Pods**, **Deployments**, **Services** or **ConfigMaps**, but instead as a singular, simplified custom object that only exposes the specific configuration values that make sense for the specific application.
+
+
+
+
+## 4.1 - Deploying an operator
+
+Deploying an application via an **Operator** is generally a two step process. The first step is to deploy the **Operator** itself.
+
+Once the **Operator** is installed we can deploy the application.
+
+For this exercise we will install the **Operator** for the [Grafana](https://grafana.com) observability platform.
+
+Let's start in the **Topology** view of the **Developer** perspective.
+
+Copy the following YAML snippet to your clipboard:
+
+```yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: grafana-operator
+  namespace: userX
+spec:
+  channel: v5
+  installPlanApproval: Automatic
+  name: grafana-operator
+  source: community-operators
+  sourceNamespace: openshift-marketplace
+```
+
+Click the **+** button in the top right corner menu bar of the OpenShift web console. This is a fast way to quickly import snippets of YAML for testing or exploration purposes.
+
+Paste the above snippet of YAML into the editor and replace the three instances of `userX` with your assigned user.
+
+Click **Create**. In a minute or so you should see the Grafana operator installed and running in your project.
+
+<Zoom>
+|![operator-deployment](/ocp-app-delivery-workshop/static/images/operator-deployment.gif) | 
+|:-------------------------------------------------------------------:|
+| *Deploying grafana operator via static yaml*                        |
+</Zoom>
