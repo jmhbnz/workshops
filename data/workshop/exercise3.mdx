@@ -39,13 +39,13 @@ spec:
 
 ## 3.2 - Intentionally crashing the application
 
-With our ParksMap application only having one replica currently it will not be very tolerant to failures. OpenShift will automatically restart the single pod if it encounters a failure, however during the time the application pod takes to start back up our users will not be able to access the application.
+With our ParksMap application only having one pod replica currently it will not be tolerant to failures. OpenShift will automatically restart the single pod if it encounters a failure, however during the time the application pod takes to start back up our users will not be able to access the application.
 
 Let's see that in practice by intentionally causing an error in our application.
 
 Start in the **Topology** view of the **Developer** perspective and click your Parksmap application icon.
 
-In the **Resources** tab of the details pane open a second browser tab showing the ParksMap application **Route** that we explored in the previous exercise. The application should be running as normal.
+In the **Resources** tab of the information pane open a second browser tab showing the ParksMap application **Route** that we explored in the previous exercise. The application should be running as normal.
 
 Click on the pod name under the **Pods** header of the **Resources** tab and then click on the **Terminal** tab. This will open a terminal within our running ParksMap application container.
 
@@ -55,12 +55,33 @@ Inside the terminal run the following to intentionally crash the application:
 kill 1 
 ```
 
-The pod will automatically be restarted by OpenShift however if you open your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
+The pod will automatically be restarted by OpenShift however if you refresh your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
 
 <Zoom>
 |![parksmap-crash](/ocp-app-delivery-workshop/static/images/app-crash.gif) | 
 |:-------------------------------------------------------------------:|
 | *Intentionally crashing the ParksMap application*                   |
+</Zoom>
+
+
+## 3.2 - Scaling up the application
+
+As a best practice, wherever possible we should try to run multiple replicas of our pods so that if one pod is unavailable our application will continue to be available to users.
+
+Let's scale up our application and confirm it is now fault tolerant.
+
+In the **Topology** view of the **Developer** perspective click your Parksmap application icon.
+
+In the **Details** tab of the information pane click the **^ Increase the pod count** arrow to increase our replicas to `2`.  You will see the second pod starting up and becoming ready.
+
+> Note: You can also scale the replicas of a deployment in automated and event driven fashions in response to factors like incoming traffic or resource consumption, or by using the `oc` cli for example `oc scale --replicas=2 deployment/parksmap`.
+
+Once the new pod is ready, repeat the steps from task `3.2` to crash one of the pods. You should see that the application continues to serve traffic thanks to our OpenShift **Service** load balancing traffic to the second **Pod**.
+
+<Zoom>
+|![parksmap-scale](/ocp-app-delivery-workshop/static/images/app-scale.gif) | 
+|:-------------------------------------------------------------------:|
+| *Scaling up the ParksMap application*                               |
 </Zoom>
 
 
