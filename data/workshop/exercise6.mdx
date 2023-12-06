@@ -51,3 +51,40 @@ Scroll down reviewing the other options then click **Create**.
 | *Creating a source to image build in OpenShift*                     |
 </Zoom>
 
+
+## 6.2 - Monitoring the build
+
+To see the build logs, in **Topology** view of the **Developer** perspective, click the nationalparks python icon, then click on **View Logs** in the **Builds** section of the **Resources** tab.
+
+Based on the application’s language, the build process will be different. However, the initial build will take a few minutes as the dependencies are downloaded. You can see all of this happening in real time!
+
+From the `oc` command line utility, you can also see **Builds**, let's open our **Web Terminal** back up and take a look:
+
+```bash
+oc get builds
+```
+
+You will see output similar to the example below:
+
+```bash
+NAME                     TYPE     FROM          STATUS     STARTED         DURATION
+nationalparks-py-git-1   Source   Git@f87895b   Complete   7 minutes ago   48s
+```
+
+Let's also take a look at the logs from the `oc` command line with:
+
+```bash
+oc logs -f builds/nationalparks-py-git-1
+```
+
+After the build has completed and successfully:
+
+- The S2I process will push the resulting image to the internal OpenShift image registry.
+
+- The Deployment (D) will detect that the image has changed, and this will cause a new deployment to happen.
+
+- A ReplicaSet (RS) will be spawned for this new deployment.
+
+- The ReplicaSet will detect no Pods are running and will cause one to be deployed, as our default replica count is just 1.
+
+To conclude, when issuing the `oc get pods` command, you will see that the build **Pod** has finished (exited) and that an application **Pod** is in a ready and running state.
