@@ -1,0 +1,59 @@
+---
+title: Deploying an application via helm chart
+exercise: 4
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','deployments','autoscaling']
+draft: false
+authors: ['default']
+summary: "Exploring alternative deployment approaches."
+---
+
+In **Exercise 2** we deployed our ParksMap application in the most simplistic way. Just throwing an individual docker container at the cluster via the web console and letting OpenShift automate everything else for us.
+
+With more complex applications comes the need to more finely customise the details of our application **Deployments** along with any other associated resources the application requires.
+
+Enter the [**Helm**](https://www.redhat.com/en/topics/devops/what-is-helm) project, which can package up our application resources and distribute them as something called a **Helm chart**.
+
+In simple terms, a **Helm chart** is basically a directory containing a collection of YAML template files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
+
+
+## 3.1 - Deploying a helm chart via the web console 
+
+It is common for organisations that produce and ship applications to provide their applications to organisations as a **Helm chart**.
+
+Let's get started by deploying a **Helm chart** for the [Gitea](https://about.gitea.com) application which is a git oriented devops platform similar to GitHub or GitLab.
+
+Start in the **+Add** view of the **Developer** perspective.
+
+Scroll down and click **Helm chart**. OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
+
+Click on the search result and click **Create**.
+
+In the YAML configuration window enter the following, substituting `userX` with your assigned user and then click **Create** once more.
+
+```yaml
+db:
+  password: userX
+hostname: userX-gitea.apps.<clusterdomain>
+tlsRoute: true
+```
+
+
+<Zoom>
+|![gitea-deployment](/ocp-app-delivery-workshop/static/images/gitea-deployment.gif) | 
+|:-------------------------------------------------------------------:|
+| *Gitea application deployment via helm chart*                       |
+</Zoom>
+
+
+## 3.2 - Examine deployed application
+
+You will now see the Gitea application being deployed in your project. Notice how the application is made up of two separate pods, a Database, and Web server.
+
+<Zoom>
+|![gitea-deployment](/ocp-app-delivery-workshop/static/images/gitea-deployment.gif) | 
+|:-------------------------------------------------------------------:|
+| *ParksMap application deployment replicas*                          |
+</Zoom>
+
+
