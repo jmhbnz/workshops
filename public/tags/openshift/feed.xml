@@ -50,5 +50,25 @@
     <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>autoscaling</category>
   </item>
 
+  <item>
+    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise5</guid>
+    <title>Deploying an application via operator</title>
+    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise5</link>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>operator-framework</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise6</guid>
+    <title>Deploying an application from source</title>
+    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise6</link>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Thu, 07 Dec 2023 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>s2i</category><category>shipwright</category>
+  </item>
+
     </channel>
   </rss>

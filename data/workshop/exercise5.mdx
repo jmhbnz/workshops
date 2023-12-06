@@ -19,7 +19,7 @@ With Operators you can stop treating an application as a collection␃of primiti
 
 
 
-## 4.1 - Deploying an operator
+## 5.1 - Deploying an operator
 
 Deploying an application via an **Operator** is generally a two step process. The first step is to deploy the **Operator** itself.
 
@@ -58,9 +58,9 @@ Click **Create**. In a minute or so you should see the Grafana operator installe
 </Zoom>
 
 
-## 4.2 - Deploying an operator driven application
+## 5.2 - Deploying an operator driven application
 
-With our Grafana operator now running it will be listening for the creation of a `grafana` custom resource. When one is detected the operator will deplioy the Grafana application according to the specifcation we supplied.
+With our Grafana operator now running it will be listening for the creation of a `grafana` custom resource. When one is detected the operator will deploy the Grafana application according to the specifcation we supplied.
 
 Let's switch over to the **Administrator** perspective for this next task to deploy our Grafana instance.
 
@@ -106,7 +106,7 @@ spec:
 </Zoom>
 
 
-## 4.3 Logging into the application
+## 5.3 Logging into the application
 
 While we are in the **Administrator** perspective of the web console let's take a look at a couple of sections to confirm our newly deployed Grafana application is running as expected.
 
@@ -130,7 +130,7 @@ Click the **Route** named `grafana-route` and open the url on the right hand sid
 Once the new tab opens we should be able to login to Grafana using the credentials we supplied in the previous step in the YAML configuration.
 
 <Zoom>
-|![grafana-route](/ocp-app-delivery-workshop/static/images/grafana-route.png) | 
+|![grafana-route](/ocp-app-delivery-workshop/static/images/grafana-route.gif) | 
 |:-------------------------------------------------------------------:|
 | *Confirming the grafana route is working*                           |
 </Zoom>
