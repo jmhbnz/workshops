@@ -9,7 +9,7 @@ summary: "Time to deploy your first app!"
 ---
 
 
-Now that we have had a tour of the OpenShift web console to get familar, let's use the web console to deploy our first application.
+Now that we have had a tour of the OpenShift web console to get familiar, let's use the web console to deploy our first application.
 
 Let’s start by doing the simplest thing possible - get a plain old Docker-formatted container image to run on OpenShift. This is incredibly simple to do. With OpenShift it can be done directly from the web console.
 
@@ -36,7 +36,7 @@ In the **Image name** field enter the following:
 quay.io/openshiftroadshow/parksmap:latest
 ```
 
-Leave all other fields at their defaults (but take your time to scroll down and review each one to familarise yourself! 🎓)
+Leave all other fields at their defaults (but take your time to scroll down and review each one to familiarise yourself! 🎓)
 
 Click **Create** to deploy the application.
 
@@ -61,7 +61,7 @@ The **Resources** tab may be displayed by default. If so, click on the **Details
 | *Deploying the container image*                                     |
 </Zoom>
 
-> Note: A pod is the smallest deployable unit in Kubernetes and is effectively a grouping of one or more individual containers. Any containers deployed within a pod are guaranteed to run on the same machine. It is very common for pods in kubernetes to only hold a single container, although sometimes auxiliary services can be included as additional containers in a pod when we want them to run alongside our application.
+> Note: A pod is the smallest deployable unit in Kubernetes and is effectively a grouping of one or more individual containers. Any containers deployed within a pod are guaranteed to run on the same machine. It is very common for pods in kubernetes to only hold a single container, although sometimes auxiliary services can be included as additional containers in a pod when we want them to run alongside our application container.
 
 
 ## 2.2 - Accessing the application
@@ -93,7 +93,7 @@ Clicking the link you should now see the ParksMap application frontend 🎉
 
 ## 2.3 - Checking application logs
 
-If we deploy an application and something isn't working the way we expect, reviewing the application logs can often be helpful. OpenShift includes built in support features for reviewing application logs.
+If we deploy an application and something isn't working the way we expect, reviewing the application logs can often be helpful. OpenShift includes built in support for reviewing application logs.
 
 Let's try it now for our ParksMap frontend.
 

@@ -25,7 +25,7 @@ Let's get started by deploying a **Helm chart** for the [Gitea](https://about.gi
 
 Start in the **+Add** view of the **Developer** perspective.
 
-Scroll down and click **Helm chart**. OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
+Scroll down and click the **Helm chart** tile. OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
 
 Click on the search result and click **Create**.
 
@@ -47,9 +47,9 @@ tlsRoute: true
 
 ## 4.2 - Examine deployed application
 
-Returning to the **Topology** view of the **Developer** perspective you will now see the Gitea application being deployed in your `userX` project. Notice how the application is made up of two separate pods, the `gitea-db` database and the `gitea` frontend web server.
+Returning to the **Topology** view of the **Developer** perspective you will now see the Gitea application being deployed in your `userX` project (this can take a few minutes to complete). Notice how the application is made up of two separate pods, the `gitea-db` database and the `gitea` frontend web server.
 
-Once your gitea pods are both running open the **Route** for the `gitea` web frontend and confirm you can access the application.
+Once your gitea pods are both running open the **Route** for the `gitea` web frontend and confirm you can see the application web interface.
 
 Next, if we click on the overall gitea **Helm release** by clicking on the shaded box surrounding our two Gitea pods we can see the full list of resources deployed by this helm chart, which in addition to the two running pods includes the following:
 
@@ -67,5 +67,31 @@ Next, if we click on the overall gitea **Helm release** by clicking on the shade
 |:-------------------------------------------------------------------:|
 | *Gitea helm release resources created*                              |
 </Zoom>
+
+
+## 4.3 - Upgrade helm chart
+
+If we want to make a change to the configuration of our Gitea application we can perform a `helm upgrade`. OpenShift has built in support to perform helm upgrades through the web console.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Upgrade**.
+
+Now let's intentionally modify the `hostname:` field in the yaml configuration to `hostname: bogushostname.example.com` and click **Upgrade**.
+
+We will be returned to the **Helm releases** view. Notice how the release status is now Failed (due to our bogus configuration), however the previous release of the application is still running. OpenShift has validated the helm release, determined the updates will not work, and prevented the release from proceeding.
+
+From here it is trivial to perform a **Rollback** to remove our misconfigured update. We'll do that in the next step.
+
+<Zoom>
+|![helm-upgrade](/ocp-app-delivery-workshop/static/images/helm-upgrade.gif) | 
+|:-------------------------------------------------------------------:|
+| *Attempting a gitea helm upgrade*                                   |
+</Zoom>
+
+
+
 
 
