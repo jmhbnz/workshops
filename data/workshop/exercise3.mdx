@@ -114,4 +114,9 @@ If we now run `oc get pods` again we will see a new **Pod** has automatically be
 
 In our ParksMap **Deployment** we have declared we always want two replicas of our application running at all times. Even if we (possibly accidentally) delete one, OpenShift will always attempt to self heal to return to our desired state.
 
+## 3.5 - Bonus objective: Autoscaling
+
+If you have time, take a while to explore the concepts of [HorizontalPodAutoscaling](https://docs.openshift.com/container-platform/4.14/nodes/pods/nodes-pods-autoscaling.html), [VerticalPodAutoscaling](https://docs.openshift.com/container-platform/4.14/nodes/pods/nodes-pods-vertical-autoscaler.html) and [Cluster autoscaling](https://docs.openshift.com/container-platform/4.14/machine_management/applying-autoscaling.html).
+
+
 Well done, you've finished exercise 3! 🎉
