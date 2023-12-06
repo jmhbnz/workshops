@@ -106,4 +106,34 @@ spec:
 </Zoom>
 
 
+## 4.3 Logging into the application
+
+While we are in the **Administrator** perspective of the web console let's take a look at a couple of sections to confirm our newly deployed Grafana application is running as expected.
+
+For our first step click on the **Workloads** category on the left hand side menu and then click **Pods**.
+
+We should see that a `grafana-deployment-<id>` pod with a **Status** of `Running`.
+
+<Zoom>
+|![grafana-pod](/ocp-app-delivery-workshop/static/images/grafana-pod.png) | 
+|:-------------------------------------------------------------------:|
+| *Confirming the grafana pod is running*                             |
+</Zoom>
+
+
+Now that we know the Grafana application **Pod** is running let's open the application and confirm we can log in.
+
+Click the **Networking** category on the left hand side menu and then click **Routes**.
+
+Click the **Route** named `grafana-route` and open the url on the right hand side under the **Location** header.
+
+Once the new tab opens we should be able to login to Grafana using the credentials we supplied in the previous step in the YAML configuration.
+
+<Zoom>
+|![grafana-route](/ocp-app-delivery-workshop/static/images/grafana-route.png) | 
+|:-------------------------------------------------------------------:|
+| *Confirming the grafana route is working*                           |
+</Zoom>
+
+
 
