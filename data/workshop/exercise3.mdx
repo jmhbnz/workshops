@@ -113,3 +113,5 @@ pod "parksmap-ff7477dc4-2nxd2" deleted
 If we now run `oc get pods` again we will see a new **Pod** has automatically been created by OpenShift to replace the one we fully deleted. This is because OpenShift is a container orchestration engine that will always try and enforce the desired state that we declare.
 
 In our ParksMap **Deployment** we have declared we always want two replicas of our application running at all times. Even if we (possibly accidentally) delete one, OpenShift will always attempt to self heal to return to our desired state.
+
+Well done, you've finished exercise 3! 🎉
