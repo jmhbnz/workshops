@@ -111,3 +111,23 @@ Select the radio button for revision `1` which should be showing a status of `De
 </Zoom>
 
 
+## 4.5 - Deleting an application deployed via helm
+
+Along with upgrades and rollbacks **Helm** also makes deleting deployed applications (along with all of their associated resources) straightforward.
+
+Before we move on to exercise 5 let's delete the gitea application.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Delete Helm Release**.
+
+Enter the `gitea` confirmation at the prompt and click **Delete**. If you now return to the **Topology** view you will see the gitea application deleting.
+
+<Zoom>
+|![helm-delete](/ocp-app-delivery-workshop/static/images/helm-delete.gif) | 
+|:-------------------------------------------------------------------:|
+| *Deleting the gitea application helm release*                       |
+</Zoom>
+
