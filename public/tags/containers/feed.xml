@@ -47,7 +47,7 @@
     <description>Exploring alternative deployment approaches.</description>
     <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>autoscaling</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>helm</category>
   </item>
 
   <item>
