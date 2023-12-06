@@ -8,7 +8,7 @@ authors: ['default']
 summary: "Exploring alternative deployment approaches."
 ---
 
-In **Exercise 2** we deployed our ParksMap application in the most simplistic way. Just throwing an individual docker container at the cluster via the web console and letting OpenShift automate everything else for us.
+In **Exercise 2** we deployed our ParksMap application in the most simplistic way. Just throwing an individual container image at the cluster via the web console and letting OpenShift automate everything else for us.
 
 With more complex applications comes the need to more finely customise the details of our application **Deployments** along with any other associated resources the application requires.
 
@@ -17,7 +17,7 @@ Enter the [**Helm**](https://www.redhat.com/en/topics/devops/what-is-helm) proje
 In simple terms, a **Helm chart** is basically a directory containing a collection of YAML template files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
 
 
-## 3.1 - Deploying a helm chart via the web console 
+## 4.1 - Deploying a helm chart via the web console 
 
 It is common for organisations that produce and ship applications to provide their applications to organisations as a **Helm chart**.
 
@@ -38,7 +38,6 @@ hostname: userX-gitea.apps.<clusterdomain>
 tlsRoute: true
 ```
 
-
 <Zoom>
 |![gitea-deployment](/ocp-app-delivery-workshop/static/images/gitea-deployment.gif) | 
 |:-------------------------------------------------------------------:|
@@ -46,14 +45,27 @@ tlsRoute: true
 </Zoom>
 
 
-## 3.2 - Examine deployed application
+## 4.2 - Examine deployed application
 
-You will now see the Gitea application being deployed in your project. Notice how the application is made up of two separate pods, a Database, and Web server.
+Returning to the **Topology** view of the **Developer** perspective you will now see the Gitea application being deployed in your `userX` project. Notice how the application is made up of two separate pods, the `gitea-db` database and the `gitea` frontend web server.
+
+Once your gitea pods are both running open the **Route** for the `gitea` web frontend and confirm you can access the application.
+
+Next, if we click on the overall gitea **Helm release** by clicking on the shaded box surrounding our two Gitea pods we can see the full list of resources deployed by this helm chart, which in addition to the two running pods includes the following:
+
+ - 1 **ConfigMap**
+ - 1 **ImageStream**
+ - 2 **PersistentVolumeClaims**
+ - 1 **Route**
+ - 1 **Secret**
+ - 2 **Services**
+
+> Note: Feel free to try out a `oc explain <resource>` command in your web terminal to learn more about each of the resource types mentioned above, for example `oc explain service`.
 
 <Zoom>
-|![gitea-deployment](/ocp-app-delivery-workshop/static/images/gitea-deployment.gif) | 
+|![helm-resources](/ocp-app-delivery-workshop/static/images/helm-resources.png) | 
 |:-------------------------------------------------------------------:|
-| *ParksMap application deployment replicas*                          |
+| *Gitea helm release resources created*                              |
 </Zoom>
 
 
