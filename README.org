@@ -29,7 +29,7 @@ To export the site to static html to serve for example via github pages, run:
 npm install
 
 # Build and export the site
-npm run build && npm export
+npm run build && npm run export
 #+end_src
 
 
@@ -39,7 +39,10 @@ The workshop expects an OpenShift 4.14 cluster with a few pre-requisites.
 
 *** Add redhat-cop helm chart repository
 
-#+begin_src yaml
+Required so the Gitea helm chart will be available for all users.
+
+#+begin_src bash
+cat << EOF | oc apply --filename -
 apiVersion: helm.openshift.io/v1beta1
 kind: HelmChartRepository
 metadata:
@@ -48,12 +51,16 @@ spec:
   connectionConfig:
     url: 'https://redhat-cop.github.io/helm-charts'
   name: Red Hat Community
+EOF
 #+end_src
 
 
 *** Install web terminal operator
 
-#+begin_src yaml
+So our workshop participants don't need to install ~oc~ locally.
+
+#+begin_src bash
+cat << EOF | oc apply --filename -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
@@ -65,11 +72,13 @@ spec:
   name: web-terminal
   source: redhat-operators
   sourceNamespace: openshift-marketplace
-  #startingCSV: web-terminal.v1.8.0-0.1692219820.p
+EOF
 #+end_src
 
 
 *** Create an operatorgroup for each user
+
+We want each user to be able to install the same operator so we can pre-create namespaces and seed them with OperatorGroups to reduce complexity.
 
 #+begin_src bash
 cat << EOF > operatorgroup.yaml
@@ -77,11 +86,16 @@ apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
   name: grafana-og
-  namespace: userX
 spec:
   targetNamespaces:
-    - userX
+    - user$user
   upgradeStrategy: Default
 EOF
-for user in $(seq 1 30); do oc apply ...; done
+
+for user in $(seq 1 30); do
+    export user=${user}
+    oc new-project user"${user}"
+    envsubst < operatorgroup.yaml | oc create --filename - --namespace user"${user}"
+    oc adm policy add-role-to-user --namespace user"${user}" admin user"${user}"
+done
 #+end_src
