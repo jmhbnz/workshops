@@ -17,13 +17,41 @@ There are of course many different options for installing OpenShift in a restric
 **Let's get started!**
 
 
-## 1.1 - Creating an air gap
+## 1.1 - Obtaining your aws account
 
-According to the [Internet Security Glossary](https://www.rfc-editor.org/rfc/rfc4949), an Air Gap is an interface between two systems at which (a) they are not connected physically and (b) any logical connection is not automated (i.e., data is transferred through the interface only manually, under human control). 
+To get underway open your web browser and navigate to the workshop login page https://demo.redhat.com/workshop/enwmgc.
+
+Once the page loads you can login with the details provided by your workshop facilitator. Once logged in you will see your aws environment details.
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/workshop.png)                | 
+|:-----------------------------------------------------------------------------:|
+| *Workshop login page*                                                         |
+</Zoom>
+
+
+## 1.2 - Opening your web terminal
+
+Throughout the remainder of the workshop you will be using a number of command line interface tools for example, `aws` to quickly interact with resources in Amazon Web Services, and `ssh` to login to a remote server.
+
+To save you from needing to install or configure these tools on your own device for the remainder of this workshop a web terminal will be available for you.
+
+Simply copy the link below and paste into your browser, replacing `<number>` with the three digit number in the top level route53 domain obtained in the aws environment details assigned in the previous step.
+
+```bash
+https://terminal-sandbox<number>.apps.openshift.example.com
+```
+
+
+## 1.3 - Creating an air gap
+
+According to the [Internet Security Glossary](https://www.rfc-editor.org/rfc/rfc4949), an Air Gap is:
+
+> "an interface between two systems at which (a) they are not connected physically and (b) any logical connection is not automated (i.e., data is transferred through the interface only manually, under human control)." 
 
 In disconnected OpenShift installations, the air gap exists between the **Low Side** and the **High Side**, so it is between these systems where a manual data transfer, or **sneakernet** is required.
 
-For the purposes of this workshop we will be operating within Amazon Web Services. You will be allocated an environment that already has AWS credentials configured and has some basic preparation completed. This will be a single VPC with 3 public subnets, which will serve as our **Low Side**, and 3 private subnets, which will serve as our **High Side**.
+For the purposes of this workshop we will be operating within Amazon Web Services. You have been allocated a set of credentials for an environment that already has some basic preparation completed. This will be a single VPC with 3 public subnets, which will serve as our **Low Side**, and 3 private subnets, which will serve as our **High Side**.
 
 The diagram below shows a simplified overview of the networking topology:
 
@@ -33,8 +61,19 @@ The diagram below shows a simplified overview of the networking topology:
 | *Workshop network topology*                                                   |
 </Zoom>
 
+Let's check the virtual private cloud network is created using the `aws` command line interface by copying the command below into our web terminal:
 
-Let's review this setup by running the command below:
+```bash
+aws ec2 describe-vpcs | jq '.Vpcs[] | select(.Tags[].Value=="disco").VpcId' -r
+```
+
+You should see output similar to the example below:
+
+```text
+vpc-0e6d176c7d9c94412
+```
+
+We can also check our three public **Low side** and three private **High side** subnets are ready to go by running the command below in our web terminal:
 
 ```bash
 aws ec2 describe-subnets | jq '[.Subnets[].Tags[] | select(.Key=="Name").Value] | sort'
@@ -52,3 +91,5 @@ We should see output matching this example:
    "Public Subnet 3 - disco"
 ]
 ```
+
+If your environment access and topology is all working you've finished exercise 1! 🎉
