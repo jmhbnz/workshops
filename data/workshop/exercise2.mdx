@@ -1,0 +1,66 @@
+---
+title: Preparing our low side
+exercise: 2
+date: '2023-12-18'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "Downloading content and tooling for sneaker ops 💾"
+---
+
+A disconnected OpenShift installation begins with downloading content and tooling to a prep system that has outbound access to the Internet.  This server resides in an environment commonly referred to as the **Low side** due to its low security profile. 
+
+In this exercise we will be creating a new [AWS ec2 instance](https://aws.amazon.com/ec2) in our **Low side** that we will carry out all our preparation activities on.
+
+
+## 2.1 - Creating a security group
+
+We'll start by creating an [AWS security group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) and collecting its ID. 
+
+We're going to use this shortly for the **Low side** prep system, and later on in the workshop for the **High side** bastion server:
+
+```bash
+# Obtain vpc id
+VPC_ID=$(aws ec2 describe-vpcs | jq '.Vpcs[] | select(.Tags[].Value=="disco").VpcId' -r)
+echo "Virtual private cloud id is: ${VPC_ID}"
+
+# Obtain first public subnet id
+PUBLIC_SUBNET=$(aws ec2 describe-subnets | jq '.Subnets[] | select(.Tags[].Value=="Public Subnet - disco").SubnetId' -r)
+
+# Create security group
+aws ec2 create-security-group --group-name disco-sg --description disco-sg --vpc-id ${VPC_ID} --tag-specifications "ResourceType=security-group,Tags=[{Key=Name,Value=disco-sg}]"
+
+# Store security group id
+SG_ID=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=disco-sg" | jq -r '.SecurityGroups[0].GroupId')
+echo "Security group id is: ${SG_ID}"
+```
+
+
+## 2.2 - Opening ssh port ingress
+
+We will want to login to our soon to be created **Low side** aws ec2 instance remotely via `ssh` so let's enable ingress on port `22` for this security group now:
+
+> Note: We're going to allow traffic from all sources for simplicity (`0.0.0.0/0`), but this is likely to be more restrictive in real world environments:
+
+```bash
+aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 22 --cidr 0.0.0.0/0
+```
+
+
+## 2.3 - Create prep system instance
+
+Ready to launch! 🚀 We'll use the `t3.micro` instance type, which offers `1GiB` of RAM and `2` vCPUs, along with a `50GiB` storage volume to ensure we have enough storage for mirrored content:
+
+> Note: As mentioned in [OpenShift documentation](https://access.redhat.com/documentation/en-us/openshift_container_platform/4.14/html/installing/disconnected-installation-mirroring) about 12 GB of storage space is required for OpenShift Container Platform 4.14 release images, or additionally about 358 GB for OpenShift Container Platform 4.14 release images and all OpenShift Container Platform 4.14 Red Hat Operator images.
+
+Run the command below in your web terminal to launch the instance. We will specify an Amazon Machine Image (AMI) to use for our prep system which for this lab will be the [Marketplace AMI for RHEL 8](https://access.redhat.com/solutions/15356#us_east_2) in `us-east-2`.
+
+```bash
+aws ec2 run-instances --image-id "ami-092b43193629811af" --count 1 --instance-type t3.micro --key-name disco-key --security-group-ids $SG_ID --subnet-id $PUBLIC_SUBNET --associate-public-ip-address --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=disco-prep-system}]" --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/workshop.png)                | 
+|:-----------------------------------------------------------------------------:|
+| *Workshop login page*                                                         |
+</Zoom>
