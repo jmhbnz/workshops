@@ -68,10 +68,10 @@ module.exports = {
               paddingBottom: '2px',
               borderRadius: '0.25rem',
             },
-            'code:before': {
+            'code::before': {
               content: 'none',
             },
-            'code:after': {
+            'code::after': {
               content: 'none',
             },
             details: {
