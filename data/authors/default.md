@@ -1,8 +1,8 @@
-name: Red Hat
+name: James Blair
 avatar: /static/images/redhat.png
-occupation: TSSC Workshop
-company: Open Source
-email: redhat@redhat.com
+occupation: Specialist Architect
+company: Red Hat
+email: jablair@redhat.com
 twitter: https://twitter.com/RedHat
-github: https://github.com/RedHat
+github: https://github.com/jmhbnz
 linkedin: https://www.linkedin.com/in/RedHat

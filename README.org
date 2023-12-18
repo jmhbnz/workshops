@@ -1,11 +1,10 @@
-#+TITLE: OpenShift Application Delivery Workshop
+#+TITLE: OpenShift Workshops
 #+AUTHOR: James Blair
 #+DATE: <2023-12-04 Mon>
 
 This repository contains a basic [[https://nextjs.org/][nextjs]] frontend designed to be exported as a static site and served via [[https://pages.github.com/][github pages]].
 
-The frontend contains a walkthrough for workshop designed to be run over three hours covering basic application delivery, monitoring and security on OpenShift. The workshop content is tailored towards participants that are new to containers and kubernetes and will not be developing applications but will instead be expected to deliver existing applications onto OpenShift.
-
+The frontend is used to serve workshop instructions for several workshops.
 
 ** Local development
 
