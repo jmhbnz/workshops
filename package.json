@@ -1,5 +1,5 @@
 {
-  "name": "ocp-app-delivery-workshop",
+  "name": "workshops",
   "version": "0.0.1",
   "private": true,
   "scripts": {

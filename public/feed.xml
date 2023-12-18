@@ -1,19 +1,19 @@
 
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>Red Hat OpenShift Application Delivery Workshop</title>
-      <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop</link>
-      <description>Red Hat OpenShift Application Delivery Workshop</description>
+      <title>Red Hat OpenShift Workshops</title>
+      <link>https://jmhbnz.github.io/workshops/workshop</link>
+      <description>Red Hat OpenShift Workshops</description>
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
       <lastBuildDate>Mon, 04 Dec 2023 00:00:00 GMT</lastBuildDate>
-      <atom:link href="https://jmhbnz.github.io/ocp-app-delivery-workshop/feed.xml" rel="self" type="application/rss+xml"/>
+      <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise1</guid>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise1</guid>
     <title>Getting familiar with OpenShift</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise1</link>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise1</link>
     <description>In this first exercise we&#39;ll get familiar with OpenShift.</description>
     <pubDate>Mon, 04 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
@@ -21,9 +21,9 @@
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise2</guid>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
     <title>Deploying your first application</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise2</link>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
     <description>Time to deploy your first app!</description>
     <pubDate>Tue, 05 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
@@ -31,9 +31,9 @@
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise3</guid>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise3</guid>
     <title>Scaling and self-healing applications</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise3</link>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise3</link>
     <description>Let&#39;s scale our application up 📈</description>
     <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
@@ -41,9 +41,9 @@
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise4</guid>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise4</guid>
     <title>Deploying an application via helm chart</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise4</link>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise4</link>
     <description>Exploring alternative deployment approaches.</description>
     <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
@@ -51,9 +51,9 @@
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise5</guid>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise5</guid>
     <title>Deploying an application via operator</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise5</link>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise5</link>
     <description>Exploring alternative deployment approaches.</description>
     <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
@@ -61,9 +61,9 @@
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise6</guid>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise6</guid>
     <title>Deploying an application from source</title>
-    <link>https://jmhbnz.github.io/ocp-app-delivery-workshop/workshop/exercise6</link>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise6</link>
     <description>Exploring alternative deployment approaches.</description>
     <pubDate>Thu, 07 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
