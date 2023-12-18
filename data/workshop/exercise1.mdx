@@ -1,31 +1,54 @@
 ---
-title: Understanding the lab environment
+title: Understanding our lab environment
 exercise: 1
 date: '2023-12-18'
-tags: ['openshift','containers','kubernetes']
+tags: ['openshift','containers','kubernetes','disconnected']
 draft: false
 authors: ['default']
-summary: "Let's get familiar with the lab setup."
+summary: "Let's get familiar with our lab setup."
 ---
 
-Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. In this first excercise we'll get logged into our cluster and familarise ourselves with the OpenShift web console and web terminal.
+Welcome to the OpenShift 4 Disconnected Workshop! Here you'll learn about operating an OpenShift 4 cluster in a disconnected network, for our purposes today that will be a network without access to the internet (even through a proxy or firewall). 
 
-The OpenShift Container Platform web console is a feature-rich user interface with both an **Administrator** perspective and a **Developer** perspective accessible through any modern web browser. You can use the web console to visualize, browse, and manage your OpenShift cluster and the applications running on it.
+To level set, Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. OpenShift supports running in disconnected networks, though this does change the way the cluster operates because key ingredients like container images, operator bundles, and helm charts must be brought into the environment from the outside world via mirroring.
 
-In addition to the web console, OpenShift includes command line tools to provide users with a nice interface to work with applications deployed to the platform. The `oc` command line tool is available for Linux, macOS or Windows.
+There are of course many different options for installing OpenShift in a restricted network; this workshop will primarily cover one opinionated approach. We'll do our best to point out where there's the potential for variability along the way.
 
 **Let's get started!**
 
-## 1.1 - Login to lab environment
 
-An OpenShift `4.14` cluster has already been provisioned for you to complete these excercises. Open your web browser and navigate to the workshop login page https://demo.redhat.com/workshop/enwmgc.
+## 1.1 - Creating an air gap
 
-Once the page loads you can login with the details provided by your workshop facilitator.
+According to the [Internet Security Glossary](https://www.rfc-editor.org/rfc/rfc4949), an Air Gap is an interface between two systems at which (a) they are not connected physically and (b) any logical connection is not automated (i.e., data is transferred through the interface only manually, under human control). 
+
+In disconnected OpenShift installations, the air gap exists between the **Low Side** and the **High Side**, so it is between these systems where a manual data transfer, or **sneakernet** is required.
+
+For the purposes of this workshop we will be operating within Amazon Web Services. You will be allocated an environment that already has AWS credentials configured and has some basic preparation completed. This will be a single VPC with 3 public subnets, which will serve as our **Low Side**, and 3 private subnets, which will serve as our **High Side**.
+
+The diagram below shows a simplified overview of the networking topology:
 
 <Zoom>
-|![workshop](/workshops/static/images/workshop.png)             | 
+|![workshop](/workshops/static/images/disconnected/vpc-setup.svg)               | 
 |:-----------------------------------------------------------------------------:|
-| *Workshop login page*                                                         |
+| *Workshop network topology*                                                   |
 </Zoom>
 
 
+Let's review this setup by running the command below:
+
+```bash
+aws ec2 describe-subnets | jq '[.Subnets[].Tags[] | select(.Key=="Name").Value] | sort'
+```
+
+We should see output matching this example:
+
+```bash
+[
+   "Private Subnet - disco",
+   "Private Subnet 2 - disco",
+   "Private Subnet 3 - disco",
+   "Public Subnet - disco",
+   "Public Subnet 2 - disco",
+   "Public Subnet 3 - disco"
+]
+```
