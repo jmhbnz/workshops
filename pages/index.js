@@ -5,7 +5,7 @@ import siteMetadata from '@/data/siteMetadata'
 import { getAllFilesFrontMatter } from '@/lib/mdx'
 import formatDate from '@/lib/utils/formatDate'
 
-const MAX_DISPLAY = 5
+const MAX_DISPLAY = 10
 
 export async function getStaticProps() {
   const posts = await getAllFilesFrontMatter('workshop')
@@ -26,7 +26,7 @@ export default function Home({ posts }) {
         <ul className="divide-y divide-gray-200 dark:divide-gray-700">
           {!posts.length && 'No posts found.'}
           {posts.slice(0, MAX_DISPLAY).map((frontMatter) => {
-            const { slug, date, title, summary, tags, exercise } = frontMatter
+            const { slug, date, title, summary, exercise } = frontMatter
             return (
               <li key={slug} className="py-12">
                 <article>
@@ -48,11 +48,6 @@ export default function Home({ posts }) {
                               {title}
                             </Link>
                           </h2>
-                          <div className="flex flex-wrap">
-                            {tags.map((tag) => (
-                              <Tag key={tag} text={tag} />
-                            ))}
-                          </div>
                         </div>
                         <div className="prose text-gray-500 max-w-none dark:text-gray-400">
                           {summary}
@@ -64,7 +59,7 @@ export default function Home({ posts }) {
                           className="text-primary-800 dark:text-primary-700 hover:text-primary-900 dark:hover:text-primary-400"
                           aria-label={`Read "${title}"`}
                         >
-                          Read more &rarr;
+                          Get started &rarr;
                         </Link>
                       </div>
                     </div>
