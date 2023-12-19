@@ -36,7 +36,7 @@ echo $SG_ID
 Once we know our subnet and security group ID's we can spin up our **High side** bastion server. Copy the commands below into your web terminal to complete this:
 
 ```bash
-aws ec2 run-instances --image-id $BASTION_AMI_ID \
+aws ec2 run-instances --image-id $(cat ami.txt) \
   --count 1 \
   --instance-type t3.large \
   --key-name disco-key \
@@ -46,11 +46,10 @@ aws ec2 run-instances --image-id $BASTION_AMI_ID \
   --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
 ```
 
-
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/security-group.gif)          | 
+|![workshop](/workshops/static/images/disconnected/launch-bastion-ec2.gif)      | 
 |:-----------------------------------------------------------------------------:|
-| *Creating aws ec2 security group*                                             |
+| *Launching bastion ec2 instance*                                              |
 </Zoom>
 
 
