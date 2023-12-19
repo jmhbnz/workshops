@@ -87,9 +87,9 @@ aws ec2 run-instances --image-id "ami-092b43193629811af" \
 </Zoom>
 
 
-## 2.4 - Downloading tools
+## 2.4 - Connecting to the low side
 
-Now that our prep system is up, let's `ssh` into it and download the content we'll need to support our install on the high side.
+Now that our prep system is up, let's `ssh` into it and download the content we'll need to support our install on the **High side**.
 
 Copy the commands below into your web terminal. Let's start by retrieving the IP for the new ec2 instance and then connecting via `ssh`:
 
@@ -99,9 +99,17 @@ Copy the commands below into your web terminal. Let's start by retrieving the IP
 PREP_SYSTEM_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=disco-prep-system" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
 echo $PREP_SYSTEM_IP
 
-ssh -i ~/disco_key ec2-user@$PREP_SYSTEM_IP
+ssh -i disco_key ec2-user@$PREP_SYSTEM_IP
 ```
 
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/connect-prep-ec2.gif)        | 
+|:-----------------------------------------------------------------------------:|
+| *Connecting to the prep rhel8 ec2 instance*                                   |
+</Zoom>
+
+
+## 2.5 - Downloading required tools
 
 For the purposes of this workshop, rather than downloading mirror content to a USB drive as we would likely do in a real SneakerOps situation, we will instead be saving content to an EBS volume which will be mounted to our prep system on the **Low side** and then subsequently to our bastion system on the **High side**.
 
@@ -115,9 +123,9 @@ sudo chown ec2-user:ec2-user /mnt/high-side
 cd /mnt/high-side
 ```
 
-With our mount in place let's grab the tools we'll need for the bastion server - we'll use some of them on the prep system too. Life's good on the low side; we can download these from the internet and tuck them into our high side gift basket at `/mnt/high-side`.
+With our mount in place let's grab the tools we'll need for the bastion server - we'll use some of them on the prep system too. Life's good on the low side; we can download these from the internet and tuck them into our **High side** gift basket at `/mnt/high-side`.
 
-There are four tools we need, copy the commands for each into your web terminal to download each one:
+There are four tools we need, copy the commands into your web terminal to download each one:
 
 1. `oc` OpenShift cli
 
