@@ -42,7 +42,7 @@ aws ec2 run-instances --image-id $(cat ami.txt) \
   --key-name disco-key \
   --security-group-ids $SG_ID \
   --subnet-id $PRIVATE_SUBNET \
-  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=$BASTION_NAME}]" \
+  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=disco-bastion-server}]" \
   --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
 ```
 
@@ -51,5 +51,47 @@ aws ec2 run-instances --image-id $(cat ami.txt) \
 |:-----------------------------------------------------------------------------:|
 | *Launching bastion ec2 instance*                                              |
 </Zoom>
+
+
+## 3.2 - Accessing the high side
+
+Now we need to access our bastion server on the high side. In real customer environments, this might entail use of a VPN, or physical access to a workstation in a secure facility such as a SCIF. 
+
+To make things a bit simpler for our lab, we're going to restrict access to our bastion to its private IP address. So we'll use the prep system as a sort of bastion-to-the-bastion.
+
+Let's get access by grabbing the bastion's private IP.
+
+```bash
+HIGHSIDE_BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=disco-bastion-server" | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
+echo $HIGHSIDE_BASTION_IP
+```
+
+Our next step will be to `exit` back to our web terminal and copy our private key to the prep system so that we can `ssh` to the bastion from there. You may have to wait a minute for the VM to finish initializing:
+
+```bash
+PREP_SYSTEM_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=disco-prep-system" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
+
+scp -i disco_key disco_key ec2-user@$PREP_SYSTEM_IP:/home/ec2-user/disco_key
+```
+
+To make life a bit easier down the track let's set an environment variable on the prep system so that we can preserve the bastion's IP:
+
+```bash
+ssh -i disco_key ec2-user@$PREP_SYSTEM_IP
+echo HIGHSIDE_BASTION_IP=$(echo $HIGHSIDE_BASTION_IP) > highside.env
+```
+
+Finally - Let's now connect through to our **High side** bastion 🚀
+
+```bash
+ssh -i disco_key ec2-user@$HIGHSIDE_BASTION_IP
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/connect-bastion-ec2.gif)     | 
+|:-----------------------------------------------------------------------------:|
+| *Connecting to our bastion ec2 instance*                                      |
+</Zoom>
+
 
 
