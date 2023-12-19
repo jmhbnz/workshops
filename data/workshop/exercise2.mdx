@@ -111,7 +111,7 @@ ssh -i disco_key ec2-user@$PREP_SYSTEM_IP
 
 ## 2.5 - Downloading required tools
 
-For the purposes of this workshop, rather than downloading mirror content to a USB drive as we would likely do in a real SneakerOps situation, we will instead be saving content to an EBS volume which will be mounted to our prep system on the **Low side** and then subsequently to our bastion system on the **High side**.
+For the purposes of this workshop, rather than downloading mirror content to a USB drive as we would likely do in a real SneakerOps situation, we will instead be saving content to an EBS volume which will be mounted to our prep system on the **Low side** and then subsequently synced to our bastion system on the **High side**.
 
 Once your prep system has booted let's mount the EBS volume we attached so we can start downloading content. Copy the commands below into your web terminal:
 

@@ -83,8 +83,7 @@ ssh -i disco_key ec2-user@$PREP_SYSTEM_IP "echo HIGHSIDE_BASTION_IP=$(echo $HIGH
 Finally - Let's now connect all the way through to our **High side** bastion 🚀
 
 ```bash
-ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGHSIDE_B
-ASTION_IP"
+ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGHSIDE_BASTION_IP"
 ```
 
 <Zoom>
@@ -94,4 +93,25 @@ ASTION_IP"
 </Zoom>
 
 
+## 3.3 - Sneakernetting content to the high side
 
+We'll now deliver the **High side** gift basket to the bastion server. Start by mounting our EBS volume on the bastion server to ensure that we don't run out of space:
+
+```bash
+sudo mkfs -t xfs /dev/nvme1n1
+sudo mkdir /mnt/high-side
+sudo mount /dev/nvme1n1 /mnt/high-side
+sudo chown ec2-user:ec2-user /mnt/high-side
+```
+
+With the mount in place we can exit back to our base web terminal and send over our gift basket at `/mnt/high-side` using `rsync`.
+
+```bash
+ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "rsync -avP -e 'ssh -i disco_key' /mnt/high-side ec2-user@$HIGHSIDE_BASTION_IP:/mnt"
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/sneakernet-transfer.gif)     | 
+|:-----------------------------------------------------------------------------:|
+| *Initiating the sneakernet transfer via rsync*                                |
+</Zoom>
