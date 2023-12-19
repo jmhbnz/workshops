@@ -160,5 +160,51 @@ tar -xzf openshift-installer.tar.gz openshift-install
 rm -f openshift-installer.tar.gz
 ```
 
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/downloading-tools.gif)       | 
+|:-----------------------------------------------------------------------------:|
+| *Downloading required tools with curl*                                        |
+</Zoom>
 
 
+## 2.6 - Mirroring content to disk
+
+The `oc-mirror` plugin supports mirroring content directly from upstream sources to a mirror registry, but since there is an air gap between our **Low side** and **High side**, that's not an option for this lab. Instead, we'll mirror content to a tarball on disk that we can then sneakernet into the bastion server on the **High side**. We'll then mirror from the tarball into the mirror registry from there.
+
+> Note: A pre-requisite for this process is an OpenShift pull secret to authenticate to the Red Hat registries. This has already been created for you to avoid the delay of registering for individual Red Hat accounts during this workhop. You can copy this into your newly created prep system by running `scp -pr -i disco_key .docker ec2-user@$PREP_SYSTEM_IP:` in your web terminal. In a real world scenario this pull secret can be downloaded from https://console.redhat.com/openshift/install/pull-secret.
+
+Let's get started by generating an `ImageSetConfiguration` that describes the parameters of our mirror. Run the command below to generate a boilerplate configuration file, it may take a minute:
+
+```bash
+oc mirror init > imageset-config.yaml
+```
+
+> You can take a look at the default file by running `cat imageset-config.yaml` in your web terminal. Feel free to pause the workshop tasks for a few minutes and read through the [OpenShift documentation](https://docs.openshift.com/container-platform/4.14/updating/updating_a_cluster/updating_disconnected_cluster/mirroring-image-repository.html#oc-mirror-creating-image-set-config_mirroring-ocp-image-repository) for the different options available within the image set configuration.
+
+To save time and storage, we're going to remove the operator catalogs and mirror only the release images for this workshop. We'll still get a fully functional cluster, but OperatorHub will be empty.
+
+To complete this, remove the operators object from your `imageset-config.yaml` by running the command below in your web terminal:
+
+```
+cat << EOF > imageset-config.yaml
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  local:
+    path: ./
+mirror:
+  platform:
+    channels:
+    - name: stable-4.14
+      type: ocp
+  additionalImages:
+  - name: registry.redhat.io/ubi8/ubi:latest
+  helm: {}
+EOF
+```
+
+Now we're ready to kick off the mirror! This will take a few minutes, you can keep an eye on the progress in your web terminal:
+
+```bash
+oc mirror --config imageset-config.yaml file:///mnt/high-side
+```

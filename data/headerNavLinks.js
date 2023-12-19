@@ -1,6 +1,6 @@
 const headerNavLinks = [
-  { href: '/workshop', title: 'Exercises' }
-  // { href: 'https://etherpad.wikimedia.org/p/tssc-workshop-bne-dec-23', title: 'Etherpad'}
+    { href: '/workshop', title: 'Exercises' },
+    { href: 'https://etherpad.wikimedia.org/p/OpenShiftDisco_2023_12_20', title: 'Etherpad' }
 ]
 
 export default headerNavLinks
