@@ -61,3 +61,33 @@ Then we can go ahead and generate our `install-config.yaml`:
 ```bash
 /mnt/high-side/openshift-install create install-config --dir /mnt/high-side/install --log-level=DEBUG
 ```
+
+
+## 5.2 Running the installation
+
+We're ready to run the install! Let's kick off the cluster installation by copying the command below into our web terminal:
+
+> Note: Once more we can use the `--log-level=DEBUG` flag to get more insight on how the install is progressing.
+
+```bash
+/mnt/high-side/openshift-install create cluster --log-level=DEBUG
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/install-cluster.gif)         | 
+|:-----------------------------------------------------------------------------:|
+| *Installation overview*                                                       |
+</Zoom>
+
+The installation process should take about 30 minutes. If you've done everything correctly, you should see something like the example below at the conclusion:
+
+```text
+...
+INFO Install complete!
+INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/home/myuser/install_dir/auth/kubeconfig'
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.mycluster.example.com
+INFO Login to the console with user: "kubeadmin", and password: "password"
+INFO Time elapsed: 30m49s
+```
+
+If you made it this far you have completed all the workshop exercises, well done! 🎉
