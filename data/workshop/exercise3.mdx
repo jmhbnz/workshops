@@ -104,7 +104,7 @@ sudo mount /dev/nvme1n1 /mnt/high-side
 sudo chown ec2-user:ec2-user /mnt/high-side
 ```
 
-With the mount in place we can exit back to our base web terminal and send over our gift basket at `/mnt/high-side` using `rsync`.
+With the mount in place we can exit back to our base web terminal and send over our gift basket at `/mnt/high-side` using `rsync`. This can take 10-15 minutes depending on the size of the mirror tarball.
 
 ```bash
 ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "rsync -avP -e 'ssh -i disco_key' /mnt/high-side ec2-user@$HIGHSIDE_BASTION_IP:/mnt"

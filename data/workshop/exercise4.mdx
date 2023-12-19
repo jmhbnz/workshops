@@ -72,12 +72,30 @@ Now that our registry is running let's login with `podman` which will generate a
 ```bash
 podman login -u init -p discopass --tls-verify=false $(hostname):8443
 ```
+
+We should be greeted with `Login Succeeded!`.
+
 > Note: We pass `--tls-verify=false` here for simplicity during this workshop, but you can optionally add `/mnt/high-side/quay/quay-install/quay-rootCA/rootCA.pem` to the system trust store by following the guide in the Quay documentation [here](https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/manage_red_hat_quay/using-ssl-to-protect-quay?extIdCarryOver=true&sc_cid=701f2000001OH74AAG#configuring_the_system_to_trust_the_certificate_authority).
 
 
 ## 4.4 Pushing content into mirror registry
 
-Now we're ready to mirror images from disk into the registry. Let's add oc and `oc-mirror` to the path:
+Now we're ready to mirror images from disk into the registry. Let's add `oc` and `oc-mirror` to the path:
 
+```bash
+sudo cp /mnt/high-side/oc /usr/local/bin/
+sudo cp /mnt/high-side/oc-mirror /usr/local/bin/
+```
 
+And now we fire up the mirror process to push our content from disk into the registry ready to be pulled by the OpenShift installation. This can take a similar amount of time to the sneakernet procedure we completed in exercise 3.
+
+```bash
+oc mirror --from=/mnt/high-side/mirror_seq1_000000.tar --dest-skip-tls docker://$(hostname):8443
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/registry-push.gif)           | 
+|:-----------------------------------------------------------------------------:|
+| *Running the oc mirror process to push content to our registry*               |
+</Zoom>
 

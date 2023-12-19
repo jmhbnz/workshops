@@ -1,0 +1,63 @@
+---
+title: Installing a disconnected OpenShift cluster
+exercise: 5
+date: '2023-12-20'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "Time to install a cluster 🚀"
+---
+
+We're on the home straight now. In this exercise we'll configure and then execute our `openshift-installer`.
+
+The OpenShift installation process is initiated from the bastion server on our **High side**. There are a handful of different ways to install OpenShift, but for this lab we're going to be using installer-provisioned infrastructure (IPI). 
+
+By default, the installation program acts as an installation wizard, prompting you for values that it cannot determine on its own and providing reasonable default values for the remaining parameters. 
+
+We'll then customize the `install-config.yaml` file that is produced to specify advanced configuration for our disconnected installation. The installation program then provisions the underlying infrastructure for the cluster. Here's a diagram describing the inputs and outputs of the installation configuration process:
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/install-overview.png)        | 
+|:-----------------------------------------------------------------------------:|
+| *Installation overview*                                                       |
+</Zoom>
+
+> Note: You may notice that nodes are provisioned through a process called Ignition. This concept is out of scope for this workshop, but if you're interested to learn more about it, you can read up on it in the documentation [here](https://docs.openshift.com/container-platform/4.14/installing/index.html#about-rhcos).
+
+IPI is the recommended installation method in most cases because it leverages full automation in installation and cluster management, but there are some key considerations to keep in mind when planning a production installation in a real world scenario.
+
+You may not have access to the infrastructure APIs. Our lab is going to live in AWS, which requires connectivity to the `.amazonaws.com` domain. We accomplish this by using an allowed list on a Squid proxy running on the **High side**, but a similar approach may not be achievable or permissible for everyone.
+
+You may not have sufficient permissions with your infrastructure provider. Our lab has full admin in our AWS enclave, so that's not a constraint we'll need to deal with. In real world environments, you'll need to ensure your account has the appropriate permissions which sometimes involves negotiating with security teams.
+
+Once configuration has been completed, we can kick off the OpenShift Installer and it will do all the work for us to provision the infrastructure and install OpenShift.
+
+
+## 5.1 - Building install-config.yaml
+
+Before we run the installer we need to create a configuration file. Let's set up a workspace for it first.
+
+```bash
+mkdir /mnt/high-side/install
+cd /mnt/high-side/install
+```
+
+Next we will generate the ssh key pair for access to cluster nodes:
+
+```bash
+ssh-keygen -f ~/.ssh/disco-openshift-key -q -N ""
+```
+
+Use the following Python code to minify your mirror container registry pull secret to a single line. Copy this output to your clipboard, since you'll need it in a moment:
+
+```bash
+python3 -c $'import json\nimport sys\nwith open(sys.argv[1], "r") as f: print(json.dumps(json.load(f)))' /run/user/1000/containers/auth.json
+```
+
+Then we can go ahead and generate our `install-config.yaml`:
+
+> Note: We are setting --log-level
+
+```bash
+/mnt/high-side/openshift-install create install-config --dir /mnt/high-side/install --log-level=DEBUG
+```
