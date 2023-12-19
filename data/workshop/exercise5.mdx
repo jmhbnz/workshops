@@ -133,13 +133,13 @@ networking:
 cat << EOF >> install-config.yaml
 imageContentSources:
   - mirrors:
-    - $(hostname)/ubi8/ubi
+    - $(hostname):8443/ubi8/ubi
     source: registry.redhat.io/ubi8/ubi
   - mirrors:
-    - $(hostname)/openshift/release-images
+    - $(hostname):8443/openshift/release-images
     source: quay.io/openshift-release-dev/ocp-release
   - mirrors:
-    - $(hostname)/openshift/release
+    - $(hostname):8443/openshift/release
     source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
 EOF
 ```
