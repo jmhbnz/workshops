@@ -8,7 +8,7 @@ authors: ['default']
 summary: "Let's get familiar with our lab setup."
 ---
 
-Welcome to the OpenShift 4 Disconnected Workshop! Here you'll learn about operating an OpenShift 4 cluster in a disconnected network, for our purposes today that will be a network without access to the internet (even through a proxy or firewall). 
+Welcome to the OpenShift 4 Disconnected Workshop! Here you'll learn about operating an OpenShift 4 cluster in a disconnected network, for our purposes today that will be a network without access to the internet (even through a proxy or firewall).
 
 To level set, Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. OpenShift supports running in disconnected networks, though this does change the way the cluster operates because key ingredients like container images, operator bundles, and helm charts must be brought into the environment from the outside world via mirroring.
 
@@ -17,16 +17,14 @@ There are of course many different options for installing OpenShift in a restric
 **Let's get started!**
 
 
-## 1.1 - Obtaining your aws account
+## 1.1 - Obtaining your environment
 
-To get underway open your web browser and navigate to the workshop login page https://demo.redhat.com/workshop/enwmgc.
-
-Once the page loads you can login with the details provided by your workshop facilitator. Once logged in you will see your aws environment details.
+To get underway open your web browser and navigate to the etherpad link to reserve yourself a user [insert etherpad link here].  You can reserve a user by noting your name or initials next to a user that has not yet been claimed.
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/workshop.png)                | 
+|![workshop](/workshops/static/images/disconnected/etherpad.gif)                | 
 |:-----------------------------------------------------------------------------:|
-| *Workshop login page*                                                         |
+| *Etherpad collaborative editor*                                               |
 </Zoom>
 
 
@@ -36,11 +34,7 @@ Throughout the remainder of the workshop you will be using a number of command l
 
 To save you from needing to install or configure these tools on your own device for the remainder of this workshop a web terminal will be available for you.
 
-Simply copy the link below and paste into your browser, replacing `<number>` with the three digit number in the top level route53 domain obtained in the aws environment details assigned in the previous step.
-
-```bash
-https://terminal-sandbox<number>.apps.openshift.example.com
-```
+Simply copy the link next to the user your reserved in etherpad and paste into your browser.
 
 
 ## 1.3 - Creating an air gap

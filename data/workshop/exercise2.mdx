@@ -17,7 +17,9 @@ In this exercise we will be creating a new [AWS ec2 instance](https://aws.amazon
 
 We'll start by creating an [AWS security group](https://docs.aws.amazon.com/vpc/latest/userguide/vpc-security-groups.html) and collecting its ID. 
 
-We're going to use this shortly for the **Low side** prep system, and later on in the workshop for the **High side** bastion server:
+We're going to use this shortly for the **Low side** prep system, and later on in the workshop for the **High side** bastion server.
+
+Copy the commands below into your web terminal:
 
 ```bash
 # Obtain vpc id
@@ -34,6 +36,12 @@ aws ec2 create-security-group --group-name disco-sg --description disco-sg --vpc
 SG_ID=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=disco-sg" | jq -r '.SecurityGroups[0].GroupId')
 echo "Security group id is: ${SG_ID}"
 ```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/security-group.gif)          | 
+|:-----------------------------------------------------------------------------:|
+| *Creating aws ec2 security group*                                             |
+</Zoom>
 
 
 ## 2.2 - Opening ssh port ingress
@@ -56,7 +64,14 @@ Ready to launch! 🚀 We'll use the `t3.micro` instance type, which offers `1GiB
 Run the command below in your web terminal to launch the instance. We will specify an Amazon Machine Image (AMI) to use for our prep system which for this lab will be the [Marketplace AMI for RHEL 8](https://access.redhat.com/solutions/15356#us_east_2) in `us-east-2`.
 
 ```bash
-aws ec2 run-instances --image-id "ami-092b43193629811af" --count 1 --instance-type t3.micro --key-name disco-key --security-group-ids $SG_ID --subnet-id $PUBLIC_SUBNET --associate-public-ip-address --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=disco-prep-system}]" --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
+aws ec2 run-instances --image-id "ami-092b43193629811af" \
+  --count 1 --instance-type t3.micro \
+  --key-name disco-key \
+  --security-group-ids $SG_ID \
+  --subnet-id $PUBLIC_SUBNET \
+  --associate-public-ip-address \
+  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=disco-prep-system}]" \
+  --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
 ```
 
 <Zoom>
