@@ -1,0 +1,36 @@
+---
+title: What about rebalancing virtual machines across nodes?
+exercise: 4
+date: '2024-04-05'
+tags: ['openshift','virtualisation','kubernetes','kubevirt']
+draft: false
+authors: ['default']
+summary: "How do we optimally balance virtual machine workloads in OpenShift?"
+---
+
+Acme Financial Services have agreed to run a small scale proof of concept for OpenShift Virtualisation.
+
+They have spun up a bare metal OpenShift cluster, installed OpenShift Virtualisation and now have a small number of virtual machines running.
+
+One of the goals of the pilot is to ensure their virtual machine workloads will run efficiently on their new infrastructure and continually auto balance over time based on available underlying infrastructure capacity so they don't have some nodes much busier than others.
+
+The Acme team are stuck on how they might implement this goal within the poc. They told you they found some documentation online on this thing called "deschedular" but didn't have any luck setting it up.
+
+Your pre-sales team have offered to setup an example environment for them and give them a quick demo on how it works.
+
+
+## 3.1 - Install de-schedular operator
+
+...
+
+## 3.2 - Enabling evictions for a virtual machine
+
+...
+
+## 3.3 - Check your work
+
+If you've successfully enabled deschedular evictions for a virtual machine please post a message in `#rh-hackathon-ocp-virt` with the message:
+
+> Please review team [name] solution for exercise 4.
+
+This exercise is worth 25 points. The event team will reply in slack to confirm your updated team total score.
