@@ -3,21 +3,41 @@
     <channel>
       <title>Red Hat OpenShift Virtualisation Hackathon</title>
       <link>https://jmhbnz.github.io/workshops/workshop</link>
-      <description>Red Hat OpenShift Workshops</description>
+      <description>Red Hat OpenShift Virtualisation Hackathon</description>
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Mon, 18 Dec 2023 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Fri, 05 Apr 2024 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/scenario1</guid>
-    <title>Understanding our lab environment</title>
+    <title>Understanding the hackathon environment</title>
     <link>https://jmhbnz.github.io/workshops/workshop/scenario1</link>
-    <description>Let&#39;s get familiar with our lab setup.</description>
-    <pubDate>Mon, 18 Dec 2023 00:00:00 GMT</pubDate>
+    <description>Let&#39;s get underway with the hackathon.</description>
+    <pubDate>Fri, 05 Apr 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/scenario2</guid>
+    <title>How old is too old?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/scenario2</link>
+    <description>Will OpenShift Virtualisation run Acme virtual machines?</description>
+    <pubDate>Fri, 05 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/scenario3</guid>
+    <title>But can it do live migration?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/scenario3</link>
+    <description>Will OpenShift Virtualisation live migrate a virtual machine?</description>
+    <pubDate>Fri, 05 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
   </item>
 
     </channel>
