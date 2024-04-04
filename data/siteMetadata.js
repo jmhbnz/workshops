@@ -1,5 +1,5 @@
 const siteMetadata = {
-  title: 'Red Hat OpenShift Workshops',
+  title: 'Red Hat OpenShift Virtualisation Hackathon',
   author: 'Red Hat',
   headerTitle: 'Red Hat',
   description: 'Red Hat OpenShift Workshops',
