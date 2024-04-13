@@ -14,3 +14,280 @@ For our purposes we have clusters running in Equinix Metal provisioned via the [
 * Cluster setup
 
 Follow the steps below to prepare each cluster in advance of the hackathon.
+
+
+* Automated scenario population
+
+To quickly setup an example environment with all solutions populated you can use the following source blocks.
+
+** Exercise two - What about my legacy technical debt?
+
+#+begin_src tmux
+# Create namespace
+oc create namespace crusty-corp
+
+# Create the virtual machine template
+#+begin_src tmux
+cat << 'EOF' | oc apply --namespace crusty-corp -f -
+kind: Template
+apiVersion: template.openshift.io/v1
+metadata:
+  name: centos5-server-small
+  namespace: crusty-corp
+  labels:
+    app.kubernetes.io/part-of: hyperconverged-cluster
+    os.template.kubevirt.io/centos5.0: 'true'
+    flavor.template.kubevirt.io/small: 'true'
+    template.kubevirt.io/version: v0.25.0
+    app.kubernetes.io/version: 4.13.8
+    template.kubevirt.io/type: base
+    app.kubernetes.io/component: templating
+    app.kubernetes.io/managed-by: ssp-operator
+    template.kubevirt.io/default-os-variant: 'true'
+    app.kubernetes.io/name: common-templates
+    workload.template.kubevirt.io/server: 'true'
+  annotations:
+    template.kubevirt.io/provider: Red Hat
+    name.os.template.kubevirt.io/centos5.0: CentOS 5 or higher
+    template.kubevirt.io/provider-url: 'https://www.centos.org'
+    template.kubevirt.io/containerdisks: |
+      quay.io/containerdisks/centos:7-2009
+    template.kubevirt.io/version: v1alpha1
+    openshift.io/display-name: CentOS 5 VM
+    openshift.io/documentation-url: 'https://github.com/kubevirt/common-templates'
+    template.kubevirt.io/images: >
+      https://cloud.centos.org/centos/7/images/CentOS-7-x86_64-GenericCloud.qcow2
+    operator-sdk/primary-resource-type: SSP.ssp.kubevirt.io
+    defaults.template.kubevirt.io/disk: rootdisk
+    template.kubevirt.io/editable: |
+      /objects[0].spec.template.spec.domain.cpu.sockets
+      /objects[0].spec.template.spec.domain.cpu.cores
+      /objects[0].spec.template.spec.domain.cpu.threads
+      /objects[0].spec.template.spec.domain.resources.requests.memory
+      /objects[0].spec.template.spec.domain.devices.disks
+      /objects[0].spec.template.spec.volumes
+      /objects[0].spec.template.spec.networks
+    template.openshift.io/bindable: 'false'
+    openshift.kubevirt.io/pronounceable-suffix-for-name-expression: 'true'
+    operator-sdk/primary-resource: openshift-cnv/ssp-kubevirt-hyperconverged
+    tags: 'hidden,kubevirt,virtualmachine,linux,centos'
+    template.kubevirt.io/provider-support-level: Community
+    description: >-
+      Template for CentOS 5 VM or newer. A PVC with the CentOS disk image must
+      be available.
+    openshift.io/support-url: 'https://github.com/kubevirt/common-templates/issues'
+    iconClass: icon-centos
+    openshift.io/provider-display-name: Red Hat
+objects:
+  - apiVersion: kubevirt.io/v1
+    kind: VirtualMachine
+    metadata:
+      annotations:
+        vm.kubevirt.io/validations: |
+          [
+            {
+              "name": "minimal-required-memory",
+              "path": "jsonpath::.spec.domain.resources.requests.memory",
+              "rule": "integer",
+              "message": "This VM requires more memory.",
+              "min": 1073741824
+            }
+          ]
+      labels:
+        app: '${NAME}'
+        vm.kubevirt.io/template: centos5-server-small
+        vm.kubevirt.io/template.revision: '1'
+        vm.kubevirt.io/template.version: v0.25.0
+      name: '${NAME}'
+    spec:
+      dataVolumeTemplates:
+        - apiVersion: cdi.kubevirt.io/v1beta1
+          kind: DataVolume
+          metadata:
+            name: '${NAME}'
+          spec:
+            sourceRef:
+              kind: DataSource
+              name: '${DATA_SOURCE_NAME}'
+              namespace: '${DATA_SOURCE_NAMESPACE}'
+            storage:
+              resources:
+                requests:
+                  storage: 30Gi
+      running: false
+      template:
+        metadata:
+          annotations:
+            vm.kubevirt.io/flavor: small
+            vm.kubevirt.io/os: centos5
+            vm.kubevirt.io/workload: server
+          labels:
+            kubevirt.io/domain: '${NAME}'
+            kubevirt.io/size: small
+        spec:
+          domain:
+            cpu:
+              cores: 1
+              sockets: 1
+              threads: 1
+            devices:
+              disks:
+                - disk:
+                    bus: virtio
+                  name: rootdisk
+                - disk:
+                    bus: virtio
+                  name: cloudinitdisk
+              interfaces:
+                - masquerade: {}
+                  model: virtio
+                  name: default
+              networkInterfaceMultiqueue: true
+              rng: {}
+            machine:
+              type: pc-q35-rhel9.2.0
+            resources:
+              requests:
+                memory: 2Gi
+          evictionStrategy: LiveMigrate
+          networks:
+            - name: default
+              pod: {}
+          terminationGracePeriodSeconds: 180
+          volumes:
+            - dataVolume:
+                name: '${NAME}'
+              name: rootdisk
+            - cloudInitNoCloud:
+                userData: |-
+                  #cloud-config
+                  user: centos
+                  password: ${CLOUD_USER_PASSWORD}
+                  chpasswd: { expire: False }
+              name: cloudinitdisk
+parameters:
+  - name: NAME
+    description: VM name
+    generate: expression
+    from: 'centos5-[a-z0-9]{16}'
+  - name: DATA_SOURCE_NAME
+    description: Name of the DataSource to clone
+    value: centos5
+  - name: DATA_SOURCE_NAMESPACE
+    description: Namespace of the DataSource
+    value: openshift-virtualization-os-images
+  - name: CLOUD_USER_PASSWORD
+    description: Randomized password for the cloud-init user centos
+    generate: expression
+    from: '[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}'
+EOF
+
+# Create the virtual machine from template
+cat << 'EOF' | oc apply --namespace crusty-corp -f -
+apiVersion: 'kubevirt.io/v1'
+kind: 'VirtualMachine'
+metadata:
+  labels:
+    app: 'crusty-corp-fun-financial-appliance'
+    vm.kubevirt.io/template: 'centos5-server-small'
+    vm.kubevirt.io/template.namespace: 'crusty-corp'
+    vm.kubevirt.io/template.revision: '1'
+    vm.kubevirt.io/template.version: 'v0.25.0'
+  name: 'crusty-corp-fun-financial-appliance'
+  namespace: 'crusty-corp'
+spec:
+  dataVolumeTemplates:
+    - apiVersion: 'cdi.kubevirt.io/v1beta1'
+      kind: 'DataVolume'
+      metadata:
+        annotations:
+          cdi.kubevirt.io/storage.bind.immediate.requested: 'true'
+        creationTimestamp: null
+        name: 'crusty-corp-fun-financial-appliance'
+      spec:
+        source:
+          blank: {}
+        storage:
+          resources:
+            requests:
+              storage: '30Gi'
+    - metadata:
+        creationTimestamp: null
+        name: 'crusty-corp-fun-financial-appliance-installation-cdrom'
+      spec:
+        source:
+          http:
+            url: 'https://vault.centos.org/5.11/isos/x86_64/CentOS-5.11-x86_64-netinstall.iso'
+        storage:
+          resources:
+            requests:
+              storage: '5Gi'
+  running: false
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: 'small'
+        vm.kubevirt.io/os: 'centos5'
+        vm.kubevirt.io/workload: 'server'
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: 'crusty-corp-fun-financial-appliance'
+        kubevirt.io/size: 'small'
+    spec:
+      domain:
+        cpu:
+          cores: 1
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - bootOrder: 2
+              disk:
+                bus: 'virtio'
+              name: 'rootdisk'
+            - bootOrder: 3
+              disk:
+                bus: 'virtio'
+              name: 'cloudinitdisk'
+            - bootOrder: 1
+              cdrom:
+                bus: 'sata'
+              name: 'installation-cdrom'
+          interfaces:
+            - macAddress: '02:d5:73:00:00:06'
+              masquerade: {}
+              model: 'virtio'
+              name: 'default'
+          networkInterfaceMultiqueue: true
+          rng: {}
+        machine:
+          type: 'pc-q35-rhel9.2.0'
+        resources:
+          requests:
+            memory: '2Gi'
+      evictionStrategy: 'LiveMigrate'
+      networks:
+        - name: 'default'
+          pod: {}
+      terminationGracePeriodSeconds: 180
+      volumes:
+        - dataVolume:
+            name: 'crusty-corp-fun-financial-appliance'
+          name: 'rootdisk'
+        - cloudInitNoCloud:
+            userData: "#cloud-config\nuser: centos\npassword: cqud-lhel-rd0b\nchpasswd: { expire: False }"
+          name: 'cloudinitdisk'
+        - dataVolume:
+            name: 'crusty-corp-fun-financial-appliance-installation-cdrom'
+          name: 'installation-cdrom'
+EOF
+#+end_src
+
+
+* Automated scenario cleanup
+
+If you need to quickly reset an example environment to have no solutions populated you can use the following source blocks.
+
+#+begin_src tmux
+oc delete namespace crusty-corp
+#+end_src
