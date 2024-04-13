@@ -1,0 +1,16 @@
+#+TITLE: OpenShift Workshops
+#+AUTHOR: James Blair
+#+DATE: <2024-04-14 Sun>
+
+This directory contains a set of scenarios to be used for an [[https://www.redhat.com/en/technologies/cloud-computing/openshift/virtualization][OpenShift Virtualisation]] hackathon and was created for an internal enablement exercise at Red Hat.
+
+* Pre-requisites
+
+The hackathon is run by breaking attendees into small teams of 2-4 and assigning each team a bare metal OpenShift 4 cluster with OpenShift Virtualisation already installed.
+
+For our purposes we have clusters running in Equinix Metal provisioned via the [[https://demo.redhat.com/catalog?item=babylon-catalog-prod/equinix-metal.roadshow-ocpvirt.prod&utm_source=webapp&utm_medium=share-link][Red Hat Demo System]].
+
+
+* Cluster setup
+
+Follow the steps below to prepare each cluster in advance of the hackathon.
