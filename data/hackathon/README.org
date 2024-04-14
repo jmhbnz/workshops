@@ -206,6 +206,13 @@ spec:
 EOF
 #+end_src
 
+#+begin_src tmux
+# Break the storage class for exercise five
+oc patch storageclass ocs-storagecluster-ceph-rbd --type='merge' --patch-file /dev/stdin <<-EOF
+allowVolumeExpansion: false
+EOF
+#+end_src
+
 
 * Automated scenario population
 
@@ -560,8 +567,40 @@ EOF
 
 ** Exercise five - How do I resize virtual machine disks again?
 
-asdas
+#+begin_src tmux
+# Patch the storageclass to enable volume expansion
+oc patch storageclass ocs-storagecluster-ceph-rbd --type='merge' --patch-file /dev/stdin <<-EOF
+allowVolumeExpansion: true
+EOF
+#+end_src
 
+#+begin_src tmux
+# Patch the claim to increase sizea
+oc --namespace super-important-dont-deleteme patch persistentvolumeclaim cryto-carnivore-cpuminer3000 --type='merge' --patch-file /dev/stdin <<-EOF
+spec:
+  resources:
+    requests:
+      storage: 60Gi
+EOF
+#+end_src
+
+#+begin_src tmux
+# Create new claim for wannacry volume
+cat << EOF | oc --namespace super-important-dont-deleteme apply --filename -
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: wannacry
+  namespace: super-important-dont-deleteme
+spec:
+  accessModes:
+    - ReadWriteMany
+  volumeMode: Block
+  resources:
+    requests:
+      storage: 20Gi
+EOF
+#+end_src
 
 * Automated scenario cleanup
 
