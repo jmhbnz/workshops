@@ -15,6 +15,106 @@ For our purposes we have clusters running in Equinix Metal provisioned via the [
 
 Follow the steps below to prepare each cluster in advance of the hackathon.
 
+#+begin_src tmux
+# Create the exercise three namespace
+oc create namespace demotestwtf17
+
+# Create the exercise three virtual machine
+cat << EOF | oc apply --namespace demotestwtf17 --filename -
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: fedora
+  namespace: demotestwtf17
+  finalizers:
+    - kubevirt.io/virtualMachineControllerFinalize
+  labels:
+    app: fedora
+    vm.kubevirt.io/template: fedora-server-small
+    vm.kubevirt.io/template.namespace: openshift
+    vm.kubevirt.io/template.revision: '1'
+    vm.kubevirt.io/template.version: v0.25.0
+spec:
+  dataVolumeTemplates:
+    - apiVersion: cdi.kubevirt.io/v1beta1
+      kind: DataVolume
+      metadata:
+        creationTimestamp: null
+        name: fedora
+      spec:
+        sourceRef:
+          kind: DataSource
+          name: fedora
+          namespace: openshift-virtualization-os-images
+        storage:
+          resources:
+            requests:
+              storage: 30Gi
+  running: true
+  template:
+    metadata:
+      annotations:
+        vm.kubevirt.io/flavor: small
+        vm.kubevirt.io/os: fedora
+        vm.kubevirt.io/workload: server
+      creationTimestamp: null
+      labels:
+        kubevirt.io/domain: fedora
+        kubevirt.io/size: small
+    spec:
+      domain:
+        cpu:
+          cores: 1
+          sockets: 1
+          threads: 1
+        devices:
+          disks:
+            - disk:
+                bus: virtio
+              name: rootdisk
+            - disk:
+                bus: virtio
+              name: cloudinitdisk
+          interfaces:
+            - macAddress: '02:d5:73:00:00:07'
+              masquerade: {}
+              model: virtio
+              name: default
+          networkInterfaceMultiqueue: true
+          rng: {}
+        features:
+          acpi: {}
+          smm:
+            enabled: true
+        firmware:
+          bootloader:
+            efi: {}
+        machine:
+          type: pc-q35-rhel9.2.0
+        resources:
+          requests:
+            memory: 2Gi
+      evictionStrategy: LiveMigrate
+      networks:
+        - name: default
+          pod: {}
+      nodeSelector:
+        seems: legit
+      terminationGracePeriodSeconds: 180
+      volumes:
+        - dataVolume:
+            name: fedora
+          name: rootdisk
+        - cloudInitNoCloud:
+            userData: |-
+              #cloud-config
+              user: fedora
+              password: fedora
+              chpasswd: { expire: False }
+          name: cloudinitdisk
+EOF
+#+end_src
+
 
 * Automated scenario population
 
@@ -28,7 +128,7 @@ oc create namespace crusty-corp
 
 # Create the virtual machine template
 #+begin_src tmux
-cat << 'EOF' | oc apply --namespace crusty-corp -f -
+cat << 'EOF' | oc apply --namespace crusty-corp --filename -
 kind: Template
 apiVersion: template.openshift.io/v1
 metadata:
@@ -183,7 +283,7 @@ parameters:
 EOF
 
 # Create the virtual machine from template
-cat << 'EOF' | oc apply --namespace crusty-corp -f -
+cat << 'EOF' | oc apply --namespace crusty-corp --filename -
 apiVersion: 'kubevirt.io/v1'
 kind: 'VirtualMachine'
 metadata:
@@ -284,10 +384,49 @@ EOF
 #+end_src
 
 
+** Exercise three - But can it do live migration?
+
+#+begin_src tmux
+# Create the namespace
+oc create namespace demotestwtf17
+
+# Patch the bogus virtual machine nodeselector
+cat << EOF | oc apply --namespace demotestwtf17 --filename -
+apiVersion: kubevirt.io/v1
+kind: VirtualMachine
+metadata:
+  name: fedora
+  namespace: demotestwtf17
+spec:
+  template:
+    spec:
+      nodeSelector:
+EOF
+
+# Initiate the live migration
+cat << EOF | oc create --namespace demotestwtf17 --filename -
+apiVersion: kubevirt.io/v1
+kind: VirtualMachineInstanceMigration
+metadata:
+  name: fedora-migration-hackathon
+  namespace: demotestwtf17
+  finalizers:
+    - kubevirt.io/migrationJobFinalize
+  labels:
+    kubevirt.io/vmi-name: fedora
+spec:
+  vmiName: fedora
+EOF
+
+# Check the node virtual machine migrated to
+oc --namespace demotestwtf17 get VirtualMachineInstance fedora
+#+end_src
+
+
 * Automated scenario cleanup
 
 If you need to quickly reset an example environment to have no solutions populated you can use the following source blocks.
 
 #+begin_src tmux
-oc delete namespace crusty-corp
+oc delete namespace --ignore-not-found crusty-corp demotestwtf17
 #+end_src

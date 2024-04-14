@@ -1,7 +1,7 @@
 ---
 title: But can it do live migration?
 exercise: 3
-date: '2024-04-05'
+date: '2024-04-14'
 tags: ['openshift','virtualisation','kubernetes','kubevirt']
 draft: false
 authors: ['default']
@@ -10,16 +10,16 @@ summary: "Will OpenShift Virtualisation live migrate a virtual machine?"
 
 During the demo with the Acme Financial Services team one of their traditional hypervisor team asked if you can show them a live migration for a running virtual machine.
 
-Thinking on your feet you remember the Fedora virtual machine you were tinkering with last night in the `demotestblah17` namespace on the cluster. Perhaps you can quickly use that to demo a live migration?
+Thinking on your feet you remember the Fedora virtual machine you were tinkering with last night in the `demotestwtf17` namespace on the cluster. Perhaps you can quickly use that to demo a live migration?
 
 The Acme Financial Services team have put you on the spot, can you pull off a virtual machine live migration? 😅
 
 
 ## 3.1 - Initiate the live migration
 
-For this task, your team must live migrate the virtual machine named `fedora` in namespace `demotestblah17` from one node to another and record the name of the node the vm has migrated to.
+For this task, your team must live migrate the virtual machine named `fedora` in namespace `demotestwtf17` from one node to another and record the name of the node the vm has migrated to.
 
-No command line is required. However before you can complete the migration you will first need to investigate and correct why the virtual machine is currently not running. You had one too many coke zeros last night and can't remember how the machine got into the state it did.
+No command line is required. However before you can complete the migration you will first need to investigate and correct why the virtual machine is currently not running. You had one too many coke zeros last night and can't remember how the machine got into the state it did 🤦.
 
 Documentation you may find helpful is:
 - https://docs.openshift.com/container-platform/4.15/virt/live_migration/virt-configuring-live-migration.html
@@ -30,6 +30,6 @@ Documentation you may find helpful is:
 
 If the virtual machine in your **demotestblah17** namespace has been live migrated to another node successfully please post a message in `#event-anz-ocp-virt-hackathon` with the message:
 
-> Please review team [name] solution for exercise 3. Our vm has migrated to node [node name].
+> Please review [team name] solution for exercise 3. Our vm has migrated to node [node name].
 
 This exercise is worth 25 points. The event team will reply in slack to confirm your updated team total score.
