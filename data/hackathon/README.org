@@ -64,6 +64,7 @@ spec:
     spec:
       domain:
         cpu:
+          model: Conroe
           cores: 1
           sockets: 1
           threads: 1
@@ -99,7 +100,7 @@ spec:
         - name: default
           pod: {}
       nodeSelector:
-        seems: legit
+        cpumodel: totallylegitipromise
       terminationGracePeriodSeconds: 180
       volumes:
         - dataVolume:
@@ -387,22 +388,21 @@ EOF
 ** Exercise three - But can it do live migration?
 
 #+begin_src tmux
-# Create the namespace
-oc create namespace demotestwtf17
-
-# Patch the bogus virtual machine nodeselector
-cat << EOF | oc apply --namespace demotestwtf17 --filename -
-apiVersion: kubevirt.io/v1
-kind: VirtualMachine
-metadata:
-  name: fedora
-  namespace: demotestwtf17
+# Patch the bogus virtual machine nodeselector & cpumodel
+oc patch --namespace demotestwtf17 VirtualMachine fedora --type='merge' --patch-file /dev/stdin <<-EOF
 spec:
   template:
     spec:
+      domain:
+        cpu:
+          model:
       nodeSelector:
 EOF
+#+end_src
 
+# Restart vm manually
+
+#+begin_src tmux
 # Initiate the live migration
 cat << EOF | oc create --namespace demotestwtf17 --filename -
 apiVersion: kubevirt.io/v1
