@@ -1,36 +1,48 @@
 ---
 title: How do I resize virtual machine disks again?
-exercise: 4
-date: '2024-04-12'
+exercise: 5
+date: '2024-04-14'
 tags: ['openshift','virtualisation','kubernetes','kubevirt']
 draft: false
 authors: ['default']
 summary: "Persistent volume what??"
 ---
 
-Acme Financial Services have agreed to run a small scale proof of concept for OpenShift Virtualisation.
-
-They have spun up a bare metal OpenShift cluster, installed OpenShift Virtualisation and now have a small number of virtual machines running.
-
-One of the goals of the pilot is to ensure their virtual machine workloads will run efficiently on their new infrastructure and continually auto balance over time based on available underlying infrastructure capacity so they don't have some nodes much busier than others.
-
-The Acme team are stuck on how they might implement this goal within the poc. They told you they found some documentation online on this thing called "deschedular" but didn't have any luck setting it up.
-
-Your pre-sales team have offered to setup an example environment for them and give them a quick demo on how it works.
+The proof of concept has been going well at Acme Financial Services. Their team are a few sprints in and have just pinged you an email:
 
 
-## 3.1 - Install de-schedular operator
+> Subject: Quick Help Needed: Expanding Storage for VM!
+> 
+> Hey Red Hat Pre-Sales Team,
+> 
+> Hope you're doing awesome! 🚀
+> 
+> I'm the storage guru over at Acme Financial Services, we met last sprint review. I need your brainpower to help with a little incident. One of our virtual machines in our Red Hat playground will run out of disk in 2 hours based on current rates.
+
+> Are you free to jump on a call, like nowish so we can fix it???
+
+> Would not be a good look if this thing blows up 😅
+> 
+> Thanks a ton for your help!
+> 
+> Cheers,
+> Chad McStorageGuy
+> Chief Principal Lead Storage Architect Engineer
+> Acme Financial Services
+
+Ruh roh. Normally this would just be handled via support but you know it might take longer for a response as this isn't technically a production environment. You agree to help Chad to try and prevent any bad news for the proof of concept.
+
+Time to roll up your sleeves, join the Acme Skype for Business™ video call and get it sorted. Tick tock...
+
+
+## 5.1 - Expand the vm storage
 
 ...
 
-## 3.2 - Enabling evictions for a virtual machine
+## 5.2 - Check your work
 
-...
+If you've successfully  for a virtual machine please post a message in `#event-anz-ocp-virt-hackathon` with the message:
 
-## 3.3 - Check your work
-
-If you've successfully enabled deschedular evictions for a virtual machine please post a message in `#event-anz-ocp-virt-hackathon` with the message:
-
-> Please review team [name] solution for exercise 4.
+> Please review team [name] solution for exercise 5.
 
 This exercise is worth 25 points. The event team will reply in slack to confirm your updated team total score.
