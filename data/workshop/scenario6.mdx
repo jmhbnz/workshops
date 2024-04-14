@@ -8,17 +8,36 @@ authors: ['default']
 summary: "How do we make a virtual machine accessible over the OpenShift SDN"
 ---
 
-...
+Time flies when you're having fun, after 17 months the "quick" proof of concept for OpenShift Virtualisation has now completed at Acme Financial Services and the CTO has asked for a final presentation from the local Red Hat pre sales team.
 
-## 6.1 - 
+The Acme team have kept talking about modernisation throughout the proof of concept so for the final demo your local Red Hat team agree to showcase how container workloads can be run alongside virtual machines and even balance traffic across containers and virtual machines.
 
-...
+This is it. No pressure but we need to nail this!
+
+<Zoom>
+|![workshop](/workshops/static/images/hackathon/vms-containers.jpeg)            | 
+|:-----------------------------------------------------------------------------:|
+| *"The best of both worlds!"*                                                  |
+</Zoom>
+
+
+## 6.1 - Deploy workloads
+
+Your first challenge for this exercise is to deploy two workloads within the `acme-bank` namespace on your cluster:
+
+1. The container image `quay.io/jmhbnz/acme-bank:latest`.
+2. A virtual machine running that same workload (in podman for simplicity).
+
+
+## 6.2 - Establish networking
+
+Once the workloads are deployed your challenge is to create one service that will load balance traffic across the virtual machine and regular container.
 
 
 ## 6.2 - Check your work
 
-If you've successfully ... please post a message in `#event-anz-ocp-virt-hackathon` with the message:
+If you've successfully prepared the demo environment for the CTO please post a message in `#event-anz-ocp-virt-hackathon` with the message:
 
 > Please review team [name] solution for exercise 5.
 
-This exercise is worth 25 points. The event team will reply in slack to confirm your updated team total score.
+Each of the 6.1 and 6.2 exercises are worth 15 points for a total of 30 points. The event team will reply in slack to confirm your updated team total score.
