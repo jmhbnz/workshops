@@ -8,18 +8,24 @@ authors: ['default']
 summary: "Will OpenShift Virtualisation live migrate a virtual machine?"
 ---
 
-During the demo with the Acme Financial Services team one of their traditional hypervisor team asked if you can show them a live migration for a running virtual machine.
+During the demo with the Acme Financial Services team one of their traditional hypervisor team asked if you can show them a live migration for a running virtual machine. They say they are used to performing migrations using a feature in their existing hypervisor called "vMotion" so want to know that feature works in OpenShift Virtualisation.
 
 Thinking on your feet you remember the Fedora virtual machine you were tinkering with last night in the `demotestwtf17` namespace on the cluster. Perhaps you can quickly use that to demo a live migration?
 
 The Acme Financial Services team have put you on the spot, can you pull off a virtual machine live migration? 😅
+
+<Zoom>
+|![workshop](/workshops/static/images/hackathon/broken-vm.png)                  | 
+|:-----------------------------------------------------------------------------:|
+| *He's dead Jim...*                                                            |
+</Zoom>
 
 
 ## 3.1 - Initiate the live migration
 
 For this task, your team must live migrate the virtual machine named `fedora` in namespace `demotestwtf17` from one node to another and record the name of the node the vm has migrated to.
 
-No command line is required. However before you can complete the migration you will first need to investigate and correct why the virtual machine is currently not running. You had one too many coke zeros last night and can't remember how the machine got into the state it did 🤦.
+No command line is required. However before you can complete the migration you will first need to investigate and correct why the virtual machine is not running. You had one too many coke zeros last night and can't remember how you got the machine into the state it's in 🤦.
 
 Documentation you may find helpful is:
 - https://docs.openshift.com/container-platform/4.15/virt/live_migration/virt-configuring-live-migration.html
