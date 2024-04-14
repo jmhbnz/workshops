@@ -423,10 +423,19 @@ oc --namespace demotestwtf17 get VirtualMachineInstance fedora
 #+end_src
 
 
+** Exercise four - What about balancing vm workloads?
+
+#+begin_src tmux
+# Create required namespace
+oc create namespace itsjustyaml
+
+
+#+end_src
+
 * Automated scenario cleanup
 
 If you need to quickly reset an example environment to have no solutions populated you can use the following source blocks.
 
 #+begin_src tmux
-oc delete namespace --ignore-not-found crusty-corp demotestwtf17
+oc delete namespace --ignore-not-found crusty-corp demotestwtf17 itsjustyaml
 #+end_src
