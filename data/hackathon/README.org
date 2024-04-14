@@ -426,10 +426,46 @@ oc --namespace demotestwtf17 get VirtualMachineInstance fedora
 ** Exercise four - What about balancing vm workloads?
 
 #+begin_src tmux
-# Create required namespace
+# Create required namespace for vm
 oc create namespace itsjustyaml
 
+# Create the suggested namespace for descheduler operator
+oc create namespace openshift-kube-descheduler-operator
 
+# Create the subscription for the kube deschedular operator
+cat << EOF | oc apply --namespace openshift-kube-descheduler-operator --filename -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: cluster-kube-descheduler-operator
+  namespace: openshift-kube-descheduler-operator
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: cluster-kube-descheduler-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+
+# Create the instance of descheduler
+cat << EOF | oc apply --namespace openshift-kube-descheduler-operator --filename -
+apiVersion: operator.openshift.io/v1
+kind: KubeDescheduler
+metadata:
+  name: cluster
+  namespace: openshift-kube-descheduler-operator
+spec:
+  deschedulingIntervalSeconds: 3600
+  logLevel: Normal
+  managementState: Managed
+  mode: Automatic
+  operatorLogLevel: Normal
+  profileCustomizations:
+    devLowNodeUtilizationThresholds: Medium
+  profiles:
+    - AffinityAndTaints
+    - DevPreviewLongLifecycle
+EOF
 #+end_src
 
 * Automated scenario cleanup

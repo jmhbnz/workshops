@@ -1,5 +1,5 @@
 ---
-title: What about rebalancing virtual machines?
+title: What about balancing vm workloads?
 exercise: 4
 date: '2024-04-14'
 tags: ['openshift','virtualisation','kubernetes','kubevirt']
@@ -16,12 +16,12 @@ One of the goals of the pilot is to ensure their virtual machine workloads will 
 
 The Acme team are stuck on how they might implement this goal within their current sprint. They told you they found some documentation online on this thing called *"deschedular"* but have decided it would be easier to email Red Hat and ask for a walkthrough.
 
-Your account manager has voluntold you to setup an example environment for them and step through how to enable the feature. No worries right. After all, how hard can it be?
+Your local pre-sales team has offered to setup an example environment for Acme and step through how to enable the feature. No worries right. After all, how hard can it be?
 
 <Zoom>
 |![workshop](/workshops/static/images/hackathon/yaml-file.jpeg)                 | 
 |:-----------------------------------------------------------------------------:|
-| *"We've all said it"*                                                         |
+| *"We've all said it 😂"*                                                      |
 </Zoom>
 
 
@@ -29,10 +29,11 @@ Your account manager has voluntold you to setup an example environment for them 
 
 Your challenge for this task is to enable the **Technology Preview** feature for Virtual Machine workload balancing in OpenShift at the cluster level.
 
-Once enabled at the cluster level you then need to deploy a **CentOS Stream 9** virtual machine called `centos` running in a new namespace called `itsjustyaml`.
+Once enabled at the cluster level you then need to deploy a **CentOS Stream 9** virtual machine called `centos` running in a new namespace called `itsjustyaml`. No command line is required.
 
 Documentation you may find helpful is:
 - https://docs.openshift.com/container-platform/4.15/virt/virtual_machines/advanced_vm_management/virt-enabling-descheduler-evictions.html
+- https://docs.openshift.com/container-platform/4.15/virt/virtual_machines/creating_vms_rh/virt-creating-vms-from-templates.html
 
 
 ## 4.2 - Check your work
