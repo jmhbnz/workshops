@@ -614,5 +614,5 @@ TODO: Patch the vm to include the new volume
 If you need to quickly reset an example environment to have no solutions populated you can use the following source blocks.
 
 #+begin_src tmux
-oc delete namespace --ignore-not-found crusty-corp demotestwtf17 itsjustyaml super-important-dont-deleteme
+oc delete namespace --ignore-not-found crusty-corp demotestwtf17 itsjustyaml super-important-dont-deleteme acme-bank
 #+end_src
