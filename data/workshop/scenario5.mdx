@@ -53,10 +53,11 @@ While you're on the Skype for Business™ video call with Chad fixing the `crypt
 
 This is a straightforward table stakes procedure for any virtualisation platform so you offer to step Chad through it then and there and get it out of the way.
 
-Your task is to add an additional `20GiB` disk labelled `wannacry` to the virtual machine. No command line is required.
+Your task is to add an additional `20GiB` disk labelled `wannacry` to the virtual machine. No command line is required, however you may have to get creative and manually create the volume and update the virtual machine spec if your OpenShift console "Configure --> Add Disk" functionality isn't working.
 
 Documentation you may find helpful is:
 - https://docs.openshift.com/container-platform/4.15/virt/virtual_machines/virtual_disks/virt-hot-plugging-virtual-disks.html
+- https://access.redhat.com/documentation/en-us/red_hat_openshift_data_foundation/4.15/html/managing_and_allocating_storage_resources/managing-persistent-volume-claims_rhodf#configuring-application-pods-to-use-openshift-data-foundation_rhodf
 
 
 ## 5.3 - Check your work

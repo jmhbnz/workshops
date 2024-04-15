@@ -64,7 +64,7 @@ spec:
     spec:
       domain:
         cpu:
-          model: Conroe
+          model: Superlegitcpu9000
           cores: 1
           sockets: 1
           threads: 1
@@ -212,6 +212,7 @@ oc patch storageclass ocs-storagecluster-ceph-rbd --type='merge' --patch-file /d
 allowVolumeExpansion: false
 EOF
 #+end_src
+
 
 
 * Automated scenario population
@@ -565,6 +566,8 @@ spec:
 EOF
 #+end_src
 
+TODO: Create CentOS9 VM With deshcheduler turned on.
+
 ** Exercise five - How do I resize virtual machine disks again?
 
 #+begin_src tmux
@@ -601,6 +604,10 @@ spec:
       storage: 20Gi
 EOF
 #+end_src
+
+TODO: Patch the vm to include the new volume
+
+
 
 * Automated scenario cleanup
 

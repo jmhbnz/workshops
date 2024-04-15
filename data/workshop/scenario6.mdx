@@ -10,7 +10,7 @@ summary: "How do we make a virtual machine accessible over the OpenShift SDN"
 
 Time flies when you're having fun, after 17 months the "quick" proof of concept for OpenShift Virtualisation has now completed at Acme Financial Services and the CTO has asked for a final presentation from the local Red Hat pre sales team.
 
-The Acme team have kept talking about modernisation throughout the proof of concept so for the final demo your local Red Hat team agree to showcase how container workloads can be run alongside virtual machines and even balance traffic across containers and virtual machines.
+The Acme team have talked about modernisation throughout the proof of concept so for the final demo your local Red Hat team agree to again showcase how container workloads can be run alongside virtual machines and even balance traffic across containers and virtual machines.
 
 This is it. No pressure but we need to nail this!
 
@@ -25,13 +25,30 @@ This is it. No pressure but we need to nail this!
 
 Your first challenge for this exercise is to deploy two workloads within the `acme-bank` namespace on your cluster:
 
-1. The container image `quay.io/jmhbnz/acme-bank:latest`.
-2. A virtual machine running that same workload (in podman for simplicity).
+1. The container image `quay.io/redhattraining/hello-world-nginx` running as a standard `deployment` named `acme-pod`, listening on port `8080`.
 
+2. A linux virtual machine named `acme-vm` running that same workload on port `8080` in podman for simplicity.
+
+Documentation you may find helpful is:
+- https://docs.openshift.com/container-platform/4.15/applications/creating_applications/odc-creating-applications-using-developer-perspective.html#odc-deploying-container-image_odc-creating-applications-using-developer-perspective
+- https://podman.io/docs/installation#installing-on-linux
+- https://developers.redhat.com/cheat-sheets/podman-cheat-sheet
 
 ## 6.2 - Establish networking
 
-Once the workloads are deployed your challenge is to create one service that will load balance traffic across the virtual machine and regular container.
+Once the workloads are deployed your challenge is to create one service named `acme-balancer` that will load balance traffic across the virtual machine and regular container.
+
+You'll know if this is working correctly when you can see two pods appearing in your service pod listing:
+
+<Zoom>
+|![workshop](/workshops/static/images/hackathon/vm-pod-service.png)             | 
+|:-----------------------------------------------------------------------------:|
+| *"The best of both worlds!"*                                                  |
+</Zoom>
+
+Documentation you may find helpful is:
+- https://docs.openshift.com/container-platform/4.15/virt/vm_networking/virt-exposing-vm-with-service.html
+- https://kubernetes.io/docs/concepts/services-networking/service
 
 
 ## 6.2 - Check your work
