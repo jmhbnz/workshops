@@ -1,6 +1,7 @@
 const headerNavLinks = [
     { href: '/workshop', title: 'Exercises' },
-    { href: 'https://etherpad.wikimedia.org/p/OpenShiftDisco_2023_12_20', title: 'Etherpad' }
+    { href: 'https://docs.openshift.com/container-platform/4.15/welcome/index.html', title: 'Documentation' },
+    { href: 'https://demo.redhat.com/workshop/s72ya3', title: 'Environment login' }
 ]
 
 export default headerNavLinks
