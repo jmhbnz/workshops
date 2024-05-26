@@ -26,9 +26,9 @@ The two primary resources are:
 
 ## 3.1 Create a single replica machineset
 
-In this excersie we will create a `MachineSet`. Once created this will automatically begin provisoning a Windows machine and adding it to our cluster as a worker node.
+In this exercise we will create a `MachineSet`. Once created this will automatically begin provisoning a Windows machine and adding it to our cluster as a worker node.
 
-Below is a yaml snippet we will use as base to create our `MachineSet`:
+Below is a YAML snippet we will use as base to create our `MachineSet`:
 
 ```yaml
 apiVersion: machine.openshift.io/v1beta1
@@ -100,7 +100,7 @@ spec:
 
 There are ten references to `<id>` in the sample that we need to find & replace with the actual cluster id for the cluster we have been allocated for the workshop and five references to the availability `<zone>` for our cluster nodes that we also need to update with our actual zone in use.
 
-Run the following command in your bastion host to find your cluster id and zone:
+Run the following command in your bastion host terminal session to find your cluster id and zone:
 
 ```bash
 name=$(oc get machineset -A -o jsonpath={.items[0].metadata.name})
