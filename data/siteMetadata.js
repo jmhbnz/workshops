@@ -1,8 +1,8 @@
 const siteMetadata = {
-  title: 'Red Hat OpenShift Virtualisation Hackathon',
+  title: 'Red Hat OpenShift Windows Container Workshop',
   author: 'Red Hat',
   headerTitle: 'Red Hat',
-  description: 'Red Hat OpenShift Virtualisation Hackathon',
+  description: 'Red Hat OpenShift Windows Container Workshop',
   language: 'en-us',
   siteUrl: 'https://jmhbnz.github.io/workshops',
   siteRepo: 'https://github.com/jmhbnz/workshops',
