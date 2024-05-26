@@ -22,7 +22,7 @@ To install Operators on OpenShift we use Operator Hub. A simplistic way of think
 </Zoom>
 
 
-## 1.1 - Install the windows machine config operator
+## 2.1 - Install the windows machine config operator
 
 If you have a running OpenShift cluster, you can install the optional **Windows Machine Config Operator** to configure Windows machines into nodes, enabling Windows container workloads to be ran within your OpenShift cluster. 
 
@@ -40,3 +40,26 @@ Follow the steps below to install the operator:
 | *Installing the windows machine config operator*                              |
 </Zoom>
 
+> Note: The operator installation may take several minutes to complete. Wait for the status of `succeeded` before continuing with the following step.
+> 
+
+## 2.2 - Create configuration secrets
+
+The windows machine config operator expects a secret to be present in its namespace called `cloud-private-key` containing a private key. This private key will be used to log into the soon to be provisioned Windows machine and set it up as an OpenShift node.
+
+Run the commands below to connect to your environment bastion host and create the required secret.
+
+1. Enter `ssh lab-user@<bastion-hostname>` replacing `<bastion-hostname>` with the one listed in your **Bastion Access** environment details page.
+2. Enter the password mentioned under **Bastion Access** in your environment details page.
+3. Generate a new ssh key with `ssh-keygen -t rsa -f ${HOME}/.ssh/winkey -q -N ''`
+4. Run the command below to create the required secret from the public key you just created.
+
+```bash
+oc create secret generic cloud-private-key --from-file=private-key.pem=${HOME}/.ssh/winkey -n openshift-windows-machine-config-operator
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/create-secret.gif)                | 
+|:-----------------------------------------------------------------------------:|
+| *Create a private key secret*                                                 |
+</Zoom>
