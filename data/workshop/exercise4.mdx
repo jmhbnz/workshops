@@ -1,0 +1,99 @@
+---
+title: Deploying a windows workload
+exercise: 4
+date: '2024-05-26'
+tags: ['openshift','windows','kubernetes','containers']
+draft: false
+authors: ['default']
+summary: "Putting our new cluster windows node to work 🚀"
+---
+
+
+With our cluster now having both Windows and Linux worker nodes, let's deploy a hybrid workload that will make use of both.
+
+**The NetCandy Store**
+
+You will be deploying a sample application stack that delivers an eCommerce site, The NetCandy Store. This application is built using Windows Containers working together with Linux Containers.
+
+This application consists of:
+
+1. Windows Container running a .NET v4 frontend, which is consuming a backend service.
+2. Linux Container running a .NET Core backend service, which is using a database.
+3. Linux Container running a MSSql database.
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/mixed-workloads.png)              | 
+|:-----------------------------------------------------------------------------:|
+| *Mixed workload architecture diagram*                                         |
+</Zoom>
+
+
+## 4.1 Add helm repository
+
+In this exercise we will deploy the NetCandy Store application using `helm`. You can deliver your Windows workloads in the same way you deliver your Linux workloads. Since everything is just YAML, the workflow is the same. Whether that be via Helm, an Operator, or via Ansible.
+
+We'll get started by creating a project and adding a helm repository that our application helm chart will be sourced from.
+
+Follow the steps below to add the repository:
+
+1. Switch from **Administrator** to **Developer** view in the top left web console dropdown menu.
+2. Click on **+Add** in the left menu.
+3. Click on the **Project** dropdown at the top and click **Create Project**
+4. Enter the name `netcandystore` and click **Create**.
+5. Click on **Helm Chart repositories**.
+6. Enter the name `redhat-demos` and url `https://redhat-developer-demos.github.io/helm-repo` then click **Create**.
+
+This will allow us to deploy any helm charts available in this repository.
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/mixed-workloads.png)              | 
+|:-----------------------------------------------------------------------------:|
+| *Mixed workload architecture diagram*                                         |
+</Zoom>
+
+
+
+In this excersie we will create a `MachineSet`. Once created this will automatically begin provisoning a Windows machine and adding it to our cluster as a worker node.
+
+Below is a yaml snippet we will use as base to create our `MachineSet`:
+
+```yaml
+          metadataServiceOptions: {}
+          tags:
+            - name: kubernetes.io/cluster/cluster-<id>
+              value: owned
+          deviceIndex: 0
+          ami:
+            id: ami-0e76083a67107f741
+          subnet:
+            filters:
+              - name: 'tag:Name'
+                values:
+                  - cluster-<id>-private-ap-southeast-<zone>
+          apiVersion: awsproviderconfig.openshift.io/v1beta1
+          iamInstanceProfile:
+            id: cluster-<id>-worker-profile
+```
+
+There are ten references to `<id>` in the sample that we need to find & replace with the actual cluster id for the cluster we have been allocated for the workshop and five references to the availability `<zone>` for our cluster nodes that we also need to update with our actual zone in use.
+
+Run the following command in your bastion host to find your cluster id and zone:
+
+```bash
+name=$(oc get machineset -A -o jsonpath={.items[0].metadata.name})
+echo "Cluster id is: ${name:8:11}"
+echo "Cluster availability zone is: ${name:40:2}"
+```
+
+After retrieving your cluster id and zone update the sample `MachineSet` using your preferred text editor, then select and copy all of the text to clipboard.
+
+Within OpenShift you can then click the ➕ button in the top right hand corner, paste in your yaml and click **Create**. 
+
+
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/create-machineset.gif)            | 
+|:-----------------------------------------------------------------------------:|
+| *Create a windows machineset*                                                 |
+</Zoom>
