@@ -28,7 +28,7 @@ To get underway open your web browser and navigate to the following link to rese
 </Zoom>
 
 
-## 1.2 - Logging into your cluster
+## 1.2 - Logging into your cluster console
 
 After entering an email and the provided password you'll be presented with a console url and login credentials for your OpenShift cluster.
 
@@ -40,4 +40,16 @@ Open the console url and login.
 | *Obtaining a workshop environment*                                            |
 </Zoom>
 
-You're now ready to proceed with the next exercise 🎉.
+
+## 1.3 - Logging into your bastion host
+
+Along with the cluster web console we will also use the command line during this workshop. You've been allocated a bastion host that you can ssh to as part of step 1.1.
+
+Follow the steps below to connect to your environment bastion host:
+
+1. Open your preferrred terminal application.
+2. Enter `ssh lab-user@<bastion-hostname>` replacing `<bastion-hostname>` with the hostname listed in your **Bastion Access** environment details page.
+3. Enter `yes` if you receive a host key verification prompt. This only appears as it is the first time you have connected to this host.
+4. When prompted enter the password mentioned under **Bastion Access** in your environment details page.
+
+Congratulations, you're now ready to proceed with the next exercise 🎉.

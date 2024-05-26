@@ -21,13 +21,14 @@ To install Operators on OpenShift we use Operator Hub. A simplistic way of think
 | *OpenShift Operator Hub*                                                      |
 </Zoom>
 
+
 ## 2.1 - Enable hybrid networking
 
-As a cluster administrator, you can configure a Red Hat OpenShift cluster network to allow Linux and Windows nodes to host Linux and Windows workloads, respectively.
+Before installing the windows maching config operator our first step as a cluster administrator is configure a our OpenShift cluster network to allow Linux and Windows nodes to host Linux and Windows workloads, respectively.
 
-This requires enabling a feature called **[hybrid networking](https://docs.openshift.com/container-platform/4.15/networking/ovn_kubernetes_network_provider/configuring-hybrid-networking.html#configuring-hybrid-ovnkubernetes)**.
+This requires enabling a feature called **[hybrid overlay networking](https://docs.openshift.com/container-platform/4.15/networking/ovn_kubernetes_network_provider/configuring-hybrid-networking.html#configuring-hybrid-ovnkubernetes)**.
 
-To configure hybrid networking, run the following command in your bastion host terminal:
+To configure hybrid overlay networking, run the following command in your bastion host terminal:
 
 ```bash
 oc patch networks.operator.openshift.io cluster --type=merge \
@@ -49,10 +50,16 @@ oc patch networks.operator.openshift.io cluster --type=merge \
   }'
 ```
 
+<Zoom>
+|![workshop](/workshops/static/images/windows/hybrid-networking.gif)            | 
+|:-----------------------------------------------------------------------------:|
+| *Patching an OpenShift cluster network to enable hybrid networking*           |
+</Zoom>
+
 
 ## 2.2 - Install the windows machine config operator
 
-If you have a running OpenShift cluster, you can install the optional **Windows Machine Config Operator** to configure Windows machines into nodes, enabling Windows container workloads to be ran within your OpenShift cluster. 
+If you have a running OpenShift cluster and have enabled hybrid overlay networking, you can then install the optional **Windows Machine Config Operator**. This operator will configure any Windows machines we add to the cluster, enabling Windows container workloads to be run within your OpenShift cluster. 
 
 Windows instances can be added either by creating a `MachineSet`, or by specifying existing instances through a `ConfigMap`. The operator will do all the necessary steps to configure the instance so that it can join the cluster as a worker node.
 
@@ -75,15 +82,15 @@ Follow the steps below to install the operator:
 
 The windows machine config operator expects a secret to be present in its namespace called `cloud-private-key` containing a private key. This private key will be used to log into the soon to be provisioned Windows machine and set it up as an OpenShift node.
 
-Run the commands below to connect to your environment bastion host and create the required secret.
+Run the commands below from your bastion host to create the required secret.
 
-1. Enter `ssh lab-user@<bastion-hostname>` replacing `<bastion-hostname>` with the one listed in your **Bastion Access** environment details page.
-2. Enter the password mentioned under **Bastion Access** in your environment details page.
-3. Generate a new ssh key with `ssh-keygen -t rsa -f ${HOME}/.ssh/winkey -q -N ''`
-4. Run the command below to create the required secret from the public key you just created.
+1. Generate a new ssh key with `ssh-keygen -t rsa -f ${HOME}/.ssh/winkey -q -N ''`
+2. Run the command below to create the required secret from the public key you just created.
 
 ```bash
-oc create secret generic cloud-private-key --from-file=private-key.pem=${HOME}/.ssh/winkey -n openshift-windows-machine-config-operator
+oc create secret generic cloud-private-key \
+  --from-file=private-key.pem=${HOME}/.ssh/winkey \
+  --namespace openshift-windows-machine-config-operator
 ```
 
 <Zoom>
