@@ -1,0 +1,53 @@
+#+TITLE: OpenShift Workshops
+#+AUTHOR: James Blair
+#+DATE: <2024-05-26 Sun>
+
+This directory contains the setup instructions for an OpenShift Windows Container Workshop.
+
+* Pre-requisites
+
+This guide assumes you have an existing OpenShift 4.15 cluster running in AWS.
+
+For my purposes I have clusters provisioned via the Red Hat Demo System.
+
+* Cluster setup
+
+Follow the steps below to prepare each cluster in advance of the hackathon.
+
+** Login and verify network
+
+Our first step is to login to the cluster and confirm cluster network details
+
+#+begin_src tmux
+oc login --web <api-server>
+#+end_src
+
+#+begin_src tmux
+# Check cluster cidr
+oc get network.operator cluster -o yaml
+#+end_src
+
+** Enable hybrid overlay networking
+
+https://docs.openshift.com/container-platform/4.15/networking/ovn_kubernetes_network_provider/configuring-hybrid-networking.html#configuring-hybrid-ovnkubernetes
+
+#+begin_src tmux
+# Patch the cluster network to enable hybrid overlay networking
+oc patch networks.operator.openshift.io cluster --type=merge \
+  -p '{
+    "spec":{
+      "defaultNetwork":{
+        "ovnKubernetesConfig":{
+          "hybridOverlayConfig":{
+            "hybridClusterNetwork":[
+              {
+                "cidr": "10.128.0.0/14",
+                "hostPrefix": 23
+              }
+            ]
+          }
+        }
+      }
+    }
+  }'
+#+end_src
