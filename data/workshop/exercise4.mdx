@@ -52,48 +52,4 @@ This will allow us to deploy any helm charts available in this repository.
 </Zoom>
 
 
-
-In this excersie we will create a `MachineSet`. Once created this will automatically begin provisoning a Windows machine and adding it to our cluster as a worker node.
-
-Below is a yaml snippet we will use as base to create our `MachineSet`:
-
-```yaml
-          metadataServiceOptions: {}
-          tags:
-            - name: kubernetes.io/cluster/cluster-<id>
-              value: owned
-          deviceIndex: 0
-          ami:
-            id: ami-0e76083a67107f741
-          subnet:
-            filters:
-              - name: 'tag:Name'
-                values:
-                  - cluster-<id>-private-ap-southeast-<zone>
-          apiVersion: awsproviderconfig.openshift.io/v1beta1
-          iamInstanceProfile:
-            id: cluster-<id>-worker-profile
-```
-
-There are ten references to `<id>` in the sample that we need to find & replace with the actual cluster id for the cluster we have been allocated for the workshop and five references to the availability `<zone>` for our cluster nodes that we also need to update with our actual zone in use.
-
-Run the following command in your bastion host to find your cluster id and zone:
-
-```bash
-name=$(oc get machineset -A -o jsonpath={.items[0].metadata.name})
-echo "Cluster id is: ${name:8:11}"
-echo "Cluster availability zone is: ${name:40:2}"
-```
-
-After retrieving your cluster id and zone update the sample `MachineSet` using your preferred text editor, then select and copy all of the text to clipboard.
-
-Within OpenShift you can then click the ➕ button in the top right hand corner, paste in your yaml and click **Create**. 
-
-
-```
-
-<Zoom>
-|![workshop](/workshops/static/images/windows/create-machineset.gif)            | 
-|:-----------------------------------------------------------------------------:|
-| *Create a windows machineset*                                                 |
-</Zoom>
+## 4.2 Deploy candystore helm chart
