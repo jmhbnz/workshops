@@ -66,3 +66,25 @@ With our helm chart repository added, let's deploy our application! This is as s
 | *Create mixed archiecture application via helm*                               |
 </Zoom>
 
+> Note: The application can take a few minutes to complete deploying.
+
+## 4.3 Review deployed windows application
+
+After creating our helm release we can see the status of the application from the **Topology** screen in the **Developer** view.
+
+We can verify our Windows Container is running by:
+
+1. Clicking on the **netcandystore** frontend Windows Container.
+2. Selecting the **Resources** tab on the right hand panel and clicking on the pod name.
+3. Clicking the **Termainl** tab and verifying that a Windows command prompt displays.
+4. Returning to the **Topology** screen and opening the URL for the **netcandystore** application to confirm the application is running.
+
+> Note: You may need to change from `https://` to `http://` in your browser address bar when opening the application URL as some browsers now automatically attempt to redirect to HTTPS, however this application route is currently only served as HTTP.
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/confirm-application.gif)          | 
+|:-----------------------------------------------------------------------------:|
+| *Confirm Windows container status*                                            |
+</Zoom>
+
+Congratulations! You've taken an existing OpenShift 4 cluster, set it up for running Windows workloads, then deployed a Windows app 🎉.
