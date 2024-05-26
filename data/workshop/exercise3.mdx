@@ -34,21 +34,23 @@ Below is a yaml snippet we will use as base to create our `MachineSet`:
 apiVersion: machine.openshift.io/v1beta1
 kind: MachineSet
 metadata:
-  name: windows
+  name: cluster-<id>-windows-ap-southeast-<zone>
   namespace: openshift-machine-api
+  labels:
+    machine.openshift.io/cluster-api-cluster: cluster-<id>
 spec:
   replicas: 1
   selector:
     matchLabels:
-      machine.openshift.io/cluster-api-cluster: demo
-      machine.openshift.io/cluster-api-machineset: windows
+      machine.openshift.io/cluster-api-cluster: cluster-<id>
+      machine.openshift.io/cluster-api-machineset: cluster-<id>-worker-ap-southeast-<zone>
   template:
     metadata:
       labels:
-        machine.openshift.io/cluster-api-cluster: demo
+        machine.openshift.io/cluster-api-cluster: cluster-<id>
         machine.openshift.io/cluster-api-machine-role: worker
         machine.openshift.io/cluster-api-machine-type: worker
-        machine.openshift.io/cluster-api-machineset: windows
+        machine.openshift.io/cluster-api-machineset: cluster-<id>-worker-ap-southeast-<zone>
         machine.openshift.io/os-id: Windows
     spec:
       lifecycleHooks: {}
@@ -60,7 +62,7 @@ spec:
           userDataSecret:
             name: windows-user-data
           placement:
-            availabilityZone: ap-southeast-1c
+            availabilityZone: ap-southeast-<zone>
             region: ap-southeast-1
           credentialsSecret:
             name: aws-cloud-credentials
@@ -90,24 +92,23 @@ spec:
             filters:
               - name: 'tag:Name'
                 values:
-                  - cluster-<id>-private-ap-southeast-1c
+                  - cluster-<id>-private-ap-southeast-<zone>
           apiVersion: awsproviderconfig.openshift.io/v1beta1
           iamInstanceProfile:
             id: cluster-<id>-worker-profile
-
 ```
 
-There are four references to `<id>` in the sample that we need to replace with the actual cluster id for the cluster we have been allocated for the workshop.
+There are ten references to `<id>` in the sample that we need to find & replace with the actual cluster id for the cluster we have been allocated for the workshop and five references to the availability `<zone>` for our cluster nodes that we also need to update with our actual zone in use.
 
-Run the following command in your bastion host to find your cluster id:
+Run the following command in your bastion host to find your cluster id and zone:
 
 ```bash
-name=$(oc get machineset -n openshift-machine-api cluster-nkpgx-zf758-worker-ap-southeast-1c -o jsonpath={.metadata.name})
-
-echo ${name:8:11}
+name=$(oc get machineset -A -o jsonpath={.items[0].metadata.name})
+echo "Cluster id is: ${name:8:11}"
+echo "Cluster availability zone is: ${name:40:2}"
 ```
 
-After retrieving your cluster id which will look something like example `nkpgx-zf758` update the sample `MachineSet` using your preferred text editor, then select and copy all of the text to clipboard.
+After retrieving your cluster id and zone update the sample `MachineSet` using your preferred text editor, then select and copy all of the text to clipboard.
 
 Within OpenShift you can then click the ➕ button in the top right hand corner, paste in your yaml and click **Create**. 
 

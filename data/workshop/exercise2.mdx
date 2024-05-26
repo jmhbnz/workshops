@@ -11,7 +11,7 @@ summary: "Preparing our cluster for windows machines."
 
 In this first hands on excercise we will prepare our cluster for running Windows nodes by installing an operator and configuring it.
 
-[Operatps](https://docs.openshift.com/container-platform/4.15/operators/index.html) are among the most important components of OpenShift Container Platform. Operators are the preferred method of packaging, deploying, and managing additional cluster services or application.
+[Operators](https://docs.openshift.com/container-platform/4.15/operators/index.html) are among the most important components of OpenShift Container Platform. Operators are the preferred method of packaging, deploying, and managing additional cluster services or application.
 
 To install Operators on OpenShift we use Operator Hub. A simplistic way of thinking about Operator Hub is as the "App Store" for your OpenShift cluster.
 
@@ -21,8 +21,36 @@ To install Operators on OpenShift we use Operator Hub. A simplistic way of think
 | *OpenShift Operator Hub*                                                      |
 </Zoom>
 
+## 2.1 - Enable hybrid networking
 
-## 2.1 - Install the windows machine config operator
+As a cluster administrator, you can configure a Red Hat OpenShift cluster network to allow Linux and Windows nodes to host Linux and Windows workloads, respectively.
+
+This requires enabling a feature called **[hybrid networking](https://docs.openshift.com/container-platform/4.15/networking/ovn_kubernetes_network_provider/configuring-hybrid-networking.html#configuring-hybrid-ovnkubernetes)**.
+
+To configure hybrid networking, run the following command in your bastion host terminal:
+
+```bash
+oc patch networks.operator.openshift.io cluster --type=merge \
+  -p '{
+    "spec":{
+      "defaultNetwork":{
+        "ovnKubernetesConfig":{
+          "hybridOverlayConfig":{
+            "hybridClusterNetwork":[
+              {
+                "cidr": "10.132.0.0/14",
+                "hostPrefix": 23
+              }
+            ]
+          }
+        }
+      }
+    }
+  }'
+```
+
+
+## 2.2 - Install the windows machine config operator
 
 If you have a running OpenShift cluster, you can install the optional **Windows Machine Config Operator** to configure Windows machines into nodes, enabling Windows container workloads to be ran within your OpenShift cluster. 
 
@@ -43,7 +71,7 @@ Follow the steps below to install the operator:
 > Note: The operator installation may take several minutes to complete. Wait for the status of `succeeded` before continuing with the following step.
 > 
 
-## 2.2 - Create configuration secrets
+## 2.3 - Create configuration secrets
 
 The windows machine config operator expects a secret to be present in its namespace called `cloud-private-key` containing a private key. This private key will be used to log into the soon to be provisioned Windows machine and set it up as an OpenShift node.
 
