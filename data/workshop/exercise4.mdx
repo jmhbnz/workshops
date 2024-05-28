@@ -1,90 +1,102 @@
 ---
-title: Deploying a windows workload
+title: Deploying a mirror registry
 exercise: 4
-date: '2024-05-26'
-tags: ['openshift','windows','kubernetes','containers']
+date: '2023-12-20'
+tags: ['openshift','containers','kubernetes','disconnected']
 draft: false
 authors: ['default']
-summary: "Putting our new cluster windows node to work 🚀"
+summary: "Let's start mirroring some content on our high side!"
 ---
 
+Images used by operators and platform components must be mirrored from upstream sources into a container registry that is accessible by the **High side**. You can use any registry you like for this as long as it supports Docker `v2-2`, such as:
+- Red Hat Quay
+- JFrog Artifactory
+- Sonatype Nexus Repository
+- Harbor
 
-With our cluster now having both Windows and Linux worker nodes, let's deploy a hybrid workload that will make use of both.
+An OpenShift subscription includes access to the [mirror registry](https://docs.openshift.com/container-platform/4.14/installing/disconnected_install/installing-mirroring-creating-registry.html#installing-mirroring-creating-registry) for Red Hat OpenShift, which is a small-scale container registry designed specifically for mirroring images in disconnected installations. We'll make use of this option in this lab.
 
-**The NetCandy Store**
+Mirroring all release and operator images can take awhile depending on the network bandwidth. For this lab, recall that we're going to mirror just the release images to save time and resources.
 
-You will be deploying a sample application stack that delivers an eCommerce site, The NetCandy Store. This application is built using Windows Containers working together with Linux Containers.
+We should have the `mirror-registry` binary along with the required container images available on the bastion in `/mnt/high-side`. The `50GB` volume we created should be enough to hold our mirror (without operators) and binaries.
 
-This application consists of:
 
-1. Windows Container running a .NET v4 frontend, which is consuming a backend service.
-2. Linux Container running a .NET Core backend service, which is using a database.
-3. Linux Container running a MSSql database 🤯.
+## 4.1 - Opening mirror registry port ingress
+
+We are getting close to deploying a disconnected OpenShift cluster that will be spread across multiple machines which are in turn spread across our three private subnets.
+
+Each of the machines in those private subnets will need to talk back to our mirror registry on port `8443` so let's quickly update our aws security group to ensure this will work.
+
+> Note: We're going to allow traffic from all sources for simplicity (`0.0.0.0/0`), but this is likely to be more restrictive in real world environments:
+
+```bash
+SG_ID=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=disco-sg" | jq -r '.SecurityGroups[0].GroupId')
+
+aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 8443 --cidr 0.0.0.0/0
+```
+
+
+## 4.2 - Running the registry install
+
+First, let's `ssh` back into the bastion:
+
+```bash
+ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGHSIDE_BASTION_IP"
+```
+
+And then we can kick off our install:
+
+```bash
+cd /mnt/high-side
+./mirror-registry install --quayHostname $(hostname) --quayRoot /mnt/high-side/quay/quay-install --quayStorage /mnt/high-side/quay/quay-storage --pgStorage /mnt/high-side/quay/pg-data --initPassword discopass
+```
+
+If all goes well, you should see something like:
+
+```text
+INFO[2023-07-06 15:43:41] Quay installed successfully, config data is stored in /mnt/quay/quay-install 
+INFO[2023-07-06 15:43:41] Quay is available at https://ip-10-0-51-47.ec2.internal:8443 with credentials (init, discopass) 
+```
 
 <Zoom>
-|![workshop](/workshops/static/images/windows/mixed-workloads.png)              | 
+|![workshop](/workshops/static/images/disconnected/registry-install.gif)        | 
 |:-----------------------------------------------------------------------------:|
-| *Mixed workload architecture diagram*                                         |
+| *Running the mirror-registry installer*                                       |
 </Zoom>
 
 
-## 4.1 Add helm repository
+## 4.3 Logging into the mirror registry
 
-In this exercise we will deploy the NetCandy Store application using `helm`. You can deliver your Windows workloads in the same way you deliver your Linux workloads. Since everything is just YAML, the workflow is the same. Whether that be via Helm, an Operator, or via Ansible.
+Now that our registry is running let's login with `podman` which will generate an auth file at `/run/user/1000/containers/auth.json`.
 
-We'll get started by creating a project and adding a helm repository that our application helm chart will be sourced from.
+```bash
+podman login -u init -p discopass --tls-verify=false $(hostname):8443
+```
 
-Follow the steps below to add the repository:
+We should be greeted with `Login Succeeded!`.
 
-1. Switch from **Administrator** to **Developer** view in the top left web console dropdown menu.
-2. Click on **+Add** in the left menu.
-3. Click on the **Project** dropdown at the top and click **Create Project**
-4. Enter the name `netcandystore` and click **Create**.
-5. Click on **Helm Chart repositories**.
-6. Enter the name `redhat-demos` and url `https://redhat-developer-demos.github.io/helm-repo` then click **Create**.
-
-This will allow us to deploy any helm charts available in this repository.
-
-<Zoom>
-|![workshop](/workshops/static/images/windows/add-helm-repo.gif)                | 
-|:-----------------------------------------------------------------------------:|
-| *Creating a project and adding a helm repository*                             |
-</Zoom>
+> Note: We pass `--tls-verify=false` here for simplicity during this workshop, but you can optionally add `/mnt/high-side/quay/quay-install/quay-rootCA/rootCA.pem` to the system trust store by following the guide in the Quay documentation [here](https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/manage_red_hat_quay/using-ssl-to-protect-quay?extIdCarryOver=true&sc_cid=701f2000001OH74AAG#configuring_the_system_to_trust_the_certificate_authority).
 
 
-## 4.2 Deploy candystore helm chart
+## 4.4 Pushing content into mirror registry
 
-With our helm chart repository added, let's deploy our application! This is as simple as following the three steps below to create a helm release.
+Now we're ready to mirror images from disk into the registry. Let's add `oc` and `oc-mirror` to the path:
 
-1. Search for `candy` on the **Helm charts** screen.
-2. Click on **Netcandystore** and then click **Create**.
-3. Review the chart settings and click **Create** once more.
+```bash
+sudo cp /mnt/high-side/oc /usr/local/bin/
+sudo cp /mnt/high-side/oc-mirror /usr/local/bin/
+```
+
+And now we fire up the mirror process to push our content from disk into the registry ready to be pulled by the OpenShift installation. This can take a similar amount of time to the sneakernet procedure we completed in exercise 3.
+
+```bash
+oc mirror --from=/mnt/high-side/mirror_seq1_000000.tar --dest-skip-tls docker://$(hostname):8443
+```
 
 <Zoom>
-|![workshop](/workshops/static/images/windows/deploy-application.gif)           | 
+|![workshop](/workshops/static/images/disconnected/registry-push.gif)           | 
 |:-----------------------------------------------------------------------------:|
-| *Create mixed archiecture application via helm*                               |
+| *Running the oc mirror process to push content to our registry*               |
 </Zoom>
 
-> Note: The application can take a few minutes to complete deploying, time for another coffee ☕.
-
-## 4.3 Review deployed windows application
-
-After creating our helm release we can see the status of the application from the **Topology** screen in the **Developer** view.
-
-We can verify our Windows Container is running by:
-
-1. Clicking on the **netcandystore** frontend Windows Container.
-2. Selecting the **Resources** tab on the right hand panel and clicking on the pod name.
-3. Clicking the **Terminal** tab and verifying that a Windows command prompt displays.
-4. Returning to the **Topology** screen and opening the URL for the **netcandystore** application to confirm the application is running.
-
-> Note: You may need to change from `https://` to `http://` in your browser address bar when opening the application URL as some browsers now automatically attempt to redirect to HTTPS, however this application route is currently only served as HTTP.
-
-<Zoom>
-|![workshop](/workshops/static/images/windows/confirm-application.gif)          | 
-|:-----------------------------------------------------------------------------:|
-| *Confirm Windows container status*                                            |
-</Zoom>
-
-Congratulations! You've taken an existing OpenShift 4 cluster, set it up for running Windows workloads, then deployed a Windows app 🎉.
+Once your content has finished pushing you are finished with exercise 4, well done! 🎉

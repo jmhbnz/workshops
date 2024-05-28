@@ -1,0 +1,55 @@
+---
+title: Understanding the workshop environment
+exercise: 1
+date: '2024-05-26'
+tags: ['openshift','windows','kubernetes','containers']
+draft: false
+authors: ['default']
+summary: "Let's get underway with the workshop."
+---
+
+Welcome to the OpenShift Windows Containers Workshop! Here you'll have a chance to build your windows container prowess.  
+
+With a Red Hat subscription, you can get support for running Windows workloads in OpenShift Container Platform.
+
+For this workshop you'll be given a fresh OpenShift 4 cluster which currently only runs linux containers. You will complete a series of exercises to transform the cluster to be capable to run Windows containers.
+
+**Let's get started!**
+
+
+## 1.1 - Obtaining your environment
+
+To get underway open your web browser and navigate to the following link to reserve yourself a user https://demo.redhat.com/workshop/98b7pu.  You can reserve an environment by entering any email address along with the password provided by your workshop facilitator.
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/workshop.png)                     | 
+|:-----------------------------------------------------------------------------:|
+| *Obtaining a workshop environment*                                            |
+</Zoom>
+
+
+## 1.2 - Logging into your cluster console
+
+After entering an email and the provided password you'll be presented with a console url and login credentials for your OpenShift cluster.
+
+Open the console url and login. 
+
+<Zoom>
+|![workshop](/workshops/static/images/windows/login.gif)                        | 
+|:-----------------------------------------------------------------------------:|
+| *Obtaining a workshop environment*                                            |
+</Zoom>
+
+
+## 1.3 - Logging into your bastion host
+
+Along with the cluster web console we will also use the command line during this workshop. You've been allocated a bastion host that you can ssh to as part of step 1.1.
+
+Follow the steps below to connect to your environment bastion host:
+
+1. Open your preferrred terminal application.
+2. Enter `ssh lab-user@<bastion-hostname>` replacing `<bastion-hostname>` with the hostname listed in your **Bastion Access** environment details page.
+3. Enter `yes` if you receive a host key verification prompt. This only appears as it is the first time you have connected to this host.
+4. When prompted enter the password mentioned under **Bastion Access** in your environment details page.
+
+Congratulations, you're now ready to proceed with the next exercise 🎉.
