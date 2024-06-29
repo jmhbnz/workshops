@@ -1,73 +1,63 @@
 
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>Red Hat OpenShift Virtualisation Hackathon</title>
+      <title>Red Hat OpenShift Windows Container Workshop</title>
       <link>https://jmhbnz.github.io/workshops/workshop</link>
-      <description>Red Hat OpenShift Virtualisation Hackathon</description>
+      <description>Red Hat OpenShift Windows Container Workshop</description>
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Sun, 14 Apr 2024 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Mon, 18 Dec 2023 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/scenario1</guid>
-    <title>Understanding the hackathon environment</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/scenario1</link>
-    <description>Let&#39;s get underway with the hackathon.</description>
-    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise1</guid>
+    <title>Understanding our lab environment</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise1</link>
+    <description>Let&#39;s get familiar with our lab setup.</description>
+    <pubDate>Mon, 18 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/scenario2</guid>
-    <title>What about my legacy technical debt?</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/scenario2</link>
-    <description>Will OpenShift Virtualisation run Acme virtual machines?</description>
-    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
+    <title>Preparing our low side</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
+    <description>Downloading content and tooling for sneaker ops 💾</description>
+    <pubDate>Mon, 18 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/scenario3</guid>
-    <title>But can it do live migration?</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/scenario3</link>
-    <description>Will OpenShift Virtualisation live migrate a virtual machine?</description>
-    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise3</guid>
+    <title>Preparing our high side</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise3</link>
+    <description>Setting up a bastion server and transferring content</description>
+    <pubDate>Tue, 19 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/scenario4</guid>
-    <title>What about balancing vm workloads?</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/scenario4</link>
-    <description>How do we optimally balance vm workloads across an OpenShift cluster?</description>
-    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise4</guid>
+    <title>Deploying a mirror registry</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise4</link>
+    <description>Let&#39;s start mirroring some content on our high side!</description>
+    <pubDate>Wed, 20 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
   </item>
 
   <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/scenario5</guid>
-    <title>How do I resize virtual machine disks again?</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/scenario5</link>
-    <description>Persistent volume what??</description>
-    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise5</guid>
+    <title>Installing a disconnected OpenShift cluster</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise5</link>
+    <description>Time to install a cluster 🚀</description>
+    <pubDate>Wed, 20 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/scenario6</guid>
-    <title>Can I connect my pods to my virtual machine?</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/scenario6</link>
-    <description>How do we make a virtual machine accessible over the OpenShift SDN</description>
-    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
   </item>
 
     </channel>
