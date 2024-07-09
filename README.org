@@ -1,10 +1,10 @@
-#+TITLE: OpenShift Workshops
+#+TITLE: Workshops
 #+AUTHOR: James Blair
 #+DATE: <2023-12-04 Mon>
 
-This repository contains a basic [[https://nextjs.org/][nextjs]] frontend designed to be exported as a static site and served via [[https://pages.github.com/][github pages]].
+This mono repo contains a basic [[https://nextjs.org/][nextjs]] frontend designed to be exported as a static site and served via [[https://pages.github.com/][github pages]].
 
-The frontend is used to serve workshop instructions for several workshops.
+The frontend is used to serve workshop instructions for custom hands on workshops I have created.
 
 ** Local development
 
@@ -15,7 +15,7 @@ To set up a local development environment run the following:
 npm install
 
 # Build and serve the site
-npm run build && npm run serve
+npm run build && npm run dev
 #+end_src
 
 
@@ -28,5 +28,5 @@ To export the site to static html to serve for example via github pages, run:
 npm install
 
 # Build and export the site
-npm run build && npm run export
+npm run build
 #+end_src
