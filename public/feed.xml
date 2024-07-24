@@ -7,57 +7,67 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Mon, 18 Dec 2023 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Mon, 04 Dec 2023 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise1</guid>
-    <title>Understanding our lab environment</title>
+    <title>Getting familiar with OpenShift</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise1</link>
-    <description>Let&#39;s get familiar with our lab setup.</description>
-    <pubDate>Mon, 18 Dec 2023 00:00:00 GMT</pubDate>
+    <description>In this first exercise we&#39;ll get familiar with OpenShift.</description>
+    <pubDate>Mon, 04 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category>
   </item>
 
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
-    <title>Preparing our low side</title>
+    <title>Deploying your first application</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
-    <description>Downloading content and tooling for sneaker ops 💾</description>
-    <pubDate>Mon, 18 Dec 2023 00:00:00 GMT</pubDate>
+    <description>Time to deploy your first app!</description>
+    <pubDate>Tue, 05 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>images</category>
   </item>
 
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise3</guid>
-    <title>Preparing our high side</title>
+    <title>Scaling and self-healing applications</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise3</link>
-    <description>Setting up a bastion server and transferring content</description>
-    <pubDate>Tue, 19 Dec 2023 00:00:00 GMT</pubDate>
+    <description>Let&#39;s scale our application up 📈</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>autoscaling</category>
   </item>
 
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise4</guid>
-    <title>Deploying a mirror registry</title>
+    <title>Deploying an application via helm chart</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise4</link>
-    <description>Let&#39;s start mirroring some content on our high side!</description>
-    <pubDate>Wed, 20 Dec 2023 00:00:00 GMT</pubDate>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>helm</category>
   </item>
 
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise5</guid>
-    <title>Installing a disconnected OpenShift cluster</title>
+    <title>Deploying an application via operator</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise5</link>
-    <description>Time to install a cluster 🚀</description>
-    <pubDate>Wed, 20 Dec 2023 00:00:00 GMT</pubDate>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>operator-framework</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise6</guid>
+    <title>Deploying an application from source</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise6</link>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Thu, 07 Dec 2023 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>s2i</category><category>shipwright</category>
   </item>
 
     </channel>

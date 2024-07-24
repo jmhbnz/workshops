@@ -1,0 +1,219 @@
+---
+title: Installing a disconnected OpenShift cluster
+exercise: 5
+date: '2023-12-20'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "Time to install a cluster 🚀"
+---
+
+We're on the home straight now. In this exercise we'll configure and then execute our `openshift-installer`.
+
+The OpenShift installation process is initiated from the bastion server on our **High side**. There are a handful of different ways to install OpenShift, but for this lab we're going to be using installer-provisioned infrastructure (IPI). 
+
+By default, the installation program acts as an installation wizard, prompting you for values that it cannot determine on its own and providing reasonable default values for the remaining parameters. 
+
+We'll then customize the `install-config.yaml` file that is produced to specify advanced configuration for our disconnected installation. The installation program then provisions the underlying infrastructure for the cluster. Here's a diagram describing the inputs and outputs of the installation configuration process:
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/install-overview.png)        | 
+|:-----------------------------------------------------------------------------:|
+| *Installation overview*                                                       |
+</Zoom>
+
+> Note: You may notice that nodes are provisioned through a process called Ignition. This concept is out of scope for this workshop, but if you're interested to learn more about it, you can read up on it in the documentation [here](https://docs.openshift.com/container-platform/4.14/installing/index.html#about-rhcos).
+
+IPI is the recommended installation method in most cases because it leverages full automation in installation and cluster management, but there are some key considerations to keep in mind when planning a production installation in a real world scenario.
+
+You may not have access to the infrastructure APIs. Our lab is going to live in AWS, which requires connectivity to the `.amazonaws.com` domain. We accomplish this by using an allowed list on a Squid proxy running on the **High side**, but a similar approach may not be achievable or permissible for everyone.
+
+You may not have sufficient permissions with your infrastructure provider. Our lab has full admin in our AWS enclave, so that's not a constraint we'll need to deal with. In real world environments, you'll need to ensure your account has the appropriate permissions which sometimes involves negotiating with security teams.
+
+Once configuration has been completed, we can kick off the OpenShift Installer and it will do all the work for us to provision the infrastructure and install OpenShift.
+
+
+## 5.1 - Building install-config.yaml
+
+Before we run the installer we need to create a configuration file. Let's set up a workspace for it first.
+
+```bash
+mkdir /mnt/high-side/install
+cd /mnt/high-side/install
+```
+
+Next we will generate the ssh key pair for access to cluster nodes:
+
+```bash
+ssh-keygen -f ~/.ssh/disco-openshift-key -q -N ""
+```
+
+Use the following Python code to minify your mirror container registry pull secret to a single line. Copy this output to your clipboard, since you'll need it in a moment:
+
+```bash
+python3 -c $'import json\nimport sys\nwith open(sys.argv[1], "r") as f: print(json.dumps(json.load(f)))' /run/user/1000/containers/auth.json
+```
+
+> Note: For connected installations, you'd use the secret from the Hybrid Cloud Console, but for our use case, the mirror registry is the only one OpenShift will need to authenticate to.
+
+Then we can go ahead and generate our `install-config.yaml`:
+
+> Note: We are setting --log-level to get more verbose output.
+
+```bash
+/mnt/high-side/openshift-install create install-config --dir /mnt/high-side/install --log-level=DEBUG
+```
+
+The OpenShift installer will prompt you for a number of fields; enter the values below:
+
+- SSH Public Key: `/home/ec2-user/.ssh/disco-openshift-key.pub`
+> The SSH public key used to access all nodes within the cluster.
+
+- Platform: aws
+> The platform on which the cluster will run.
+
+- AWS Access Key ID and Secret Access Key: From `cat ~/.aws/credentials`
+
+- Region: `us-east-2`
+
+- Base Domain: `sandboxXXXX.opentlc.com` This should automatically populate.
+> The base domain of the cluster. All DNS records will be sub-domains of this base and will also include the cluster name.
+
+- Cluster Name: `disco`
+>The name of the cluster. This will be used when generating sub-domains.
+
+- Pull Secret: Paste the output from minifying this to a single line in Step 3.
+
+That's it! The installer will generate `install-config.yaml` and drop it in `/mnt/high-side/install` for you.
+
+Once the config file is generated take a look through it, we will be making some changes as follows:
+
+- Change `publish` from `External` to `Internal`. We're using private subnets to house the cluster, so it won't be publicly accessible.
+
+- Add the subnet IDs for your private subnets to `platform.aws.subnets`. Otherwise, the installer will create its own VPC and subnets. You can retrieve them by running this command from your workstation:
+
+```bash
+aws ec2 describe-subnets | jq '[.Subnets[] | select(.Tags[].Value | contains ("Private")).SubnetId] | unique' -r | yq read - -P
+```
+
+Then add them to `platform.aws.subnets` in your `install-config.yaml` so that they look something like this:
+
+```yaml
+platform:
+  aws:
+    region: us-east-1
+    subnets:
+    - subnet-00f28bbc11d25d523
+    - subnet-07b4de5ea3a39c0fd
+    - subnet-07b4de5ea3a39c0fd
+```
+
+- Next we need to modify the `machineNetwork` to match the IPv4 CIDR blocks from the private subnets. Otherwise your control plane and compute nodes will be assigned IP addresses that are out of range and break the install. You can retrieve them by running this command from your workstation:
+
+```bash
+aws ec2 describe-subnets | jq '[.Subnets[] | select(.Tags[].Value | contains ("Private")).CidrBlock] | unique | map("cidr: " + .)' | yq read -P - | sed "s/'//g"  
+```
+
+Then use them to **replace the existing** `networking.machineNetwork` entry in your `install-config.yaml` so that they look something like this:
+
+```yaml
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 10.0.48.0/20
+  - cidr: 10.0.64.0/20
+  - cidr: 10.0.80.0/20
+```
+
+- Next we will add the `imageContentSources` to ensure image mappings happen correctly. You can append them to your `install-config.yaml` by running this command:
+
+```bash
+cat << EOF >> install-config.yaml
+imageContentSources:
+  - mirrors:
+    - $(hostname):8443/ubi8/ubi
+    source: registry.redhat.io/ubi8/ubi
+  - mirrors:
+    - $(hostname):8443/openshift/release-images
+    source: quay.io/openshift-release-dev/ocp-release
+  - mirrors:
+    - $(hostname):8443/openshift/release
+    source: quay.io/openshift-release-dev/ocp-v4.0-art-dev
+EOF
+```
+
+- Add the root CA of our mirror registry (`/mnt/high-side/quay/quay-install/quay-rootCA/rootCA.pem`) to the trust bundle using the `additionalTrustBundle` field by running this command:
+
+```bash
+cat <<EOF >> install-config.yaml
+additionalTrustBundle: |
+$(cat /mnt/high-side/quay/quay-install/quay-rootCA/rootCA.pem | sed 's/^/  /')
+EOF
+```
+
+It should look something like this:
+
+```yaml
+additionalTrustBundle: |
+  -----BEGIN CERTIFICATE-----
+  MIID2DCCAsCgAwIBAgIUbL/naWCJ48BEL28wJTvMhJEz/C8wDQYJKoZIhvcNAQEL
+  BQAwdTELMAkGA1UEBhMCVVMxCzAJBgNVBAgMAlZBMREwDwYDVQQHDAhOZXcgWW9y
+  azENMAsGA1UECgwEUXVheTERMA8GA1UECwwIRGl2aXNpb24xJDAiBgNVBAMMG2lw
+  LTEwLTAtNTEtMjA2LmVjMi5pbnRlcm5hbDAeFw0yMzA3MTExODIyMjNaFw0yNjA0
+  MzAxODIyMjNaMHUxCzAJBgNVBAYTAlVTMQswCQYDVQQIDAJWQTERMA8GA1UEBwwI
+  TmV3IFlvcmsxDTALBgNVBAoMBFF1YXkxETAPBgNVBAsMCERpdmlzaW9uMSQwIgYD
+  VQQDDBtpcC0xMC0wLTUxLTIwNi5lYzIuaW50ZXJuYWwwggEiMA0GCSqGSIb3DQEB
+  AQUAA4IBDwAwggEKAoIBAQDEz/8Pi4UYf/zanB4GHMlo4nbJYIJsyDWx+dPITTMd
+  J3pdOo5BMkkUQL8rSFkc3RjY/grdk2jejVPQ8sVnSabsTl+ku7hT0t1w7E0uPY8d
+  RTeGoa5QvdFOxWz6JsLo+C+JwVOWI088tYX1XZ86TD5FflOEeOwWvs5cmQX6L5O9
+  QGO4PHBc9FWpmaHvFBiRJN3AQkMK4C9XB82G6mCp3c1cmVwFOo3vX7h5738PKXWg
+  KYUTGXHxd/41DBhhY7BpgiwRF1idfLv4OE4bzsb42qaU4rKi1TY+xXIYZ/9DPzTN
+  nQ2AHPWbVxI+m8DZa1DAfPvlZVxAm00E1qPPM30WrU4nAgMBAAGjYDBeMAsGA1Ud
+  DwQEAwIC5DATBgNVHSUEDDAKBggrBgEFBQcDATAmBgNVHREEHzAdghtpcC0xMC0w
+  LTUxLTIwNi5lYzIuaW50ZXJuYWwwEgYDVR0TAQH/BAgwBgEB/wIBATANBgkqhkiG
+  9w0BAQsFAAOCAQEAkkV7/+YhWf1vq//N0Ms0td0WDJnqAlbZUgGkUu/6XiUToFtn
+  OE58KCudP0cAQtvl0ISfw0c7X/Ve11H5YSsVE9afoa0whEO1yntdYQagR0RLJnyo
+  Dj9xhQTEKAk5zXlHS4meIgALi734N2KRu+GJDyb6J0XeYS2V1yQ2Ip7AfCFLdwoY
+  cLtooQugLZ8t+Kkqeopy4pt8l0/FqHDidww1FDoZ+v7PteoYQfx4+R5e8ko/vKAI
+  OCALo9gecCXc9U63l5QL+8z0Y/CU9XYNDfZGNLSKyFTsbQFAqDxnCcIngdnYFbFp
+  mRa1akgfPl+BvAo17AtOiWbhAjipf5kSBpmyJA==
+  -----END CERTIFICATE-----
+```
+
+Lastly, now is a good time to make a backup of your `install-config.yaml` since the installer will consume (and delete) it:
+
+```bash
+cp install-config.yaml install-config.yaml.bak
+```
+
+
+## 5.2 Running the installation
+
+We're ready to run the install! Let's kick off the cluster installation by copying the command below into our web terminal:
+
+> Note: Once more we can use the `--log-level=DEBUG` flag to get more insight on how the install is progressing.
+
+```bash
+/mnt/high-side/openshift-install create cluster --log-level=DEBUG
+```
+
+<Zoom>
+|![workshop](/workshops/static/images/disconnected/install-cluster.gif)         | 
+|:-----------------------------------------------------------------------------:|
+| *Installation overview*                                                       |
+</Zoom>
+
+The installation process should take about 30 minutes. If you've done everything correctly, you should see something like the example below at the conclusion:
+
+```text
+...
+INFO Install complete!
+INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/home/myuser/install_dir/auth/kubeconfig'
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.mycluster.example.com
+INFO Login to the console with user: "kubeadmin", and password: "password"
+INFO Time elapsed: 30m49s
+```
+
+If you made it this far you have completed all the workshop exercises, well done! 🎉

@@ -1,102 +1,140 @@
 ---
-title: Deploying a mirror registry
+title: Deploying an application via helm chart
 exercise: 4
-date: '2023-12-20'
-tags: ['openshift','containers','kubernetes','disconnected']
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','deployments','helm']
 draft: false
 authors: ['default']
-summary: "Let's start mirroring some content on our high side!"
+summary: "Exploring alternative deployment approaches."
 ---
 
-Images used by operators and platform components must be mirrored from upstream sources into a container registry that is accessible by the **High side**. You can use any registry you like for this as long as it supports Docker `v2-2`, such as:
-- Red Hat Quay
-- JFrog Artifactory
-- Sonatype Nexus Repository
-- Harbor
+In **Exercise 2** we deployed our ParksMap application in the most simplistic way. Just throwing an individual container image at the cluster via the web console and letting OpenShift automate everything else for us.
 
-An OpenShift subscription includes access to the [mirror registry](https://docs.openshift.com/container-platform/4.14/installing/disconnected_install/installing-mirroring-creating-registry.html#installing-mirroring-creating-registry) for Red Hat OpenShift, which is a small-scale container registry designed specifically for mirroring images in disconnected installations. We'll make use of this option in this lab.
+With more complex applications comes the need to more finely customise the details of our application **Deployments** along with any other associated resources the application requires.
 
-Mirroring all release and operator images can take awhile depending on the network bandwidth. For this lab, recall that we're going to mirror just the release images to save time and resources.
+Enter the [**Helm**](https://www.redhat.com/en/topics/devops/what-is-helm) project, which can package up our application resources and distribute them as something called a **Helm chart**.
 
-We should have the `mirror-registry` binary along with the required container images available on the bastion in `/mnt/high-side`. The `50GB` volume we created should be enough to hold our mirror (without operators) and binaries.
+In simple terms, a **Helm chart** is basically a directory containing a collection of YAML template files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
 
 
-## 4.1 - Opening mirror registry port ingress
+## 4.1 - Deploying a helm chart via the web console 
 
-We are getting close to deploying a disconnected OpenShift cluster that will be spread across multiple machines which are in turn spread across our three private subnets.
+It is common for organisations that produce and ship applications to provide their applications to organisations as a **Helm chart**.
 
-Each of the machines in those private subnets will need to talk back to our mirror registry on port `8443` so let's quickly update our aws security group to ensure this will work.
+Let's get started by deploying a **Helm chart** for the [Gitea](https://about.gitea.com) application which is a git oriented devops platform similar to GitHub or GitLab.
 
-> Note: We're going to allow traffic from all sources for simplicity (`0.0.0.0/0`), but this is likely to be more restrictive in real world environments:
+Start in the **+Add** view of the **Developer** perspective.
 
-```bash
-SG_ID=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=disco-sg" | jq -r '.SecurityGroups[0].GroupId')
+Scroll down and click the **Helm chart** tile. OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
 
-aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 8443 --cidr 0.0.0.0/0
-```
+Click on the search result and click **Create**.
 
+In the YAML configuration window enter the following, substituting `userX` with your assigned user and then click **Create** once more.
 
-## 4.2 - Running the registry install
-
-First, let's `ssh` back into the bastion:
-
-```bash
-ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGHSIDE_BASTION_IP"
-```
-
-And then we can kick off our install:
-
-```bash
-cd /mnt/high-side
-./mirror-registry install --quayHostname $(hostname) --quayRoot /mnt/high-side/quay/quay-install --quayStorage /mnt/high-side/quay/quay-storage --pgStorage /mnt/high-side/quay/pg-data --initPassword discopass
-```
-
-If all goes well, you should see something like:
-
-```text
-INFO[2023-07-06 15:43:41] Quay installed successfully, config data is stored in /mnt/quay/quay-install 
-INFO[2023-07-06 15:43:41] Quay is available at https://ip-10-0-51-47.ec2.internal:8443 with credentials (init, discopass) 
+```yaml
+db:
+  password: userX
+hostname: userX-gitea.apps.cluster-dsmsm.dynamic.opentlc.com
+tlsRoute: true
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/registry-install.gif)        | 
-|:-----------------------------------------------------------------------------:|
-| *Running the mirror-registry installer*                                       |
+|![gitea-deployment](/workshops/static/images/gitea-deployment.gif) | 
+|:-------------------------------------------------------------------:|
+| *Gitea application deployment via helm chart*                       |
 </Zoom>
 
 
-## 4.3 Logging into the mirror registry
+## 4.2 - Examine deployed application
 
-Now that our registry is running let's login with `podman` which will generate an auth file at `/run/user/1000/containers/auth.json`.
+Returning to the **Topology** view of the **Developer** perspective you will now see the Gitea application being deployed in your `userX` project (this can take a few minutes to complete). Notice how the application is made up of two separate pods, the `gitea-db` database and the `gitea` frontend web server.
 
-```bash
-podman login -u init -p discopass --tls-verify=false $(hostname):8443
-```
+Once your gitea pods are both running open the **Route** for the `gitea` web frontend and confirm you can see the application web interface.
 
-We should be greeted with `Login Succeeded!`.
+Next, if we click on the overall gitea **Helm release** by clicking on the shaded box surrounding our two Gitea pods we can see the full list of resources deployed by this helm chart, which in addition to the two running pods includes the following:
 
-> Note: We pass `--tls-verify=false` here for simplicity during this workshop, but you can optionally add `/mnt/high-side/quay/quay-install/quay-rootCA/rootCA.pem` to the system trust store by following the guide in the Quay documentation [here](https://access.redhat.com/documentation/en-us/red_hat_quay/3/html/manage_red_hat_quay/using-ssl-to-protect-quay?extIdCarryOver=true&sc_cid=701f2000001OH74AAG#configuring_the_system_to_trust_the_certificate_authority).
+ - 1 **ConfigMap**
+ - 1 **ImageStream**
+ - 2 **PersistentVolumeClaims**
+ - 1 **Route**
+ - 1 **Secret**
+ - 2 **Services**
 
-
-## 4.4 Pushing content into mirror registry
-
-Now we're ready to mirror images from disk into the registry. Let's add `oc` and `oc-mirror` to the path:
-
-```bash
-sudo cp /mnt/high-side/oc /usr/local/bin/
-sudo cp /mnt/high-side/oc-mirror /usr/local/bin/
-```
-
-And now we fire up the mirror process to push our content from disk into the registry ready to be pulled by the OpenShift installation. This can take a similar amount of time to the sneakernet procedure we completed in exercise 3.
-
-```bash
-oc mirror --from=/mnt/high-side/mirror_seq1_000000.tar --dest-skip-tls docker://$(hostname):8443
-```
+> Note: Feel free to try out a `oc explain <resource>` command in your web terminal to learn more about each of the resource types mentioned above, for example `oc explain service`.
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/registry-push.gif)           | 
-|:-----------------------------------------------------------------------------:|
-| *Running the oc mirror process to push content to our registry*               |
+|![helm-resources](/workshops/static/images/helm-resources.png) | 
+|:-------------------------------------------------------------------:|
+| *Gitea helm release resources created*                              |
 </Zoom>
 
-Once your content has finished pushing you are finished with exercise 4, well done! 🎉
+
+## 4.3 - Upgrade helm chart
+
+If we want to make a change to the configuration of our Gitea application we can perform a `helm upgrade`. OpenShift has built in support to perform helm upgrades through the web console.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Upgrade**.
+
+Now let's intentionally modify the `hostname:` field in the yaml configuration to `hostname: bogushostname.example.com` and click **Upgrade**.
+
+We will be returned to the **Helm releases** view. Notice how the release status is now Failed (due to our bogus configuration), however the previous release of the application is still running. OpenShift has validated the helm release, determined the updates will not work, and prevented the release from proceeding.
+
+From here it is trivial to perform a **Rollback** to remove our misconfigured update. We'll do that in the next step.
+
+<Zoom>
+|![helm-upgrade](/workshops/static/images/helm-upgrade.gif) | 
+|:-------------------------------------------------------------------:|
+| *Attempting a gitea helm upgrade*                                   |
+</Zoom>
+
+
+## 4.4 - Rollback to a previous helm release
+
+Our previous helm upgrade for the Gitea application didn't succeed due to the misconfiguration we supplied. **Helm** has features for rolling back to a previous release through the `helm rollback` command line interface. OpenShift has made this even easier by adding native support for interactive rollbacks in the OpenShift web console so let's give that a go now.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Rollback**.
+
+Select the radio button for revision `1` which should be showing a status of `Deployed`, then click **Rollback**.
+
+<Zoom>
+|![helm-rollback](/workshops/static/images/helm-rollback.gif) | 
+|:-------------------------------------------------------------------:|
+| *Rolling back to a previous gitea helm release*                     |
+</Zoom>
+
+
+## 4.5 - Deleting an application deployed via helm
+
+Along with upgrades and rollbacks **Helm** also makes deleting deployed applications (along with all of their associated resources) straightforward.
+
+Before we move on to exercise 5 let's delete the gitea application.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Delete Helm Release**.
+
+Enter the `gitea` confirmation at the prompt and click **Delete**. If you now return to the **Topology** view you will see the gitea application deleting.
+
+<Zoom>
+|![helm-delete](/workshops/static/images/helm-delete.gif) | 
+|:-------------------------------------------------------------------:|
+| *Deleting the gitea application helm release*                       |
+</Zoom>
+
+
+## 4.6 - Bonus objective: Artifact Hub
+
+If you have time, take a while to explore https://artifacthub.io/packages/search to see the kinds of applications available in the most popular publicly available Helm Chart repository Artifact Hub.
+
+
+Well done, you've finished exercise 4! 🎉

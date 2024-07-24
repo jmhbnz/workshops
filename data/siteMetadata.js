@@ -1,8 +1,8 @@
 const siteMetadata = {
-  title: 'Red Hat OpenShift Windows Container Workshop',
+  title: 'Red Hat OpenShift Application Delivery Workshop',
   author: 'Red Hat',
   headerTitle: 'Red Hat',
-  description: 'Red Hat OpenShift Windows Container Workshop',
+  description: 'Red Hat OpenShift Application Delivery Workshop',
   language: 'en-us',
   siteUrl: 'https://jmhbnz.github.io/workshops',
   siteRepo: 'https://github.com/jmhbnz/workshops',

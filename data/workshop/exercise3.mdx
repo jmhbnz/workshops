@@ -1,119 +1,122 @@
 ---
-title: Preparing our high side
+title: Scaling and self-healing applications
 exercise: 3
-date: '2023-12-19'
-tags: ['openshift','containers','kubernetes','disconnected']
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','deployments','autoscaling']
 draft: false
 authors: ['default']
-summary: "Setting up a bastion server and transferring content"
+summary: "Let's scale our application up 📈"
 ---
 
-In this exercise, we'll prepare the **High side**. This involves creating a bastion server on the **High side** that will host our mirror registry. 
+We have our application deployed, let's scale it up to make sure it will be resilient to failures.
 
-> Note: We have an interesting dilemma for this excercise: the Amazon Machine Image we used for the prep system earlier does not have `podman` installed. We need `podman`, since it is a key dependency for `mirror-registry`.
-> 
-> We could rectify this by running `sudo dnf install -y podman` on the bastion system, but the bastion server won't have Internet access, so we need another option for this lab. To solve this problem, we need to build our own RHEL image with podman pre-installed. Real customer environments will likely already have a solution for this, but one approach is to use the [Image Builder](https://console.redhat.com/insights/image-builder) in the Hybrid Cloud Console, and that's exactly what has been done for this lab.
->
-> [workshop](/workshops/static/images/disconnected/image-builder.png)
-> 
-> In the home directory of your web terminal you will find an `ami.txt` file containng our custom image AMI which will be used by the command that creates our bastion ec2 instance.
+While **Services** provide discovery and load balancing for **Pods**, the higher level **Deployment** resource specifies how many replicas (pods) of our application will be created and is a simplistic way to configure scaling for the application.
+
+> Note: To learn more about **Deployments** refer to this [documentation](https://docs.openshift.com/container-platform/4.14/applications/deployments/what-deployments-are.html).
 
 
-## 3.1 - Creating a bastion server
+## 3.1 - Reviewing the parksmap deployment
 
-First up for this exercise we'll grab the ID of one of our **High side** private subnets as well as our ec2 security group.
+Let's start by confirming how many `replicas` we currently specify for our ParksMap application. We'll also use this exercise step to take a look at how all resources within OpenShift can be viewed and managed as [YAML](https://www.redhat.com/en/topics/automation/what-is-yaml) formatted text files which is extremely useful for more advanced automation and GitOps concepts. 
 
-Copy the commands below into your web terminal:
+Start in the **Topology** view of the **Developer** perspective.
 
-```bash
-PRIVATE_SUBNET=$(aws ec2 describe-subnets | jq '.Subnets[] | select(.Tags[].Value=="Private Subnet - disco").SubnetId' -r)
-echo $PRIVATE_SUBNET
+Click on your "Parksmap" application icon and click on the **D parksmap** deployment name at the top of the right hand panel.
 
-SG_ID=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=disco-sg" | jq -r '.SecurityGroups[0].GroupId')
-echo $SG_ID
-```
+From the **Deployment details** view we can click on the **YAML** tab and scroll down to confirm that we only specify `1` replica for the ParksMap application currently.
 
-Once we know our subnet and security group ID's we can spin up our **High side** bastion server. Copy the commands below into your web terminal to complete this:
-
-```bash
-aws ec2 run-instances --image-id $(cat ami.txt) \
-  --count 1 \
-  --instance-type t3.large \
-  --key-name disco-key \
-  --security-group-ids $SG_ID \
-  --subnet-id $PRIVATE_SUBNET \
-  --tag-specifications "ResourceType=instance,Tags=[{Key=Name,Value=disco-bastion-server}]" \
-  --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
+```yaml
+spec:
+  replicas: 1
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/launch-bastion-ec2.gif)      | 
-|:-----------------------------------------------------------------------------:|
-| *Launching bastion ec2 instance*                                              |
+|![parksmap-replicas](/workshops/static/images/app-replicas.gif) | 
+|:-------------------------------------------------------------------:|
+| *ParksMap application deployment replicas*                          |
 </Zoom>
 
 
-## 3.2 - Accessing the high side
+## 3.2 - Intentionally crashing the application
 
-Now we need to access our bastion server on the high side. In real customer environments, this might entail use of a VPN, or physical access to a workstation in a secure facility such as a SCIF. 
+With our ParksMap application only having one pod replica currently it will not be tolerant to failures. OpenShift will automatically restart the single pod if it encounters a failure, however during the time the application pod takes to start back up our users will not be able to access the application.
 
-To make things a bit simpler for our lab, we're going to restrict access to our bastion to its private IP address. So we'll use the prep system as a sort of bastion-to-the-bastion.
+Let's see that in practice by intentionally causing an error in our application.
 
-Let's get access by grabbing the bastion's private IP.
+Start in the **Topology** view of the **Developer** perspective and click your Parksmap application icon.
 
-```bash
-HIGHSIDE_BASTION_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=disco-bastion-server" | jq -r '.Reservations[0].Instances[0].PrivateIpAddress')
-echo $HIGHSIDE_BASTION_IP
-```
+In the **Resources** tab of the information pane open a second browser tab showing the ParksMap application **Route** that we explored in the previous exercise. The application should be running as normal.
 
-Our next step will be to `exit` back to our web terminal and copy our private key to the prep system so that we can `ssh` to the bastion from there. You may have to wait a minute for the VM to finish initializing:
+Click on the pod name under the **Pods** header of the **Resources** tab and then click on the **Terminal** tab. This will open a terminal within our running ParksMap application container.
 
-```bash
-PREP_SYSTEM_IP=$(aws ec2 describe-instances --filters "Name=tag:Name,Values=disco-prep-system" | jq -r '.Reservations[0].Instances[0].PublicIpAddress')
-
-scp -i disco_key disco_key ec2-user@$PREP_SYSTEM_IP:/home/ec2-user/disco_key
-```
-
-To make life a bit easier down the track let's set an environment variable on the prep system so that we can preserve the bastion's IP:
+Inside the terminal run the following to intentionally crash the application:
 
 ```bash
-ssh -i disco_key ec2-user@$PREP_SYSTEM_IP "echo HIGHSIDE_BASTION_IP=$(echo $HIGHSIDE_BASTION_IP) > highside.env"
+kill 1 
 ```
 
-Finally - Let's now connect all the way through to our **High side** bastion 🚀
-
-```bash
-ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGHSIDE_BASTION_IP"
-```
+The pod will automatically be restarted by OpenShift however if you refresh your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/connect-bastion-ec2.gif)     | 
-|:-----------------------------------------------------------------------------:|
-| *Connecting to our bastion ec2 instance*                                      |
+|![parksmap-crash](/workshops/static/images/app-crash.gif) | 
+|:-------------------------------------------------------------------:|
+| *Intentionally crashing the ParksMap application*                   |
 </Zoom>
 
 
-## 3.3 - Sneakernetting content to the high side
+## 3.3 - Scaling up the application
 
-We'll now deliver the **High side** gift basket to the bastion server. Start by mounting our EBS volume on the bastion server to ensure that we don't run out of space:
+As a best practice, wherever possible we should try to run multiple replicas of our pods so that if one pod is unavailable our application will continue to be available to users.
 
-```bash
-sudo mkfs -t xfs /dev/nvme1n1
-sudo mkdir /mnt/high-side
-sudo mount /dev/nvme1n1 /mnt/high-side
-sudo chown ec2-user:ec2-user /mnt/high-side
-```
+Let's scale up our application and confirm it is now fault tolerant.
 
-With the mount in place we can exit back to our base web terminal and send over our gift basket at `/mnt/high-side` using `rsync`. This can take 10-15 minutes depending on the size of the mirror tarball.
+In the **Topology** view of the **Developer** perspective click your Parksmap application icon.
 
-```bash
-ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "rsync -avP -e 'ssh -i disco_key' /mnt/high-side ec2-user@$HIGHSIDE_BASTION_IP:/mnt"
-```
+In the **Details** tab of the information pane click the **^ Increase the pod count** arrow to increase our replicas to `2`.  You will see the second pod starting up and becoming ready.
+
+> Note: You can also scale the replicas of a deployment in automated and event driven fashions in response to factors like incoming traffic or resource consumption, or by using the `oc` cli for example `oc scale --replicas=2 deployment/parksmap`.
+
+Once the new pod is ready, repeat the steps from task `3.2` to crash one of the pods. You should see that the application continues to serve traffic thanks to our OpenShift **Service** load balancing traffic to the second **Pod**.
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/sneakernet-transfer.gif)     | 
-|:-----------------------------------------------------------------------------:|
-| *Initiating the sneakernet transfer via rsync*                                |
+|![parksmap-scale](/workshops/static/images/app-scale.gif) | 
+|:-------------------------------------------------------------------:|
+| *Scaling up the ParksMap application*                               |
 </Zoom>
 
-Once your transfer has finished pushing you are finished with exercise 3, well done! 🎉
+
+## 3.4 - Self healing to desired state
+
+In the previous example we saw what happened when we intentionally crashed our application. Let's see what happens if we just outright delete one of our ParksMap applications two **Pods**.
+
+For this step we'll use the `oc` command line utility to build some more familiarity.
+
+Let's start by launching back into our web terminal now by clicking the terminal button in the top right hand corner and then clicking **Start** with our `userX` project selected.
+
+Once our terminal opens let's check our list of **Pods** with `oc get pods`. You should see something similar to the output below:
+
+```bash
+bash-4.4 ~ $ oc get pods
+NAME                                         READY   STATUS    RESTARTS   AGE
+parksmap-ff7477dc4-2nxd2                     1/1     Running   0          79s
+parksmap-ff7477dc4-n26jl                     1/1     Running   0          31m
+workspace45c88f4d4f2b4885-74b6d4898f-57dgh   2/2     Running   0          108s
+```
+
+Copy one of the pod names and delete it via `oc delete pods <podname>`, i.e `oc delete pod parksmap-ff7477dc4-2nxd2`.
+
+```bash
+bash-4.4 ~ $ oc delete pod parksmap-ff7477dc4-2nxd2
+pod "parksmap-ff7477dc4-2nxd2" deleted
+```
+
+If we now run `oc get pods` again we will see a new **Pod** has automatically been created by OpenShift to replace the one we fully deleted. This is because OpenShift is a container orchestration engine that will always try and enforce the desired state that we declare.
+
+In our ParksMap **Deployment** we have declared we always want two replicas of our application running at all times. Even if we (possibly accidentally) delete one, OpenShift will always attempt to self heal to return to our desired state.
+
+## 3.5 - Bonus objective: Autoscaling
+
+If you have time, take a while to explore the concepts of [HorizontalPodAutoscaling](https://docs.openshift.com/container-platform/4.14/nodes/pods/nodes-pods-autoscaling.html), [VerticalPodAutoscaling](https://docs.openshift.com/container-platform/4.14/nodes/pods/nodes-pods-vertical-autoscaler.html) and [Cluster autoscaling](https://docs.openshift.com/container-platform/4.14/machine_management/applying-autoscaling.html).
+
+
+Well done, you've finished exercise 3! 🎉
