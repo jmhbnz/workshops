@@ -38,7 +38,7 @@ echo "Security group id is: ${SG_ID}"
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/security-group.gif)          | 
+|![workshop](/static/images/disconnected/security-group.gif)          | 
 |:-----------------------------------------------------------------------------:|
 | *Creating aws ec2 security group*                                             |
 </Zoom>
@@ -55,7 +55,7 @@ aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/ssh-port-ingress.gif)          | 
+|![workshop](/static/images/disconnected/ssh-port-ingress.gif)          | 
 |:-----------------------------------------------------------------------------:|
 | *Opening ssh port ingress*                                                    |
 </Zoom>
@@ -81,7 +81,7 @@ aws ec2 run-instances --image-id "ami-092b43193629811af" \
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/launch-prep-ec2.gif)         | 
+|![workshop](/static/images/disconnected/launch-prep-ec2.gif)         | 
 |:-----------------------------------------------------------------------------:|
 | *Launching a prep rhel8 ec2 instance*                                         |
 </Zoom>
@@ -103,7 +103,7 @@ ssh -i disco_key ec2-user@$PREP_SYSTEM_IP
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/connect-prep-ec2.gif)        | 
+|![workshop](/static/images/disconnected/connect-prep-ec2.gif)        | 
 |:-----------------------------------------------------------------------------:|
 | *Connecting to the prep rhel8 ec2 instance*                                   |
 </Zoom>
@@ -161,7 +161,7 @@ rm -f openshift-installer.tar.gz
 ```
 
 <Zoom>
-|![workshop](/workshops/static/images/disconnected/download-tools.gif)       | 
+|![workshop](/static/images/disconnected/download-tools.gif)       | 
 |:-----------------------------------------------------------------------------:|
 | *Downloading required tools with curl*                                        |
 </Zoom>

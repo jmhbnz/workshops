@@ -11,8 +11,8 @@ module.exports = withBundleAnalyzer({
   images: {
     unoptimized: true
   },
-  basePath: '/workshops',
-  assetPrefix: '/workshops/',
+  basePath: '',
+  assetPrefix: '',
   experimental: { esmExternals: true },
   webpack: (config, { dev, isServer }) => {
     config.module.rules.push({
