@@ -12,12 +12,11 @@ We have our application deployed, let's scale it up to make sure it will be resi
 
 While **Services** provide discovery and load balancing for **Pods**, the higher level **Deployment** resource specifies how many replicas (pods) of our application will be created and is a simplistic way to configure scaling for the application.
 
-> Note: To learn more about **Deployments** refer to this [documentation](https://docs.openshift.com/container-platform/4.14/applications/deployments/what-deployments-are.html).
-
+> Note: To learn more about **Deployments** refer to this [documentation](https://docs.openshift.com/container-platform/4.16/applications/deployments/what-deployments-are.html).
 
 ## 3.1 - Reviewing the parksmap deployment
 
-Let's start by confirming how many `replicas` we currently specify for our ParksMap application. We'll also use this exercise step to take a look at how all resources within OpenShift can be viewed and managed as [YAML](https://www.redhat.com/en/topics/automation/what-is-yaml) formatted text files which is extremely useful for more advanced automation and GitOps concepts. 
+Let's start by confirming how many `replicas` we currently specify for our ParksMap application. We'll also use this exercise step to take a look at how all resources within OpenShift can be viewed and managed as [YAML](https://www.redhat.com/en/topics/automation/what-is-yaml) formatted text files which is extremely useful for more advanced automation and GitOps concepts.
 
 Start in the **Topology** view of the **Developer** perspective.
 
@@ -31,11 +30,10 @@ spec:
 ```
 
 <Zoom>
-|![parksmap-replicas](/static/images/app-replicas.gif) | 
+|![parksmap-replicas](/static/images/app-replicas.gif)                |
 |:-------------------------------------------------------------------:|
 | *ParksMap application deployment replicas*                          |
 </Zoom>
-
 
 ## 3.2 - Intentionally crashing the application
 
@@ -58,11 +56,10 @@ kill 1
 The pod will automatically be restarted by OpenShift however if you refresh your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
 
 <Zoom>
-|![parksmap-crash](/static/images/app-crash.gif) | 
+|![parksmap-crash](/static/images/app-crash.gif)                      |
 |:-------------------------------------------------------------------:|
 | *Intentionally crashing the ParksMap application*                   |
 </Zoom>
-
 
 ## 3.3 - Scaling up the application
 
@@ -79,11 +76,10 @@ In the **Details** tab of the information pane click the **^ Increase the pod co
 Once the new pod is ready, repeat the steps from task `3.2` to crash one of the pods. You should see that the application continues to serve traffic thanks to our OpenShift **Service** load balancing traffic to the second **Pod**.
 
 <Zoom>
-|![parksmap-scale](/static/images/app-scale.gif) | 
+|![parksmap-scale](/static/images/app-scale.gif)                      |
 |:-------------------------------------------------------------------:|
 | *Scaling up the ParksMap application*                               |
 </Zoom>
-
 
 ## 3.4 - Self healing to desired state
 
@@ -116,7 +112,6 @@ In our ParksMap **Deployment** we have declared we always want two replicas of o
 
 ## 3.5 - Bonus objective: Autoscaling
 
-If you have time, take a while to explore the concepts of [HorizontalPodAutoscaling](https://docs.openshift.com/container-platform/4.14/nodes/pods/nodes-pods-autoscaling.html), [VerticalPodAutoscaling](https://docs.openshift.com/container-platform/4.14/nodes/pods/nodes-pods-vertical-autoscaler.html) and [Cluster autoscaling](https://docs.openshift.com/container-platform/4.14/machine_management/applying-autoscaling.html).
-
+Before moving on feel free to take a moment to review the concepts of [HorizontalPodAutoscaling](https://docs.openshift.com/container-platform/4.16/nodes/pods/nodes-pods-autoscaling.html), [VerticalPodAutoscaling](https://docs.openshift.com/container-platform/4.16/nodes/pods/nodes-pods-vertical-autoscaler.html) and [Cluster autoscaling](https://docs.openshift.com/container-platform/4.16/machine_management/applying-autoscaling.html).
 
 Well done, you've finished exercise 3! 🎉
