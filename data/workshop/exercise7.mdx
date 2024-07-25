@@ -27,3 +27,29 @@ This operator has already been installed on your cluster so let's take it for a 
 
 ## 7.1 - Log in to openshift gitops web interface
 
+
+```bash
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  finalizers:
+  - argoproj.io/finalizer
+  name: argocd
+  namespace: userX
+spec:
+  defaultClusterScopedRoleDisabled: true
+  rbac:
+    defaultPolicy: ""
+    policy: |
+      g, system:cluster-admins, role:admin
+    scopes: '[groups]'
+  server:
+    route:
+      enabled: true
+  sourceNamespaces:
+  - userX
+  sso:
+    dex:
+      openShiftOAuth: true
+    provider: dex
+```
