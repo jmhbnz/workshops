@@ -70,5 +70,15 @@
     <category>openshift</category><category>containers</category><category>kubernetes</category><category>s2i</category><category>shipwright</category>
   </item>
 
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise7</guid>
+    <title>Optional - Deploying an application via gitops</title>
+    <link>https://rhdemo.win/workshop/exercise7</link>
+    <description>Keen to explore a more advanced deployment pattern?</description>
+    <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>argocd</category><category>gitops</category>
+  </item>
+
     </channel>
   </rss>

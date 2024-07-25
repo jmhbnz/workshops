@@ -1,0 +1,29 @@
+---
+title: Optional - Deploying an application via gitops
+exercise: 7
+date: '2024-07-25'
+tags: ['openshift','containers','kubernetes','argocd','gitops']
+draft: false
+authors: ['default']
+summary: "Keen to explore a more advanced deployment pattern?"
+---
+
+
+Now that you've had a taste of most of the more basic deployment methods let's introduce the concept of [GitOps](https://www.redhat.com/en/topics/devops/what-is-gitops) and deploy an application using this more advanced approach.
+
+In simple terms GitOps uses Git repositories as a single source of truth to deliver applications or infrastructure as code. Whenever you merge or push code into a specifc Git branch in a repository, an GitOps continuous delivery tool such as [ArgoCD](https://argo-cd.readthedocs.io/en/stable) can then automatically sync that to one or more Kubernetes clusters.
+
+<Zoom>
+|![argocd](/static/images/argocd-ui.gif)                              |
+|:-------------------------------------------------------------------:|
+| *ArgoCD user interface*                                             |
+</Zoom>
+
+For many organisations GitOps is a goal deployment methodology as application definitions, configurations, and environments should ideally be declarative and version controlled. Application deployment and lifecycle management should be automated, auditable, and easy to understand.
+
+Since 2021 OpenShift has included a fully supported [OpenShift GitOps](https://www.redhat.com/en/blog/announcing-openshift-gitops) operator, based on the upstream ArgoCD project.
+
+This operator has already been installed on your cluster so let's take it for a spin now! 🚀
+
+## 7.1 - Log in to openshift gitops web interface
+
