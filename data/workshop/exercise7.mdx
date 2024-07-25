@@ -7,7 +7,7 @@ draft: false
 authors: ['default']
 summary: "Keen to explore a more advanced deployment pattern?"
 ---
-
+  
 
 Now that you've had a taste of most of the more basic deployment methods let's introduce the concept of [GitOps](https://www.redhat.com/en/topics/devops/what-is-gitops) and deploy an application using this more advanced approach.
 
@@ -25,8 +25,15 @@ Since 2021 OpenShift has included a fully supported [OpenShift GitOps](https://w
 
 This operator has already been installed on your cluster so let's take it for a spin now! 🚀
 
-## 7.1 - Log in to openshift gitops web interface
+## 7.1 - Deploy openshift gitops
 
+To get started with OpenShift GitOps we will need an instance of ArgoCD deployed.
+
+Click the **+** button in the top right corner menu bar of the OpenShift web console. This is a fast way to quickly import snippets of YAML for testing or exploration purposes.
+
+Paste the below snippet of YAML into the editor and replace the instance of `userX` with your assigned user.
+
+Click **Create**. In a minute or so you should see the ArgoCD instance running successfully in your project.
 
 ```bash
 apiVersion: argoproj.io/v1beta1
@@ -39,10 +46,8 @@ metadata:
 spec:
   defaultClusterScopedRoleDisabled: true
   rbac:
-    defaultPolicy: ""
-    policy: |
-      g, system:cluster-admins, role:admin
-    scopes: '[groups]'
+    defaultPolicy: role:admin
+    scopes: '[groups]' 
   server:
     route:
       enabled: true
@@ -53,3 +58,21 @@ spec:
       openShiftOAuth: true
     provider: dex
 ```
+
+## 7.2 Login to argocd
+
+With ArgoCD running let's open the route in a new tab in our browser and click **Log in with OpenShift**.  You can retrieve the ~Route~ by running the following command in your web terminal:
+
+```bash
+oc get route argocd-server
+```
+
+<Zoom>
+|![argocd login](/static/images/argocd-login.png)                     |
+|:-------------------------------------------------------------------:|
+| *ArgoCD login*                                                      |
+</Zoom>
+
+## 7.3 Deploy an application
+
+Now that you're logged into ArgoCD have a go at deploying 
