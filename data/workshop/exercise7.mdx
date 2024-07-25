@@ -44,15 +44,12 @@ metadata:
   name: argocd
   namespace: userX
 spec:
-  defaultClusterScopedRoleDisabled: true
   rbac:
     defaultPolicy: role:admin
     scopes: '[groups]' 
   server:
     route:
       enabled: true
-  sourceNamespaces:
-  - userX
   sso:
     dex:
       openShiftOAuth: true
@@ -75,4 +72,19 @@ oc get route argocd-server
 
 ## 7.3 Deploy an application
 
-Now that you're logged into ArgoCD have a go at deploying 
+Now that you're logged into ArgoCD, have a go at creating a new `Application` using the ArgoCD web interface by clicking **+ New App**. The workload we'll deploy is a new mission critical training simulator called "Quake 3 Arena".
+
+Use the following values for your Application:
+
+|Field|Value|
+|-----|-----|
+|Name |`quake`|
+|Project|`default`|
+|Repository URL|`https://github.com/jmhbnz/workshops`|
+|Path|`data/app-delivery`|
+|Cluster URL| `https://kubernetes.default.svc`|
+|Namespace|`userX`|
+
+## 7.4 Access the mission critical simulator - challenge
+
+Your final challenge for this exercise is to access the mission critical training simulator by creating a `Route`.
