@@ -16,7 +16,6 @@ Enter the [**Helm**](https://www.redhat.com/en/topics/devops/what-is-helm) proje
 
 In simple terms, a **Helm chart** is basically a directory containing a collection of YAML template files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
 
-
 ## 4.1 - Deploying a helm chart via the web console 
 
 It is common for organisations that produce and ship applications to provide their applications to organisations as a **Helm chart**.
@@ -39,11 +38,10 @@ tlsRoute: true
 ```
 
 <Zoom>
-|![gitea-deployment](/static/images/gitea-deployment.gif) | 
+|![gitea-deployment](/static/images/gitea-deployment.gif)             |
 |:-------------------------------------------------------------------:|
 | *Gitea application deployment via helm chart*                       |
 </Zoom>
-
 
 ## 4.2 - Examine deployed application
 
@@ -53,21 +51,20 @@ Once your gitea pods are both running open the **Route** for the `gitea` web fro
 
 Next, if we click on the overall gitea **Helm release** by clicking on the shaded box surrounding our two Gitea pods we can see the full list of resources deployed by this helm chart, which in addition to the two running pods includes the following:
 
- - 1 **ConfigMap**
- - 1 **ImageStream**
- - 2 **PersistentVolumeClaims**
- - 1 **Route**
- - 1 **Secret**
- - 2 **Services**
+- 1 **ConfigMap**
+- 1 **ImageStream**
+- 2 **PersistentVolumeClaims**
+- 1 **Route**
+- 1 **Secret**
+- 2 **Services**
 
 > Note: Feel free to try out a `oc explain <resource>` command in your web terminal to learn more about each of the resource types mentioned above, for example `oc explain service`.
 
 <Zoom>
-|![helm-resources](/static/images/helm-resources.png) | 
+|![helm-resources](/static/images/helm-resources.png)                 |
 |:-------------------------------------------------------------------:|
 | *Gitea helm release resources created*                              |
 </Zoom>
-
 
 ## 4.3 - Upgrade helm chart
 
@@ -86,11 +83,10 @@ We will be returned to the **Helm releases** view. Notice how the release status
 From here it is trivial to perform a **Rollback** to remove our misconfigured update. We'll do that in the next step.
 
 <Zoom>
-|![helm-upgrade](/static/images/helm-upgrade.gif) | 
+|![helm-upgrade](/static/images/helm-upgrade.gif)                     |
 |:-------------------------------------------------------------------:|
 | *Attempting a gitea helm upgrade*                                   |
 </Zoom>
-
 
 ## 4.4 - Rollback to a previous helm release
 
@@ -105,11 +101,10 @@ Click the three dot menu to the right hand side of the that helm release and cli
 Select the radio button for revision `1` which should be showing a status of `Deployed`, then click **Rollback**.
 
 <Zoom>
-|![helm-rollback](/static/images/helm-rollback.gif) | 
+|![helm-rollback](/static/images/helm-rollback.gif)                   |
 |:-------------------------------------------------------------------:|
 | *Rolling back to a previous gitea helm release*                     |
 </Zoom>
-
 
 ## 4.5 - Deleting an application deployed via helm
 
@@ -126,15 +121,13 @@ Click the three dot menu to the right hand side of the that helm release and cli
 Enter the `gitea` confirmation at the prompt and click **Delete**. If you now return to the **Topology** view you will see the gitea application deleting.
 
 <Zoom>
-|![helm-delete](/static/images/helm-delete.gif) | 
+|![helm-delete](/static/images/helm-delete.gif)                       |
 |:-------------------------------------------------------------------:|
 | *Deleting the gitea application helm release*                       |
 </Zoom>
 
-
 ## 4.6 - Bonus objective: Artifact Hub
 
 If you have time, take a while to explore https://artifacthub.io/packages/search to see the kinds of applications available in the most popular publicly available Helm Chart repository Artifact Hub.
-
 
 Well done, you've finished exercise 4! 🎉

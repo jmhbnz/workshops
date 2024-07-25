@@ -12,12 +12,9 @@ Another alternative approach for deploying and managing the lifecycle of more co
 
 The goal of an **Operator** is to put operational knowledge into software. Previously this knowledge only resided in the minds of administrators, various combinations of shell scripts or automation software like Ansible. It was outside of your Kubernetes cluster and hard to integrate. **Operators** change that.
 
-**Operators** are the missing piece of the puzzle in Kubernetes to implement and automate common Day-1 (installation, configuration, etc.) and Day-2 (re-configuration, update, backup, failover, restore, etc.) activities in a piece of software running inside your Kubernetes cluster, by integrating natively with Kubernetes concepts and APIs. 
+**Operators** are the missing piece of the puzzle in Kubernetes to implement and automate common Day-1 (installation, configuration, etc.) and Day-2 (re-configuration, update, backup, failover, restore, etc.) activities in a piece of software running inside your Kubernetes cluster, by integrating natively with Kubernetes concepts and APIs.
 
 With Operators you can stop treating an application as a collection␃of primitives like **Pods**, **Deployments**, **Services** or **ConfigMaps**, but instead as a singular, simplified custom object that only exposes the specific configuration values that make sense for the specific application.
-
-
-
 
 ## 5.1 - Deploying an operator
 
@@ -52,11 +49,10 @@ Paste the above snippet of YAML into the editor and replace the instance of `use
 Click **Create**. In a minute or so you should see the Grafana operator installed and running in your project.
 
 <Zoom>
-|![operator-deployment](/static/images/operator-deployment.gif) | 
+|![operator-deployment](/static/images/operator-deployment.gif)       |
 |:-------------------------------------------------------------------:|
 | *Deploying grafana operator via static yaml*                        |
 </Zoom>
-
 
 ## 5.2 - Deploying an operator driven application
 
@@ -100,11 +96,10 @@ spec:
 ```
 
 <Zoom>
-|![grafana-deployment](/static/images/grafana-deployment.gif) | 
+|![grafana-deployment](/static/images/grafana-deployment.gif)         |
 |:-------------------------------------------------------------------:|
 | *Deploying grafana application via the grafana operator*            |
 </Zoom>
-
 
 ## 5.3 Logging into the application
 
@@ -115,11 +110,10 @@ For our first step click on the **Workloads** category on the left hand side men
 We should see that a `grafana-deployment-<id>` pod with a **Status** of `Running`.
 
 <Zoom>
-|![grafana-pod](/static/images/grafana-pod.png) | 
+|![grafana-pod](/static/images/grafana-pod.png)                       |
 |:-------------------------------------------------------------------:|
 | *Confirming the grafana pod is running*                             |
 </Zoom>
-
 
 Now that we know the Grafana application **Pod** is running let's open the application and confirm we can log in.
 
@@ -135,10 +129,8 @@ Once the new tab opens we should be able to login to Grafana using the credentia
 | *Confirming the grafana route is working*                           |
 </Zoom>
 
-
 ## 5.4 - Bonus objective: Grafana dashboards
 
 If you have time, take a while to learn about the https://grafana.com/grafana/dashboards and how Grafana can be used to visualise just about anything.
 
-
-Well done, you've finished exercise 5! 🎉 
+Well done, you've finished exercise 5! 🎉
