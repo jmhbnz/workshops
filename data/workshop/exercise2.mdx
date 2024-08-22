@@ -1,0 +1,62 @@
+---
+title: Mirror required content
+exercise: 2
+date: '2024-08-23'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "You want features? Mirror them in!🪞"
+---
+
+The disconnected OpenShift cluster you have been allocated is the result of a very standard installation, and does not have any post installation features added.
+
+During this workshop we want to secure the cluster with Advanced Cluster Security, understand our compliance posture against NIST 800-53 with the OpenShift Compliance Operator and then make it easy for our Developers to do the right thing with Red Hat Developer Hub.
+
+To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
+
+## 2.1 - Open a terminal on your low side
+
+Our first step to prepare to mirror content is to get connected to our low side jump host via `ssh`. Replace the placeholder ip address below with the actual ip address you've been allocated for your environment.
+
+```bash
+ssh lab-user@<placeholder>
+```
+You'll be prompted to enter a password which you can find in your allocated environment details.
+
+After connecting change directory to the low side workspace where the intial cluster installation was already completed for you and review the folder contents:
+
+```bash
+cd /mnt/low-side-data
+
+ls -lah
+```
+
+Your workspace will look similar to the one below:
+
+```bash
+[lab-user@jump low-side-data]$ ls -lah
+total 25G
+drwxr-xr-x. 4 lab-user lab-user 4.0K Aug 22 00:22 .
+drwxr-xr-x. 3 root     root       27 Aug 19 04:10 ..
+-rw-r--r--. 1 lab-user lab-user  473 Aug 22 00:10 imageset-config.yaml
+-rw-r--r--. 1 lab-user lab-user 696M Aug 21 23:57 mirror-registry.tar.gz
+-rw-r--r--. 1 lab-user lab-user  24G Aug 22 00:22 mirror_seq1_000000.tar
+-rwxr-xr-x. 1 lab-user lab-user 146M Mar 26 22:17 oc
+-rwxr-x--x. 1 lab-user lab-user 144M Mar 22 18:34 oc-mirror
+-rw-------. 1 lab-user lab-user 183K Aug 22 00:16 .oc-mirror.log
+drwxr-xr-x. 3 lab-user lab-user   17 Aug 22 00:13 oc-mirror-workspace
+-rwxr-xr-x. 1 lab-user lab-user 630M Mar 22 19:32 openshift-install
+drwxr-x---. 2 lab-user lab-user   28 Aug 22 00:22 publish
+```
+
+## 2.2 - Get familiar with oc-mirror
+
+To mirror content into our disconnected environment we will be using the [`oc-mirror`](https://github.com/openshift/oc-mirror) openshift client utility.
+
+To configure what content `oc-mirror` will download and mirror for us we use a YAML formatted file called an `ImageSetConfiguration`. This file declares:
+
+1. **What to download** which can include (OpenShift itself, operator bundles, helm charts, or specific container images)
+2. **What versions**
+3. **Where to store the downloaded content**
+
+As part of the initial installation of OpenShift an `ImageSetConfiguration` file has already been created for you.
