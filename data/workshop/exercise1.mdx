@@ -1,27 +1,25 @@
 ---
 title: Understanding our lab environment
 exercise: 1
-date: '2024-12-18'
+date: '2024-08-22'
 tags: ['openshift','containers','kubernetes','disconnected']
 draft: false
 authors: ['default']
 summary: "Let's get familiar with our lab setup."
 ---
 
-Welcome to the OpenShift 4 Disconnected Workshop! Here you'll learn about operating an OpenShift 4 cluster in a disconnected network, for our purposes today that will be a network without access to the internet (even through a proxy or firewall).
+Welcome to the OpenShift 4 Disconnected security & compliance workshop! Here you'll learn about operating a secure and compliant OpenShift 4 cluster in a disconnected network using the following key OpenShift features:
 
-To level set, Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. OpenShift supports running in disconnected networks, though this does change the way the cluster operates because key ingredients like container images, operator bundles, and helm charts must be brought into the environment from the outside world via mirroring.
+- [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes)
+- [Red Hat OpenShift Compliance Operator](https://www.redhat.com/en/blog/a-guide-to-openshift-compliance-operator-best-practices)
+- [Red Hat Developer Hub](https://developers.redhat.com/rhdh/overview)
 
-There are of course many different options for installing OpenShift in a restricted network; this workshop will primarily cover one opinionated approach. We'll do our best to point out where there's the potential for variability along the way.
+To level set, [Red Hat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. OpenShift supports running in disconnected networks, though this does change the way the cluster operates because key ingredients like container images, operator bundles, and helm charts must be brought into the environment from the outside world via mirroring.
+
+There are of course many different options for installing OpenShift in a restricted network; this workshop will not cover the deployment of a cluster, instead you will have an existing installed cluster allocated to you which has been created in advance. Your tasks during this workshop will be to improve the security and compliance of the cluster and workloads running on it.
 
 **Let's get started!**
 
-## 1.1 - Obtaining your environment
+## 1.1 - Login to lab environment
 
-To get underway open your web browser and navigate to this etherpad link to reserve yourself a user https://etherpad.wikimedia.org/p/OpenShiftDisco_2023_12_20.  You can reserve a user by noting your name or initials next to a user that has not yet been claimed.
-
-<Zoom>
-|![workshop](/static/images/disconnected/etherpad.gif)                | 
-|:-----------------------------------------------------------------------------:|
-| *Etherpad collaborative editor*                                               |
-</Zoom>
+An OpenShift `4.16` cluster has already been provisioned for you to complete these excercises. Open your web browser and navigate to the workshop guide page https://rhdemo.win.
