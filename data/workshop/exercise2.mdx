@@ -10,7 +10,7 @@ summary: "You want features? Mirror them in!🪞"
 
 The disconnected OpenShift cluster you have been allocated is the result of a standard installation using the IPI install method, and does not have any post installation features added.
 
-During this workshop we want to secure the cluster with Red Hat Advanced Cluster Security, understand our compliance posture against NIST 800-53 with the OpenShift Compliance Operator and then make it easy for our Developers to do the right thing with Red Hat Developer Hub.
+During this workshop we want to secure the cluster with Red Hat Advanced Cluster Security, understand our compliance posture against [NIST 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) with the OpenShift Compliance Operator and then make it easy for our Developers to do the right thing with Red Hat Developer Hub.
 
 To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
 
@@ -111,7 +111,7 @@ mirror:
   helm: {}
 ```
 
-## 2.2 - Confirm local cache is up to date
+## 2.3 - Confirm local cache is up to date
 
 A local cache of content already exists from when the cluster installation was initially performed in advance of this workshop. Let's confirm everything is still up to date by re-running the `oc-mirror` command specifying our configuration file and the location on our disk.
 
@@ -121,7 +121,7 @@ oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
 
 Note: This command may take several minutes to complete.
 
-## 2.3 - Add new mirror content
+## 2.4 - Add new mirror content
 
 For our workshop exercises today we need to mirror some additional operators, namely the OpenShift Compliance Operator, Red Hat Advanced Cluster Security, and Red Hat Developer Hub. Run the command below to update your `imageset-config.yaml` file to match the example below
 
@@ -154,11 +154,35 @@ mirror:
     - name: rhacs-operator
       channels:
       - name: stable
-    - name: 
   additionalImages:
   - name: registry.redhat.io/rhel8/support-tools
   helm: {}
 EOF
 ```
 
-As part of the initial installation of OpenShift a basic `ImageSetConfiguration` file has already been created for you.
+After updating the configuration file we can re-run our `oc-mirror` command to bring the new content into our local collection on disk in `/mnt/low-side-data`.
+
+```bash
+oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
+```
+
+
+## 2.5 - Mirror updated content to high side registry
+
+Once the local mirror update has completed we now need to transfer this content to our high side and mirror it from disk into the OpenShift Mirror Registry running in our disconnected high side.
+
+In this workshop we will use `rsync` to copy our content to our high side system, let's do that now:
+
+```bash
+rsync -avP /mnt/low-side-data/ highside:/mnt/high-side-data/
+```
+
+> Note: `oc-mirror` creates incremental mirror content files in order to prevent duplicating content. You will notice your low side mirror workspace includes a new file `mirror_seq2_000000.tar` which is significantly smaller than the original mirror archive.
+
+Once the transfer has completed we need to log into our high side disconnected system and run `oc-mirror` from that side to upload the content from the new archive into our disconnected container registry
+
+```bash
+ssh highside
+cd /mnt/high-side-data
+oc-mirror --from=/mnt/high-side-data/mirror_seq2_000000.tar docker://$(hostname):8443
+```
