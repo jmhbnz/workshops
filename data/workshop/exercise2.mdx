@@ -183,6 +183,21 @@ Once the transfer has completed we need to log into our high side disconnected s
 
 ```bash
 ssh highside
+```
+
+```bash
 cd /mnt/high-side-data
+podman login -u init -p discopass $(hostname):8443
 oc-mirror --from=/mnt/high-side-data/mirror_seq2_000000.tar docker://$(hostname):8443
 ```
+
+## 2.6 - Verify new operators are available
+
+After a couple of minutes the mirror process will complete. We then need to tell OpenShift about the new content that is available by running the commands below:
+
+```bash
+oc apply -f ./oc-mirror-workspace/results-*/
+```
+
+
+We can then check that our new operators are available in the OpenShift Web Console.
