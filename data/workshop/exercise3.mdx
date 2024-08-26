@@ -1,0 +1,18 @@
+---
+title: Install operators
+exercise: 3
+date: '2024-08-27'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "Operators?!? 🤔 - Think app store for Kubernetes 🌟"
+---
+
+The disconnected OpenShift cluster you have been allocated is the result of a standard installation using the IPI install method, and does not have any post installation features added.
+
+In a broad sense many OpenShift features are added via [Operators](https://www.redhat.com/en/technologies/cloud-computing/openshift/what-are-openshift-operators). Operators automate the creation, configuration, and management of instances of Kubernetes-native applications. Operators can provide automation at every level of the stack—from managing the parts that make up the platform all the way to applications that are provided as a managed service.
+
+In the previous exercise we mirrored some new operator bundles into our disconnected network. In this exercise we'll install those operators and explore the features they provide us via [Custom Resource Definitions](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources) they provide.
+
+
+## 3.1 - Exploring operator hub
