@@ -122,7 +122,7 @@ controlPlane:
   architecture: amd64
   hyperthreading: Enabled
   name: master
-  replicas: 1
+  replicas: 3
 networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
