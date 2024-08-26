@@ -8,9 +8,9 @@ authors: ['default']
 summary: "You want features? Mirror them in!🪞"
 ---
 
-The disconnected OpenShift cluster you have been allocated is the result of a very standard installation, and does not have any post installation features added.
+The disconnected OpenShift cluster you have been allocated is the result of a standard installation using the IPI install method, and does not have any post installation features added.
 
-During this workshop we want to secure the cluster with Advanced Cluster Security, understand our compliance posture against NIST 800-53 with the OpenShift Compliance Operator and then make it easy for our Developers to do the right thing with Red Hat Developer Hub.
+During this workshop we want to secure the cluster with Red Hat Advanced Cluster Security, understand our compliance posture against NIST 800-53 with the OpenShift Compliance Operator and then make it easy for our Developers to do the right thing with Red Hat Developer Hub.
 
 To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
 
@@ -19,8 +19,9 @@ To install and configure these features we first need to mirror some additional 
 Our first step to prepare to mirror content is to get connected to our low side jump host via `ssh`. Replace the placeholder ip address below with the actual ip address you've been allocated for your environment.
 
 ```bash
-ssh lab-user@<placeholder>
+ssh lab-user@<ip address>
 ```
+
 You'll be prompted to enter a password which you can find in your allocated environment details.
 
 After connecting change directory to the low side workspace where the intial cluster installation was already completed for you and review the folder contents:
@@ -56,7 +57,108 @@ To mirror content into our disconnected environment we will be using the [`oc-mi
 To configure what content `oc-mirror` will download and mirror for us we use a YAML formatted file called an `ImageSetConfiguration`. This file declares:
 
 1. **What to download** which can include (OpenShift itself, operator bundles, helm charts, or specific container images)
-2. **What versions**
+2. **What versions of each item to download**
 3. **Where to store the downloaded content**
 
-As part of the initial installation of OpenShift an `ImageSetConfiguration` file has already been created for you.
+The `oc-mirror` utility also has some features for listing available content for mirroring, let's try that now! Run the following commands in your ssh terminal:
+
+```bash
+# List available openshift release versions
+oc-mirror list releases
+
+# List operator catalogs for a specific openshift release
+oc-mirror list operators --catalogs --version=4.14
+
+# List all operators in a specific catalogs
+oc-mirror list operators --catalog registry.redhat.io/redhat/certified-operator-index:v4.14
+```
+
+We can also use the `oc-mirror` utility to understand the state of any existing mirror content bundles. We have a content bundle called `mirror_seq1_000000.tar` available from the initial installation of your OpenShift cluster, let's inspect that now.
+
+```bash
+oc-mirror describe mirror_seq1_000000.tar | more
+```
+
+This bundle archive was created by the `oc-mirror` utility using the configuration file called `imageset-config.yaml` which is also in the same directory. Let's review that file:
+
+```bash
+cat imageset-config.yaml
+```
+
+Your file should look something like the example below, we can see the two versions of OpenShift `4.14.19` and `4.14.20` that are specified to be downloaded, along with the `web-terminal` operator and the `registry.redhat.io/rhel8/support-tools` additional standalone container image.
+
+```yaml
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  local:
+    path: ./
+mirror:
+  platform:
+    channels:
+    - name: stable-4.14
+      type: ocp
+      minVersion: 4.14.19
+      maxVersion: 4.14.20
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
+    packages:
+    - name: web-terminal
+      channels:
+      - name: fast
+  additionalImages:
+  - name: registry.redhat.io/rhel8/support-tools
+  helm: {}
+```
+
+## 2.2 - Confirm local cache is up to date
+
+A local cache of content already exists from when the cluster installation was initially performed in advance of this workshop. Let's confirm everything is still up to date by re-running the `oc-mirror` command specifying our configuration file and the location on our disk.
+
+```bash
+oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
+```
+
+Note: This command may take several minutes to complete.
+
+## 2.3 - Add new mirror content
+
+For our workshop exercises today we need to mirror some additional operators, namely the OpenShift Compliance Operator, Red Hat Advanced Cluster Security, and Red Hat Developer Hub. Run the command below to update your `imageset-config.yaml` file to match the example below
+
+```bash
+cat << EOF > imageset-config.yaml
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  local:
+    path: ./
+mirror:
+  platform:
+    channels:
+    - name: stable-4.14
+      type: ocp
+      minVersion: 4.14.19
+      maxVersion: 4.14.20
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
+    packages:
+    - name: web-terminal
+      channels:
+      - name: fast
+    - name: rhdh
+      channels:
+      - name: fast
+    - name: compliance-operator
+      channels:
+      - name: stable
+    - name: rhacs-operator
+      channels:
+      - name: stable
+    - name: 
+  additionalImages:
+  - name: registry.redhat.io/rhel8/support-tools
+  helm: {}
+EOF
+```
+
+As part of the initial installation of OpenShift a basic `ImageSetConfiguration` file has already been created for you.

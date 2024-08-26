@@ -20,6 +20,18 @@ There are of course many different options for installing OpenShift in a restric
 
 **Let's get started!**
 
-## 1.1 - Login to lab environment
+## 1.1 - Reserve a lab environment
 
-An OpenShift `4.16` cluster has already been provisioned for you to complete these excercises. Open your web browser and navigate to the workshop guide page https://rhdemo.win.
+An OpenShift `4.14` cluster has already been provisioned for you to complete these excercises.
+
+## 1.2 - Login via ssh and vnc
+
+To complete the lab exercises you'll use a mix of an `ssh` terminal session for running OpenShift client `oc` commands, and then a browser based vnc session in order to access the OpenShift cluster web console.
+
+Let's log in via ssh now, open your terminal and run the following command, replacing the placeholder ip address with the one you have been allocated.
+
+```bash
+ssh lab-user@<ip address>
+```
+
+Open your browser and navigate to the vnc url that has been allocated to you, for example: https://showroom-showroom-fjbtw.apps.cluster1.openshift.shared.redhatworkshops.io/novnc/vnc.html
