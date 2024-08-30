@@ -8,7 +8,7 @@ This document captures the steps required to set up an instance of the workshop.
 * Connect to the low side instance
 
 #+begin_src tmux
-ssh lab-user@18.223.153.8
+ssh lab-user@3.21.229.143
 #+end_src
 
 
@@ -50,20 +50,10 @@ mirror:
     channels:
     - name: stable-4.14
       type: ocp
-      minVersion: 4.14.19
-      maxVersion: 4.14.20
-
-  operators:
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
-    packages:
-    - name: web-terminal
-      channels:
-      - name: fast
-
+      minVersion: 4.14.34
+      maxVersion: 4.14.35
   additionalImages:
   - name: registry.redhat.io/rhel8/support-tools
-
-  helm: {}
 EOF
 cd /mnt/low-side-data
 oc-mirror --config imageset-config.yaml file:///mnt/low-side-data
@@ -136,11 +126,13 @@ platform:
   aws:
     region: us-east-2
     subnets:
-    - subnet-0fb89a66baf6e9226
+    - $(aws ec2 describe-subnets --output json | jq '.Subnets[0].SubnetId' -r)
 publish: Internal
 additionalTrustBundlePolicy: Always
 EOF
-ssh-keygen -C "OpenShift Debug" -N "" -f /mnt/high-side-data/id_rsa
+if ! test -f "/mnt/high-side-data/id_rsa"; then
+    ssh-keygen -C "OpenShift Debug" -N "" -f /mnt/high-side-data/id_rsa
+fi
 echo "sshKey: $(cat /mnt/high-side-data/id_rsa.pub)" | tee -a /mnt/high-side-data/install-config.yaml
 echo "pullSecret: '$(jq -c . $XDG_RUNTIME_DIR/containers/auth.json)'" | tee -a /mnt/high-side-data/install-config.yaml
 if (test -e /mnt/high-side-data/oc-mirror-workspace/results-*/imageContentSourcePolicy.yaml)
