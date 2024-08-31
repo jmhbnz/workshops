@@ -98,6 +98,37 @@ Red Hat Developer Hub is an Internal Developer Portal (IDP) based on the upstrea
 We'll also install the Red Hat Developer Hub using the `oc` cli in our terminal.  Run the commands below in your terminal session to create the required `Namespace` and `Subscription` resources which will trigger the operator installation.
 
 ```bash
+cat << EOF | oc apply --filename -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rhdh-operator
+spec:
+  finalizers:
+  - kubernetes
 
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhdh
+  namespace: rhdh-operator
+spec:
+  channel: fast
+  installPlanApproval: Automatic
+  name: rhdh
+  source: cs-redhat-operator-index
+  sourceNamespace: openshift-marketplace
+  startingCSV: rhdh-operator.v1.1.1
+EOF
 ```
+
+If you check back on your web console, after a short wait the **Red Hat Developer Hub** operator should now show as `✅ Succeeded`.
+
+<Zoom>
+|![workshop](/static/images/compliance/installed-operators-2.png)               |
+|:-----------------------------------------------------------------------------:|
+| *List of installed operators*                                                 |
+</Zoom>
 
