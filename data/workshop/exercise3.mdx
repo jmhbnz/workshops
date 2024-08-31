@@ -15,4 +15,65 @@ In a broad sense many OpenShift features are added via [Operators](https://www.r
 In the previous exercise we mirrored some new operator bundles into our disconnected network. In this exercise we'll install those operators and explore the features they provide us via [Custom Resource Definitions](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources) they provide.
 
 
-## 3.1 - Exploring operator hub
+## 3.1 - Installing compliance operator
+
+First up let's install the [Red Hat OpenShift Compliance Operator](https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-overview.html).
+
+For some brief context the Compliance Operator assists platform teams by automating the inspection of numerous technical implementations and compares those against certain aspects of industry standards. For our purposes today that industry standard will be **NIST 800-53**.
+
+The Compliance Operator assesses compliance of both the Kubernetes API resources of OpenShift Container Platform, as well as the nodes running the cluster. The Compliance Operator uses [OpenSCAP](https://www.open-scap.org), a NIST-certified tool, to scan and enforce security policies provided by the content.
+
+To install the operator we can use either the OpenShift Web Console, or the terminal with `oc` cli. In this workshop we will install the operator with the Web Console using our vnc browser tab. Thanks to our previous exercise mirroring content and making it available via the cluster disconnected OperatorHub catalogs we can enjoy the same user experience to install the operator as if our cluster was fully connected.
+
+1. Open your vnc browser tab and return to the OpenShift Web Console browser tab you opened in the previous exercise.
+2. Click on the **Compliance Operator** in **OperatorHub** to open the right hand panel, then click the blue **Install** button at the top of the panel.
+3. On the install details screen stick with all the default values and simply click **Install**
+4. After a short wait the Compliance Operator will be installed and ready for use 🎉
+
+<Zoom>
+|![workshop](/static/images/compliance/install-compliance-operator.gif)         |
+|:-----------------------------------------------------------------------------:|
+| *Install OpenShift Compliance Operator*                                       |
+</Zoom>
+
+With the Compliance Operator installed feel free to explore which new Custom Resources the Operator makes available. We'll return to these in future exercises to begin using them.
+
+
+## 3.2 - Installing the rhacs operator
+
+Next up we'll install the [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes) Operator.
+
+Red Hat Advanced Cluster Security (RHACS) has direct integration with the Compliance Operator to provide a frontend user experience for running compliance scans along with viewing results.
+
+To try the alternative operator installation method this time we will install the operator via the `oc` cli in our terminal.
+
+Run the commands below in your terminal session to create the required 
+
+```bash
+cat << EOF | oc apply --filename -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rhacs-operator
+spec:
+  finalizers:
+  - kubernetes
+
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhacs-operator
+  namespace: rhacs-operator
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: rhacs-operator
+  source: cs-redhat-operator-index
+  sourceNamespace: openshift-marketplace
+  startingCSV: rhacs-operator.v4.5.1
+EOF
+```
+
+
