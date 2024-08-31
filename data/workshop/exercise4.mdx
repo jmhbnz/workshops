@@ -108,3 +108,83 @@ Follow the steps in `4.3.1.1` to generate an init bundle named `hub` using the R
 
 Once the `hub-Operator-secrets-cluster-init-bundle.yaml` file has been downloaded we'll apply it to the cluster using the OpenShift Web Console **Import YAML** feature.
 
+1. Create a new project in the Web Console named `acs-securedcluster`.
+2. Click **Import YAML** in the top right of the OpenShift Web Console.
+3. Open your **Downloads** directory in the file browser using the **Places** top left menu.
+4. Open the `hub-Operator-secrets-cluster-init-bundle.yaml` file in a text editor and copy the contents.
+5. Paste the contents into the **Import YAML** text field and click the blue **Create** button.
+
+<Zoom>
+|![workshop](/static/images/compliance/central-login.gif)                       |
+|:-----------------------------------------------------------------------------:|
+| *Logging into Red Hat Advanced Cluster Security dashboard*                    |
+</Zoom>
+
+> Note: These init bundles contain secrets enabling a secured cluster to communicate with RHACS Central so it's important to store these securely.
+
+Once our init bundle has been created we can create our `SecuredCluster` custom resource to complete the cluster onboarding process. We'll do that with our `oc` terminal session.
+
+Copy the command below and run it in your highside web terminal:
+
+```bash
+cat << EOF | oc --namespace acs-securedcluster apply --filename -
+apiVersion: platform.stackrox.io/v1alpha1
+kind: SecuredCluster
+metadata:
+  name: stackrox-secured-cluster-services
+spec:
+  monitoring:
+    openshift:
+      enabled: true
+  auditLogs:
+    collection: Auto
+  network:
+    policies: Enabled
+  admissionControl:
+    listenOnUpdates: true
+    bypass: BreakGlassAnnotation
+    contactImageScanners: ScanIfMissing
+    listenOnCreates: true
+    replicas: 3
+    timeoutSeconds: 10
+    listenOnEvents: true
+  scannerV4:
+    db:
+      persistence:
+        persistentVolumeClaim:
+          claimName: scanner-v4-db
+    indexer:
+      scaling:
+        autoScaling: Enabled
+        maxReplicas: 5
+        minReplicas: 2
+        replicas: 3
+    scannerComponent: Default
+  scanner:
+    analyzer:
+      scaling:
+        autoScaling: Enabled
+        maxReplicas: 5
+        minReplicas: 2
+        replicas: 3
+    scannerComponent: AutoSense
+  perNode:
+    collector:
+      collection: CORE_BPF
+      forceCollection: false
+      imageFlavor: Regular
+    taintToleration: TolerateTaints
+  clusterName: hub
+  centralEndpoint: 'https://central-acs-central.apps.disco.lab:443'
+EOF
+```
+
+After a short wait for pods to initialise in the `acs-securedcluster` namespace you should be able to see the cluster is now secured in RHACS by checking the **Platform Configuration** > **Clusters** overview which should show the `hub` cluster as `✅ Healthy`.
+
+<Zoom>
+|![workshop](/static/images/compliance/securedcluster-completed.png)            |
+|:-----------------------------------------------------------------------------:|
+| *Hub cluster is now secured by Red Hat Advanced Cluster Security*             |
+</Zoom>
+
+
