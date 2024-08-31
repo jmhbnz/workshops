@@ -10,6 +10,7 @@ summary: "Time to up our security & compliance game! 🔒"
 
 With our Red Hat Advanced Cluster Security Operator installed and standing by to do some work for us, let's give it some work to do by telling it to deploy Red Hat Advanced Cluster Security for us.
 
+
 ## 4.1 - Getting familiar with rhacs
 
 Before we get into the technical implementation let's take a moment to get up to speed with Red Hat Advanced Cluster Security works.
@@ -28,4 +29,57 @@ Fundamentally you install RHACS as a set of containers in your OpenShift Contain
 > Note: For an overview of which sources Red Hat Advanced Cluster Security uses for vulnerability information and a more detailed walkthrough of each compoent, take a moment to review https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/architecture/index.
 
 
+## 4.2 - Deploying central services
+
+Let's now create our **Central** services on our cluster by creating a new `Central` custom resource which our newly installed operator will then manage and deploy on our behalf. We'll deploy these services into a new namespace called `acs-central`.
+
+```bash
+cat << EOF | oc apply --filename -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: acs-central
+spec:
+  finalizers:
+  - kubernetes
+
+---
+apiVersion: platform.stackrox.io/v1alpha1
+kind: Central
+metadata:
+  name: stackrox-central-services
+  namespace: acs-central
+spec:
+  central:
+    exposure:
+      loadBalancer:
+        enabled: false
+        port: 443
+      nodePort:
+        enabled: false
+      route:
+        enabled: true
+    db:
+      isEnabled: Default
+      persistence:
+        persistentVolumeClaim:
+          claimName: central-db
+    persistence:
+      persistentVolumeClaim:
+        claimName: stackrox-db
+  egress:
+    connectivityPolicy: Offline
+EOF
+```
+
+> Note: The values we used for the `Central` instance are all defaults, aside from `connectivityPolicy: Offline`, which tells Red Hat Advanced Cluster Security it will be operating in a disconnected environment.
+
+Once the `Central` resource has been created you can check the state of the RHACS pods by running `oc get pods -n acs-central` in your highside terminal. Or navigating to **Workloads** > **Pods** for the `acs-central` project in the OpenShift Web Console.
+
+<Zoom>
+|![workshop](/static/images/compliance/acs-central-pods.png)                    |
+|:-----------------------------------------------------------------------------:|
+| *Red Hat Advanced Cluster Security central pods*                              |
+</Zoom>
 
