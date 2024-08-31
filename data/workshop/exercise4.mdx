@@ -1,0 +1,31 @@
+---
+title: Deploy advanced cluster security
+exercise: 4
+date: '2024-08-31'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "Time to up our security & compliance game! 🔒"
+---
+
+With our Red Hat Advanced Cluster Security Operator installed and standing by to do some work for us, let's give it some work to do by telling it to deploy Red Hat Advanced Cluster Security for us.
+
+## 4.1 - Getting familiar with rhacs
+
+Before we get into the technical implementation let's take a moment to get up to speed with Red Hat Advanced Cluster Security works.
+
+Fundamentally you install RHACS as a set of containers in your OpenShift Container Platform or Kubernetes cluster. RHACS includes the following services:
+
+1. **Central** services you install on a designated "hub" cluster.
+2. **Secured cluster** services you install on each cluster you want to secure by RHACS.
+
+<Zoom>
+|![workshop](/static/images/compliance/acs-architecture-kubernetes.png)         |
+|:-----------------------------------------------------------------------------:|
+| *Red Hat Advanced Cluster Security high level architecture*                   |
+</Zoom>
+
+> Note: For an overview of which sources Red Hat Advanced Cluster Security uses for vulnerability information and a more detailed walkthrough of each compoent, take a moment to review https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/architecture/index.
+
+
+
