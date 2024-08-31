@@ -14,9 +14,10 @@ During this workshop we want to secure the cluster with Red Hat Advanced Cluster
 
 To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
 
+
 ## 2.1 - Open a terminal on your low side
 
-Our first step to prepare to mirror content is to get connected to our low side jump host via `ssh`. Replace the placeholder ip address below with the actual ip address you've been allocated for your environment.
+Our first step to prepare to mirror content is to get connected to our low side jump host via `ssh`. You can use the web terminal link in your browser or alternatively your own local terminal with the command below (replacing the placeholder ip with the one you have been allocated). 
 
 ```bash
 ssh lab-user@<ip address>
@@ -50,6 +51,7 @@ drwxr-xr-x. 3 lab-user lab-user   17 Aug 22 00:13 oc-mirror-workspace
 drwxr-x---. 2 lab-user lab-user   28 Aug 22 00:22 publish
 ```
 
+
 ## 2.2 - Get familiar with oc-mirror
 
 To mirror content into our disconnected environment we will be using the [`oc-mirror`](https://github.com/openshift/oc-mirror) openshift client utility.
@@ -70,7 +72,7 @@ oc-mirror list releases
 oc-mirror list operators --catalogs --version=4.14
 
 # List all operators in a specific catalogs
-oc-mirror list operators --catalog registry.redhat.io/redhat/certified-operator-index:v4.14
+oc-mirror list operators --catalog registry.redhat.io/redhat/redhat-operator-index:v4.14
 ```
 
 We can also use the `oc-mirror` utility to understand the state of any existing mirror content bundles. We have a content bundle called `mirror_seq1_000000.tar` available from the initial installation of your OpenShift cluster, let's inspect that now.
@@ -85,7 +87,7 @@ This bundle archive was created by the `oc-mirror` utility using the configurati
 cat imageset-config.yaml
 ```
 
-Your file should look something like the example below, we can see the two versions of OpenShift `4.14.19` and `4.14.20` that are specified to be downloaded, along with the `web-terminal` operator and the `registry.redhat.io/rhel8/support-tools` additional standalone container image.
+Your file should look something like the example below, we can see the two versions of OpenShift `4.14.19` and `4.14.20` that are specified to be downloaded, along with the `registry.redhat.io/rhel8/support-tools` additional standalone container image.
 
 ```yaml
 kind: ImageSetConfiguration
@@ -100,16 +102,11 @@ mirror:
       type: ocp
       minVersion: 4.14.19
       maxVersion: 4.14.20
-  operators:
-  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
-    packages:
-    - name: web-terminal
-      channels:
-      - name: fast
+
   additionalImages:
   - name: registry.redhat.io/rhel8/support-tools
-  helm: {}
 ```
+
 
 ## 2.3 - Confirm local cache is up to date
 
@@ -119,11 +116,12 @@ A local cache of content already exists from when the cluster installation was i
 oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
 ```
 
-Note: This command may take several minutes to complete.
+Note: This command may take several minutes to complete but should complete with `No new images detected, process stopping` to confirm the existing cache is up to date.
+
 
 ## 2.4 - Add new mirror content
 
-For our workshop exercises today we need to mirror some additional operators, namely the OpenShift Compliance Operator, Red Hat Advanced Cluster Security, and Red Hat Developer Hub. Run the command below to update your `imageset-config.yaml` file to match the example below
+For our workshop exercises today we need to mirror some additional operators, namely the **OpenShift Compliance Operator**, **Red Hat Advanced Cluster Security**, and **Red Hat Developer Hub**. Run the command below to update your `imageset-config.yaml` file to match the example below
 
 ```bash
 cat << EOF > imageset-config.yaml
@@ -142,12 +140,9 @@ mirror:
   operators:
   - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
     packages:
-    - name: web-terminal
-      channels:
-      - name: fast
     - name: rhdh
       channels:
-      - name: fast
+      - name: stable
     - name: compliance-operator
       channels:
       - name: stable
