@@ -116,7 +116,7 @@ A local cache of content already exists from when the cluster installation was i
 oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
 ```
 
-Note: This command may take several minutes to complete but should complete with `No new images detected, process stopping` to confirm the existing cache is up to date.
+> Note: This command may take several minutes to complete but should complete with `No new images detected, process stopping` to confirm the existing cache is up to date.
 
 
 ## 2.4 - Add new mirror content
@@ -124,7 +124,7 @@ Note: This command may take several minutes to complete but should complete with
 For our workshop exercises today we need to mirror some additional operators, namely the **OpenShift Compliance Operator**, **Red Hat Advanced Cluster Security**, and **Red Hat Developer Hub**. Run the command below to update your `imageset-config.yaml` file to match the example below
 
 ```bash
-cat << EOF > imageset-config.yaml
+cat << EOF > /mnt/low-side-data/imageset-config.yaml
 kind: ImageSetConfiguration
 apiVersion: mirror.openshift.io/v1alpha2
 storageConfig:
@@ -142,7 +142,9 @@ mirror:
     packages:
     - name: rhdh
       channels:
-      - name: stable
+      - name: fast
+        minVersion: '1.1.1'
+        maxVersion: '1.1.1'
     - name: compliance-operator
       channels:
       - name: stable
@@ -160,6 +162,8 @@ After updating the configuration file we can re-run our `oc-mirror` command to b
 ```bash
 oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
 ```
+
+> Note: This command may take up to 10 minutes to complete depending on connection speeds.
 
 
 ## 2.5 - Mirror updated content to high side registry
@@ -188,11 +192,18 @@ oc-mirror --from=/mnt/high-side-data/mirror_seq2_000000.tar docker://$(hostname)
 
 ## 2.6 - Verify new operators are available
 
-After a couple of minutes the mirror process will complete. We then need to tell OpenShift about the new content that is available by running the commands below:
+After a couple of minutes the mirror process will complete. We then need to tell OpenShift about the new content that is available by running the commands below.
 
 ```bash
-oc apply -f ./oc-mirror-workspace/results-*/
+for file in $(find ./oc-mirror-workspace -type f -name '*.yaml'); do oc apply -f $file; done
 ```
 
+> Note: In our `oc-mirror-workspace` directory each time we mirror new content a new `results-<id>` directory will be created which may contain `imageContentSourcePolicy.yaml` or `catalogSource-cs-<index>.yaml` files which we need to apply to our cluster to tell it about the new content that is available.
 
-We can then check that our new operators are available in the OpenShift Web Console.
+Once the updates are applied we can then check that our new operators are available in the OpenShift Web Console using our browser based vnc session.
+
+<Zoom>
+|![workshop](/static/images/compliance/check-operators.gif)                     |
+|:-----------------------------------------------------------------------------:|
+| *Check disconnected operator hub*                                             |
+</Zoom>
