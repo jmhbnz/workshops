@@ -14,6 +14,14 @@ In a broad sense many OpenShift features are added via [Operators](https://www.r
 
 In the previous exercise we mirrored some new operator bundles into our disconnected network. In this exercise we'll install those operators and explore the features they provide us via [Custom Resource Definitions](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources) they provide.
 
+> Note: For some trivia, Red Hat created and open sourced the [Operator Framework](https://github.com/operator-framework), then later contributed the project to the Cloud Native Computing Foundation in 2021, ensuring all organisations can benefit from our experience building and supporting operator driven clusters since ~2016.
+
+<Zoom>
+|![workshop](/static/images/compliance/operator-framework.png)                  |
+|:-----------------------------------------------------------------------------:|
+| *The Operator Framework*                                                      |
+</Zoom>
+
 
 ## 3.1 - Installing compliance operator
 
@@ -75,5 +83,13 @@ spec:
   startingCSV: rhacs-operator.v4.5.1
 EOF
 ```
+
+If you check back on your web console, after a short wait the **Advanced Cluser Security for Kubernetes** operator should now show as `✅ Succeeded`.
+
+<Zoom>
+|![workshop](/static/images/compliance/installed-operators-1.png)               |
+|:-----------------------------------------------------------------------------:|
+| *List of installed operators*                                                 |
+</Zoom>
 
 
