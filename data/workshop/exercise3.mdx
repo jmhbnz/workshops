@@ -15,12 +15,8 @@ In a broad sense many OpenShift features are added via [Operators](https://www.r
 In the previous exercise we mirrored some new operator bundles into our disconnected network. In this exercise we'll install those operators and explore the features they provide us via [Custom Resource Definitions](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources) they provide.
 
 > Note: For some trivia, Red Hat created and open sourced the [Operator Framework](https://github.com/operator-framework), then later contributed the project to the Cloud Native Computing Foundation in 2021, ensuring all organisations can benefit from our experience building and supporting operator driven clusters since ~2016.
-
-<Zoom>
-|![workshop](/static/images/compliance/operator-framework.png)                  |
-|:-----------------------------------------------------------------------------:|
-| *The Operator Framework*                                                      |
-</Zoom>
+> 
+> ![workshop](/static/images/compliance/operator-framework.png)
 
 
 ## 3.1 - Installing compliance operator
@@ -55,7 +51,7 @@ Red Hat Advanced Cluster Security (RHACS) has direct integration with the Compli
 
 To try the alternative operator installation method this time we will install the operator via the `oc` cli in our terminal.
 
-Run the commands below in your terminal session to create the required 
+Run the commands below in your terminal session to create the required `Namespace` and `Subscription` resources which will trigger the operator installation.
 
 ```bash
 cat << EOF | oc apply --filename -
@@ -92,4 +88,16 @@ If you check back on your web console, after a short wait the **Advanced Cluser 
 | *List of installed operators*                                                 |
 </Zoom>
 
+
+## 3.3 - Installing the developer hub operator
+
+The final operator we will install for this workshop relates to [Red Hat Developer Hub](https://developers.redhat.com/rhdh/overview).
+
+Red Hat Developer Hub is an Internal Developer Portal (IDP) based on the upstream [Backstage](https://backstage.io) project initially created at Spotify. With Red Hat Developer Hub combined with Red Hat OpenShift we can enable platform engineering teams to offer software templates and pre-architected and supported approaches to make life easier for development teams, ease onboarding and reduce friction and frustration.
+
+We'll also install the Red Hat Developer Hub using the `oc` cli in our terminal.  Run the commands below in your terminal session to create the required `Namespace` and `Subscription` resources which will trigger the operator installation.
+
+```bash
+
+```
 
