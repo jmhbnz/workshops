@@ -112,7 +112,10 @@ controlPlane:
   architecture: amd64
   hyperthreading: Enabled
   name: master
-  replicas: 3
+  replicas: 1
+  platform:
+    aws:
+      type: m5.8xlarge
 networking:
   clusterNetwork:
   - cidr: 10.128.0.0/14
@@ -159,7 +162,7 @@ openshift-install create cluster --dir /mnt/high-side-data
 * Disable default catalog sources high side
 
 #+begin_src tmux
-oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)"
+oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)" --insecure-skip-tls-verify=true
 oc patch OperatorHub cluster --type merge -p '{"spec": {"disableAllDefaultSources": true}}'
 oc create -f /mnt/high-side-data/oc-mirror-workspace/results-*/catalogSource-cs-redhat-operator-index.yaml
 #+end_src
