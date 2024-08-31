@@ -200,7 +200,15 @@ for file in $(find ./oc-mirror-workspace -type f -name '*.yaml'); do oc apply -f
 
 > Note: In our `oc-mirror-workspace` directory each time we mirror new content a new `results-<id>` directory will be created which may contain `imageContentSourcePolicy.yaml` or `catalogSource-cs-<index>.yaml` files which we need to apply to our cluster to tell it about the new content that is available.
 
-Once the updates are applied we can then check that our new operators are available in the OpenShift Web Console using our browser based vnc session.
+Once the updates are applied we can then check that our new operators are available in the OpenShift Web Console using our browser based vnc session:
+
+1. Open your vnc browser tab
+2. Use the left menu panel, click **Settings** and then select **Remote Resizing** as the scaling mode to improve viewing experience.
+3. Click **Connect** and when prompted enter the password in your environment spreadsheet row, then click **Send credentials**.
+4. A Firefox browser window should already be open, you can manually start if using the top left applications menu if needed.
+5. Click the bookmark toolbar option for **DISCO - OpenShift**.
+6. Log in when prompted with the username **kubeadmin** and the kubeadmin password listed in your environment spreadsheet (you can also find this password in your highside bastion ssh session by running `cat /mnt/high-side-data/auth/kubeadmin-password`).
+7. Navigate to **Operators** on the left menu, and then click **OperatorHub**, you should see the newly mirrored operators are now available in your disconnected cluster!
 
 <Zoom>
 |![workshop](/static/images/compliance/check-operators.gif)                     |
