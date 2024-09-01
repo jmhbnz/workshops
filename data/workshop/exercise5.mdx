@@ -107,6 +107,54 @@ Navigate to **Compliance** > **Coverage** and review the overall result for the 
 | *Compliance scan results in Red Hat Advanced Cluster Security*                |
 </Zoom>
 
+Your cluster should come out compliant with ~65% of the `ocp4-moderate` profile and ~93% of the `ocp4-moderate-node` profile. Not a bad start, let's review an example of an individual result now.
+
+
+## 5.3 Review indvidual compliance results
+
+Reviewing the detailed results any checks that are not passing will either be categorised as `Failing` or `Manual`. While we do everthing we can to automate the compliance process there are still a small number of controls you need to manage outside the direct automation of the Compliance Operator.
+
+Looking at the `ocp4-moderate` results for our `hub` cluster. A good example of a `Manual` check is `ocp4-moderate-accounts-restrict-service-account-tokens`. Let's get an overview of the check, the rationale and our instructions to address it manually by clicking into that check in the list, and opening the **Details** tab. You can jump directly to it with this url: https://central-acs-central.apps.disco.lab/main/compliance/coverage/profiles/ocp4-moderate/checks/ocp4-moderate-accounts-restrict-service-account-tokens?detailsTab=Details
+
+<Zoom>
+|![workshop](/static/images/compliance/compliance-scan-results-3.png)           |
+|:-----------------------------------------------------------------------------:|
+| *Compliance scan result details in Red Hat Advanced Cluster Security*         |
+</Zoom>
+
+We can see in this example it's essentially a judgement call. Our instructions are:
+
+> For each pod in the cluster, review the pod specification and ensure that pods that do not need to explicitly communicate with the API server have `automountServiceAccountToken` configured to `false`.
+
+Now just because this check is classified as manual, does not mean that we are now all on our own. There are extremely powerful policy engine & policy violation tracking features in RHACS that we can use investigate the status of this check further.
+
+A default policy is available out of the box called **Pod Service Account Token Automatically Mounted**. By default this policy is in **Inform only** mode, which means deployments that violate this policy will not be prevented by the RHACS admission controller, or scaled down if already running by the RHACS runtime protection. However we can still use this policy as is to inform on the current state of the cluster.
+
+1. First let's navigate to **Platform Configuration** > **Policy Management** in the left hand menu.
+2. In the Policy list scroll down to find **Pod Service Account Token Automatically Mounted** and click the policy title.
+3. Have a read of the policy details, then scroll down to review the **Scope exclusions**. You will see Red Hat has already done some work for you to define some standard OpenShift compoents which do need the token mounted and can be safely excluded from the policy.
+4. The policy should already be enabled so let's click on **Violations** in the left hand menu to review any current instances where this policy is currently being violated. You should have one entry in the list for the `kube-rbac-proxy`. This is actually a standard openshift pod in the `openshift-machine-config-operator` namespace, and does actually require the api token mounted, so we could safely add this deployment to our policy exclusions.
+
+<Zoom>
+|![workshop](/static/images/compliance/rhacs-violation-exclude.gif)             |
+|:-----------------------------------------------------------------------------:|
+| *Reviewing a policy & policy violations in Red Hat Advanced Cluster Security* |
+</Zoom>
+
+
+
+At this point as a platform engineer we have some flexibility about how we handle this particular compliance check, some options could be:
+
+1. Begin 
+
+
+
+
+
+
+
+
+
 
 
 
