@@ -1,0 +1,27 @@
+---
+title: Running a cluster compliance scan
+exercise: 5
+date: '2024-09-01'
+tags: ['openshift','containers','kubernetes','disconnected']
+draft: false
+authors: ['default']
+summary: "Let's check our cluster compliance against NIST 800-53 👀"
+---
+
+We've done the work to set the OpenShift Compliance Operator and Red Hat Advanced Cluster Security up on our cluster, now let's make the most of it by using them to schedule and run a compliance scan on our cluster.
+
+For the scan we'll be using the included `NIST 800-53 Moderate-Impact Baseline for Red Hat OpenShift` and `NIST 800-53 Moderate-Impact Baseline for Red Hat OpenShift - Node level` scan profiles that are included with the OpenShift Compliance Operator.
+
+Two scan profiles are required as we need to scan both the OpenShift cluster, as well as each individual node running RHEL CoreOS.
+
+For more details on these compliance profiles please take some time to review:
+
+- https://static.open-scap.org/ssg-guides/ssg-ocp4-guide-moderate.html
+- https://static.open-scap.org/ssg-guides/ssg-ocp4-guide-moderate-node.html
+- https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-operator-supported-profiles.html
+
+
+## 5.1 - Scheduling a scan
+
+There are two methods you can use to schedule Compliance Operator scans.
+

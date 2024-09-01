@@ -8,7 +8,7 @@ This document captures the steps required to set up an instance of the workshop.
 * Connect to the low side instance
 
 #+begin_src tmux
-ssh lab-user@3.21.229.143
+ssh lab-user@3.143.149.146
 #+end_src
 
 
@@ -16,13 +16,13 @@ ssh lab-user@3.21.229.143
 
 #+begin_src tmux
 cd /mnt/low-side-data/
-curl -L -o oc-mirror.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.19/oc-mirror.tar.gz
+curl -L -o oc-mirror.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.35/oc-mirror.tar.gz
 tar -xzf oc-mirror.tar.gz
 rm -f oc-mirror.tar.gz
 chmod +x oc-mirror
 sudo cp -v oc-mirror /bin
 curl -L -o mirror-registry.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/latest/mirror-registry.tar.gz
-curl -L -o openshift-install.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.19/openshift-install-linux.tar.gz
+curl -L -o openshift-install.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.35/openshift-install-linux.tar.gz
 tar -xzf openshift-install.tar.gz openshift-install
 rm -f openshift-install.tar.gz
 curl -L -o oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.19/openshift-client-linux.tar.gz
@@ -50,7 +50,7 @@ mirror:
     channels:
     - name: stable-4.14
       type: ocp
-      minVersion: 4.14.34
+      minVersion: 4.14.35
       maxVersion: 4.14.35
   additionalImages:
   - name: registry.redhat.io/rhel8/support-tools
