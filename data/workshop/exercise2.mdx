@@ -87,7 +87,7 @@ This bundle archive was created by the `oc-mirror` utility using the configurati
 cat imageset-config.yaml
 ```
 
-Your file should look something like the example below, we can see the two versions of OpenShift `4.14.19` and `4.14.20` that are specified to be downloaded, along with the `registry.redhat.io/rhel8/support-tools` additional standalone container image.
+Your file should look something like the example below, we can see the the `4.14.35` version of OpenShift is specified to be downloaded, along with the `registry.redhat.io/rhel8/support-tools` additional standalone container image.
 
 ```yaml
 kind: ImageSetConfiguration
@@ -100,8 +100,8 @@ mirror:
     channels:
     - name: stable-4.14
       type: ocp
-      minVersion: 4.14.19
-      maxVersion: 4.14.20
+      minVersion: 4.14.35
+      maxVersion: 4.14.35
 
   additionalImages:
   - name: registry.redhat.io/rhel8/support-tools
