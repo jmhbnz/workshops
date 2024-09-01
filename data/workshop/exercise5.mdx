@@ -12,7 +12,7 @@ We've done the work to set the OpenShift Compliance Operator and Red Hat Advance
 
 For the scan we'll be using the included `NIST 800-53 Moderate-Impact Baseline for Red Hat OpenShift` and `NIST 800-53 Moderate-Impact Baseline for Red Hat OpenShift - Node level` scan profiles that are included with the OpenShift Compliance Operator.
 
-Two scan profiles are required as we need to scan both the OpenShift cluster, as well as each individual node running RHEL CoreOS.
+Two scan profiles are required as we need to scan both the OpenShift cluster, as well as each individual node running [RHEL CoreOS](https://docs.openshift.com/container-platform/4.14/architecture/architecture-rhcos.html).
 
 For more details on these compliance profiles please take some time to review:
 
@@ -49,9 +49,9 @@ After creating the scan schedule results will be shortly available in the RHACS 
 Run the commands below to review your `ScanSetting` resource:
 
 ```bash
-oc get scansetting -n openshift-compliance daily-nist-800-53-moderate
+oc get scansetting --namespace openshift-compliance daily-nist-800-53-moderate
 
-oc get scansetting -n openshift-compliance daily-nist-800-53-moderate --output yaml
+oc get scansetting --namespace openshift-compliance daily-nist-800-53-moderate --output yaml
 ```
 
 You should see details output similar to the example below. Notice the more advanced settings available in the custom resource including `rawResultsStorage.rotation` and `roles[]` which you may want to customize in your environment.
@@ -85,6 +85,28 @@ strictNodeScan: false
 suspend: false
 timeout: 30m0s
 ```
+
+
+## 5.2 Review cluster compliance
+
+Once your cluster scan completes return to your vnc browser tab with the Red Hat Advanced Cluster Security Dashboard open. We'll take a look at our overall cluster compliance now against the compliance profile.
+
+> Note: Please be aware of the usage disclaimer shown at the top of the screen *"Red Hat Advanced Cluster Security, and its compliance scanning implementations, assists users by automating the inspection of numerous technical implementations that align with certain aspects of industry standards, benchmarks, and baselines. It does not replace the need for auditors, Qualified Security Assessors, Joint Authorization Boards, or other industry regulatory bodies."*.
+
+Navigate to **Compliance** > **Coverage** and review the overall result for the `ocp4-moderate` and `ocp4-moderate-node` profiles. The results should look something similar to the examples below:
+
+<Zoom>
+|![workshop](/static/images/compliance/compliance-scan-results-1.png)           |
+|:-----------------------------------------------------------------------------:|
+| *Compliance scan results in Red Hat Advanced Cluster Security*                |
+</Zoom>
+
+<Zoom>
+|![workshop](/static/images/compliance/compliance-scan-results-2.png)           |
+|:-----------------------------------------------------------------------------:|
+| *Compliance scan results in Red Hat Advanced Cluster Security*                |
+</Zoom>
+
 
 
 
