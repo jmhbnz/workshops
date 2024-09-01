@@ -110,7 +110,7 @@ Navigate to **Compliance** > **Coverage** and review the overall result for the 
 Your cluster should come out compliant with ~65% of the `ocp4-moderate` profile and ~93% of the `ocp4-moderate-node` profile. Not a bad start, let's review an example of an individual result now.
 
 
-## 5.3 Review indvidual compliance results
+## 5.3 Review indvidual `Manual` compliance results
 
 Reviewing the detailed results any checks that are not passing will either be categorised as `Failing` or `Manual`. While we do everthing we can to automate the compliance process there are still a small number of controls you need to manage outside the direct automation of the Compliance Operator.
 
@@ -126,13 +126,13 @@ We can see in this example it's essentially a judgement call. Our instructions a
 
 > For each pod in the cluster, review the pod specification and ensure that pods that do not need to explicitly communicate with the API server have `automountServiceAccountToken` configured to `false`.
 
-Now just because this check is classified as manual, does not mean that we are now all on our own. There are extremely powerful policy engine & policy violation tracking features in RHACS that we can use investigate the status of this check further.
+Now just because this check is classified as `Manual`, does not mean that we are now all on our own. There are extremely powerful policy engine & policy violation tracking features in RHACS that we can use investigate the status of this check further.
 
-A default policy is available out of the box called **Pod Service Account Token Automatically Mounted**. By default this policy is in **Inform only** mode, which means deployments that violate this policy will not be prevented by the RHACS admission controller, or scaled down if already running by the RHACS runtime protection. However we can still use this policy as is to inform on the current state of the cluster.
+A default policy is available out of the box called **Pod Service Account Token Automatically Mounted**. By default this policy is in **Inform only** mode, which means deployments that violate this policy will not be prevented by the RHACS admission controller, or scaled down if already running by the RHACS runtime protection. However we can still use this policy as is to inform on the current state of any cluster in our fleet that is secured by RHACS.
 
 1. First let's navigate to **Platform Configuration** > **Policy Management** in the left hand menu.
 2. In the Policy list scroll down to find **Pod Service Account Token Automatically Mounted** and click the policy title.
-3. Have a read of the policy details, then scroll down to review the **Scope exclusions**. You will see Red Hat has already done some work for you to define some standard OpenShift compoents which do need the token mounted and can be safely excluded from the policy.
+3. Have a read of the policy details, then scroll down to review the **Scope exclusions**. You will see Red Hat has already done some work for you to define some standard OpenShift cluster control plane deployments which do need the token mounted and are safely & intentionally excluded from the policy to save you time.
 4. The policy should already be enabled so let's click on **Violations** in the left hand menu to review any current instances where this policy is currently being violated. You should have one entry in the list for the `kube-rbac-proxy`. This is actually a standard openshift pod in the `openshift-machine-config-operator` namespace, and does actually require the api token mounted, so we could safely add this deployment to our policy exclusions.
 
 <Zoom>
@@ -141,20 +141,76 @@ A default policy is available out of the box called **Pod Service Account Token 
 | *Reviewing a policy & policy violations in Red Hat Advanced Cluster Security* |
 </Zoom>
 
+At this point as a platform engineer we have some flexibility about how we handle this particular compliance check, one option would be to switch the **Pod Service Account Token Automatically Mounted** policy to `Inform & enforce` mode, to prevent any future deployments to any cluster in your fleet secured by RHACS from having this common misconfiguration. As a result of implementing this mitigation you could consider adjusting the compliance profile to remove or change the priority of this `Manual` check as desired. Refer to https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-operator-tailor.html
 
+## - 5.4 Review individual `Failed` compliance results 
 
-At this point as a platform engineer we have some flexibility about how we handle this particular compliance check, some options could be:
+For our last task on this exercise let's review a `Failed` check, and apply the corresponding remediation automatically to improve our compliance posture.
 
-1. Begin 
+This time, rather than using the RHACS Dashboard we'll review the check result and apply the remediation using our terminal and `oc` cli.
 
+Let's start by retrieving one of our failed checks:
 
+```bash
+oc get ComplianceCheckResult --namespace openshift-compliance ocp4-moderate-api-server-encryption-provider-cipher --output yaml
+```
 
+Each `ComplianceCheckResult` represents a result of one compliance rule check. If the rule can be remediated automatically, a `ComplianceRemediation` object with the same name, owned by the `ComplianceCheckResult` is created. Unless requested, the remediations are not applied automatically, which gives an OpenShift Container Platform administrator the opportunity to review what the remediation does and only apply a remediation once it has been verified.
 
+> Note: Not all `ComplianceCheckResult` objects create `ComplianceRemediation` objects. Only `ComplianceCheckResult` objects that can be remediated automatically do. A `ComplianceCheckResult` object has a related remediation if it is labeled with the `compliance.openshift.io/automated-remediation` label.
 
+Let's inspect the corresponding `ComplianceRemediation` for this check:
 
+```bash
+oc get ComplianceRemediation --namespace openshift-compliance ocp4-moderate-api-server-encryption-provider-cipher --output yaml
+```
 
+You should see output similar to the example below. We can see in the `spec:` that it essentially contains a yaml resource patch for our `APIServer` resource named `cluster` to specify `spec.encryption.type` be set to `aescbc`.
 
+```yaml
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ComplianceRemediation
+metadata:
+  annotations:
+    compliance.openshift.io/xccdf-value-used: var-apiserver-encryption-type
+  labels:
+    compliance.openshift.io/scan-name: ocp4-moderate
+    compliance.openshift.io/suite: daily-nist-800-53-moderate
+  name: ocp4-moderate-api-server-encryption-provider-cipher
+  namespace: openshift-compliance
+spec:
+  apply: false
+  current:
+    object:
+      apiVersion: config.openshift.io/v1
+      kind: APIServer
+      metadata:
+        name: cluster
+      spec:
+        encryption:
+          type: aescbc
+  outdated: {}
+  type: Configuration
+status:
+  applicationState: NotApplied
+```
 
+Let's apply this automatic remediation now: 
 
+```bash
+oc --namespace openshift-compliance patch complianceremediation/ocp4-moderate-api-server-encryption-provider-cipher --patch '{"spec":{"apply":true}}' --type=merge
+```
 
+> Note: This remediation has impacts for pods in the `openshift-apiserver` namespace. If you check those pods quickly with an `oc get pods --namespace openshift-apiserver` you will notice a rolling restart underway.
 
+Now it's time for some instant gratification. Let's bring up this compliance check in our vnc browser tab with the RHACS dashboard open by going to: https://central-acs-central.apps.disco.lab/main/compliance/coverage/profiles/ocp4-moderate/checks/ocp4-moderate-api-server-encryption-provider-cipher?detailsTab=Results
+
+You will see it currently shows as `Failed`. We can trigger a re-scan with the `oc` command below in our terminal:
+
+> Note: Due to the api server rolling restart when this remediation was applied you may need to perform a fresh terminal login with `oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)" --insecure-skip-tls-verify=true`
+
+```bash
+oc --namespace openshift-compliance annotate compliancescans/ocp4-moderate compliance.openshift.io/rescan=
+```
+
+Hitting refresh, the check should now report `Pass`, and our overall percentage compliance against the baseline should have also now increased. Congratulations, time to move on to exercise 6 🚀
