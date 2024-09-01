@@ -30,9 +30,61 @@ There are two methods you can use to schedule Compliance Operator scans:
 
 Complete the steps below to create your scan schedule:
 
+1. Return to your browser tab in the vnc session with the Red Hat Advanced Cluster Security dashboard open.
+2. Navigate to **Compliance** > **Schedules** in the left hand menu.
+3. Click the blue **Create Scan Schedule** button in the middle of the screen.
+4. Enter the name `daily-nist-800-53-moderate` and set the **Time** field to `00:00` then click **Next**.
+5. On the next screen select your `hub` cluster, then click **Next**.
+6. On the profile screen tick `ocp4-moderate` and `ocp4-moderate-node`, then click **Next**.
+7. Click **Next** once more on the **Reports** screen and the click **Save**.
+
 <Zoom>
 |![workshop](/static/images/compliance/compliance-scan-results.gif)             |
 |:-----------------------------------------------------------------------------:|
 | *Creating a compliance scan schedule in Red Hat Advanced Cluster Security*    |
 </Zoom>
+
+After creating the scan schedule results will be shortly available in the RHACS console. While we wait for the automatically triggered initial scan to complete, let's use the `oc` cli to review the `ScanSetting` that was created behind the scenes when we created the **Scan Schedule** in the RHACS dashboard.
+
+Run the commands below to review your `ScanSetting` resource:
+
+```bash
+oc get scansetting -n openshift-compliance daily-nist-800-53-moderate
+
+oc get scansetting -n openshift-compliance daily-nist-800-53-moderate --output yaml
+```
+
+You should see details output similar to the example below. Notice the more advanced settings available in the custom resource including `rawResultsStorage.rotation` and `roles[]` which you may want to customize in your environment.
+
+```yaml
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ScanSetting
+maxRetryOnTimeout: 3
+metadata:
+  annotations:
+    owner: stackrox
+  labels:
+    app.kubernetes.io/created-by: sensor
+    app.kubernetes.io/managed-by: sensor
+    app.kubernetes.io/name: stackrox
+  name: daily-nist-800-53-moderate
+  namespace: openshift-compliance
+rawResultStorage:
+  pvAccessModes:
+  - ReadWriteOnce
+  rotation: 3
+  size: 1Gi
+roles:
+- master
+- worker
+scanTolerations:
+- operator: Exists
+schedule: 0 0 * * *
+showNotApplicable: false
+strictNodeScan: false
+suspend: false
+timeout: 30m0s
+```
+
+
 

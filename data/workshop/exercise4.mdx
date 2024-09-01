@@ -120,7 +120,7 @@ Once the `hub-Operator-secrets-cluster-init-bundle.yaml` file has been downloade
 | *Importing an init bundle into our hub cluster*                               |
 </Zoom>
 
-> Note: These init bundles contain secrets enabling a secured cluster to communicate with RHACS Central so it's important to store these securely.
+> Note: These init bundles contain secrets enabling a secured cluster to communicate with RHACS Central so it's important to store these securely. For automation purposes you can also generate init bundles with the RHACS API or the `roxctl` CLI, for example `roxctl -e <ACS CONSOLE URL>:443 central init-bundles generate demo-cluster --output-secrets /tmp/demo-cluster.yaml --password <ACS ADMIN PASSWORD>`.
 
 Once our init bundle has been created we can create our `SecuredCluster` custom resource to complete the cluster onboarding process. We'll do that with our `oc` terminal session.
 
