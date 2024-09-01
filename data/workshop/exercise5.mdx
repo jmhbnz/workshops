@@ -87,7 +87,7 @@ timeout: 30m0s
 ```
 
 
-## 5.2 Review cluster compliance
+## 5.2 - Review cluster compliance
 
 Once your cluster scan completes return to your vnc browser tab with the Red Hat Advanced Cluster Security Dashboard open. We'll take a look at our overall cluster compliance now against the compliance profile.
 
@@ -110,7 +110,7 @@ Navigate to **Compliance** > **Coverage** and review the overall result for the 
 Your cluster should come out compliant with ~65% of the `ocp4-moderate` profile and ~93% of the `ocp4-moderate-node` profile. Not a bad start, let's review an example of an individual result now.
 
 
-## 5.3 Review indvidual `Manual` compliance results
+## 5.3 - Review indvidual `Manual` compliance results
 
 Reviewing the detailed results any checks that are not passing will either be categorised as `Failing` or `Manual`. While we do everthing we can to automate the compliance process there are still a small number of controls you need to manage outside the direct automation of the Compliance Operator.
 
@@ -143,7 +143,7 @@ A default policy is available out of the box called **Pod Service Account Token 
 
 At this point as a platform engineer we have some flexibility about how we handle this particular compliance check, one option would be to switch the **Pod Service Account Token Automatically Mounted** policy to `Inform & enforce` mode, to prevent any future deployments to any cluster in your fleet secured by RHACS from having this common misconfiguration. As a result of implementing this mitigation you could consider adjusting the compliance profile to remove or change the priority of this `Manual` check as desired. Refer to https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-operator-tailor.html
 
-## - 5.4 Review individual `Failed` compliance results 
+## 5.4 - Review individual `Failed` compliance results 
 
 For our last task on this exercise let's review a `Failed` check, and apply the corresponding remediation automatically to improve our compliance posture.
 
