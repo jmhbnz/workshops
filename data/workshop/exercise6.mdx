@@ -99,3 +99,78 @@ oc delete pod pv-extract --namespace openshift-compliance
 
 ## 6.3 Reviewing raw result files
 
+Now that we have a copy of the raw result files, let's see what they look like.
+
+Starting with an `ls -lah` in our highside terminal we can see each scan result is stored in a numbered directory, yours should look similar to the example below:
+
+```bash
+drwxr-xr-x. 5 lab-user lab-user   42 Sep  1 20:35 .
+drwxr-xr-x. 7 lab-user lab-user 4.0K Sep  1 20:28 ..
+drwxr-xr-x. 2 lab-user lab-user   52 Sep  1 20:35 0
+drwxr-xr-x. 2 lab-user lab-user   52 Sep  1 20:35 1
+drwxr-xr-x. 2 lab-user lab-user    6 Sep  1 20:35 lost+found
+```
+
+If we take a look at one of the specific directories with `ls -lah compliance-results/1/` we'll see an archive file:
+
+```bash
+-rw-r--r--. 1 lab-user lab-user 251K Sep  1 20:35 ocp4-moderate-api-checks-pod.xml.bzip2
+```
+
+Let's drop into that directory and extract it now to take a look at the contents, run the commands below in your highside ssh terminal:
+
+> Note: If you get an error from the `bunzip2` command below you may need to first install it with `sudo yum install --yes bzip2`.
+
+```bash
+cd /mnt/high-side-data/compliance-results/1
+bunzip2 ocp4-moderate-api-checks-pod.xml.bzip2
+mv ocp4-moderate-api-checks-pod.xml.bzip2.out ocp4-moderate-api-checks-pod.xml
+ls -lah
+```
+
+Now we're getting somewhere, we can see we have `.xml` file. Let's take a quick peek at the contents:
+
+```bash
+head ocp4-moderate-api-checks-pod.xml
+```
+
+You should see an xml document snippet similar to the example below:
+
+```xml
+  <core:relationships xmlns:arfvocab="http://scap.nist.gov/specifications/arf/vocabulary/relationships/1.0#">
+    <core:relationship type="arfvocab:createdFor" subject="xccdf1">
+      <core:ref>collection1</core:ref>
+    </core:relationship>
+    <core:relationship type="arfvocab:isAbout" subject="xccdf1">
+      <core:ref>asset0</core:ref>
+    </core:relationship>
+  </core:relationships>
+```
+
+
+## 6.4 Generating reports with openscap tooling
+
+To finish off this exercise let's go one step further and use OpenSCAP tooling to generate an html based report we can open in our vnc Firefox browser.
+
+Run the commands below in your high side terminal, we'll start by installing the `openscap-scanner` package.
+
+```bash
+sudo yum install -y openscap-scanner
+```
+
+One the tooling is installed let's generate the report:
+
+```bash
+oscap xccdf generate report ocp4-moderate-api-checks-pod.xml > report.html
+```
+
+So far we've done all this on our high side terminal. We need to get this report artifact to our low side server where our Firefox vnc session is running, let's copy it out now:
+
+```bash
+exit # Return to low side server
+rsync highside:/mnt/high-side-data/compliance-results/1/report.html /home/lab-user/Downloads/report.html
+```
+
+Finally - we can open up our report in our web based Firefox vnc session!
+
+
