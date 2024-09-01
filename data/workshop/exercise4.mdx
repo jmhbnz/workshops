@@ -17,8 +17,8 @@ Before we get into the technical implementation let's take a moment to get up to
 
 Fundamentally you install RHACS as a set of containers in your OpenShift Container Platform or Kubernetes cluster. RHACS includes the following services:
 
-1. **Central** services you install on a designated "hub" cluster.
-2. **Secured cluster** services you install on each cluster you want to secure by RHACS.
+1. **Central** services you install on a designated "hub" cluster. Central installs the Central, Scanner, and Scanner DB services. The Central service provides access to a user interface through a web UI or the RHACS portal. It also handles API interactions and provides persistent storage. Scanner analyzes images for known vulnerabilities. It uses Scanner DB as a cache for vulnerability definitions.
+2. **Secured cluster** services you install on each cluster you want to secure by RHACS. This installs the Collector, Sensor, and Admission Controller services. Collector collects runtime information on container security and network activity. It then sends data to Sensor, which monitors your Kubernetes cluster for policy detection and enforcement. Admission Controller monitors workloads and prevents users from creating them in RHACS when they violate security policies.
 
 <Zoom>
 |![workshop](/static/images/compliance/acs-architecture-kubernetes.png)         |
