@@ -195,6 +195,7 @@ oc-mirror --from=/mnt/high-side-data/mirror_seq2_000000.tar docker://$(hostname)
 After a couple of minutes the mirror process will complete. We then need to tell OpenShift about the new content that is available by running the commands below.
 
 ```bash
+oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)" --insecure-skip-tls-verify=true
 for file in $(find ./oc-mirror-workspace -type f -name '*.yaml'); do oc apply -f $file; done
 ```
 
