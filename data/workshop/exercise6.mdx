@@ -33,7 +33,7 @@ apiVersion: rhdh.redhat.com/v1alpha1
 kind: Backstage
 metadata:
   name: developer-hub
-  namespace: rhdh-operator
+  namespace: rhdh
 spec:
   application:
     appConfig:
@@ -48,4 +48,15 @@ spec:
 EOF
 ```
 
+Once the pods in the `rhdh` namespace are `Ready` we can retrieve and open the `Route` for our new Developer Hub instance and complete our first time login.
+
+```bash
+oc get route --namespace rhdh backstage-developer-hub --output jsonpath='{.spec.host}'
+```
+
+<Zoom>
+|![workshop](/static/images/compliance/developer-hub.gif)                       |
+|:-----------------------------------------------------------------------------:|
+| *First login for Red Hat Developer Hub*                                       |
+</Zoom>
 
