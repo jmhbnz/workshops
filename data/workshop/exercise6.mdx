@@ -72,7 +72,7 @@ spec:
       image: registry.redhat.io/rhel8/support-tools@sha256:ab42416e9e3460f6c6adac4cf09013be6f402810fba452ea95bd717c3ab4076b
       command: ["sleep", "3000"]
       volumeMounts:
-      - mountPath: "/workers-scan-results"
+      - mountPath: "/ocp4-moderate-scan-results"
         name: ocp4-moderate-scan-vol
   volumes:
     - name: ocp4-moderate-scan-vol
@@ -90,4 +90,12 @@ mkdir /mnt/high-side-data/compliance-results
 oc cp pv-extract:/ocp4-moderate-scan-results --namespace openshift-compliance .
 ```
 
+After the copy has completed we should delete our helper pod to unbind the volume:
+
+```bash
+oc delete pod pv-extract --namespace openshift-compliance
+```
+
+
+## 6.3 Reviewing raw result files
 
