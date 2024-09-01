@@ -1,6 +1,6 @@
 ---
 title: Retrieving raw compliance results
-exercise: 7
+exercise: 6
 date: '2024-09-02'
 tags: ['openshift','containers','kubernetes','disconnected']
 draft: false
@@ -17,7 +17,7 @@ The Asset Reporting Format is a data model to express the transport format of in
 For more details on the format specification refer to https://www.nist.gov/publications/specification-asset-reporting-format-11
 
 
-## 7.1 - Understanding raw result storage
+## 6.1 - Understanding raw result storage
 
 When the Compliance Operator runs a scan, raw results are stored in a `PersistentVolume`. The following `oc` command shows the mapping `PersistentVolume` name for a given scan name.
 
@@ -43,3 +43,40 @@ We should see results showing the name of each `PersistentVolume` for each profi
   "namespace": "openshift-compliance"
 }
 ```
+
+We can view the details of these `PersistentVolumes` as follows:
+
+
+```bash
+oc get pvc --namespace openshift-compliance ocp4-moderate
+```
+
+
+## 6.2 - Retrieving results from a volume
+
+Let's retrieve some specific results files from a volume by mounting the volume into a pod, and then using `oc` to copy the volume contents to our highside ssh host.
+
+
+```bash
+cat << EOF | oc --namespace openshift-compliance apply --filename -
+apiVersion: "v1"
+kind: Pod
+metadata:
+  name: pv-extract
+spec:
+  containers:
+    - name: pv-extract-pod
+      image: registry.access.redhat.com/ubi9/ubi
+      command: ["sleep", "3000"]
+      volumeMounts:
+      - mountPath: "/workers-scan-results"
+        name: ocp4-moderate-scan-vol
+  volumes:
+    - name: ocp4-moderate-scan-vol
+      persistentVolumeClaim:
+        claimName: ocp4-moderate
+EOF
+```
+
+
+
