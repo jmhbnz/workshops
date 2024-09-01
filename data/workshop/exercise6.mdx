@@ -56,6 +56,9 @@ oc get pvc --namespace openshift-compliance ocp4-moderate
 
 Let's retrieve some specific results files from a volume by mounting the volume into a pod, and then using `oc` to copy the volume contents to our highside ssh host.
 
+We can create a pod using the `rhel8/support-tools` additional image that was mirrored into our disconnected environment.
+
+> Note: Note the use of the pinned sha256 image digest below rather than standard image tags, this is a requirement of the mirroring process.
 
 ```bash
 cat << EOF | oc --namespace openshift-compliance apply --filename -
@@ -66,7 +69,7 @@ metadata:
 spec:
   containers:
     - name: pv-extract-pod
-      image: registry.access.redhat.com/ubi9/ubi
+      image: registry.redhat.io/rhel8/support-tools@sha256:ab42416e9e3460f6c6adac4cf09013be6f402810fba452ea95bd717c3ab4076b
       command: ["sleep", "3000"]
       volumeMounts:
       - mountPath: "/workers-scan-results"
@@ -78,5 +81,13 @@ spec:
 EOF
 ```
 
+> Note: Spawning a pod that mounts the `PersistentVolume` will keep the claim as `Bound`. If the volume’s storage class in use has permissions set to `ReadWriteOnce`, the volume is only mountable by one pod at a time. You must delete the pod upon completion, or it will not be possible for the Operator to schedule a pod and continue storing results in this location.
+
+With the volume mounted we can copy the results out to our machine:
+
+```bash
+mkdir /mnt/high-side-data/compliance-results
+oc cp pv-extract:/ocp4-moderate-scan-results --namespace openshift-compliance .
+```
 
 
