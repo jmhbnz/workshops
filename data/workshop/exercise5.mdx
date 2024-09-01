@@ -23,5 +23,16 @@ For more details on these compliance profiles please take some time to review:
 
 ## 5.1 - Scheduling a scan
 
-There are two methods you can use to schedule Compliance Operator scans.
+There are two methods you can use to schedule Compliance Operator scans:
+
+1. Creating a `ScanSetting` and `ScanSettingBinding` custom resource. This does not require Red Hat Advanced Cluster Security, and can be easily managed by GitOps, however is not beginner friendly and lacks any graphical frontend to easily explore cluster compliance status. For an overview of this approach please take a few minutes to review https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-scans.html#compliance-operator-scans
+2. Creating a **Scan Schedule** in Red Hat Advanced Cluster Security. This is the approach we will be using in this workshop as it is the most intuitive option.
+
+Complete the steps below to create your scan schedule:
+
+<Zoom>
+|![workshop](/static/images/compliance/compliance-scan-results.gif)             |
+|:-----------------------------------------------------------------------------:|
+| *Creating a compliance scan schedule in Red Hat Advanced Cluster Security*    |
+</Zoom>
 
