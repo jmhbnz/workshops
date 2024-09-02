@@ -7,7 +7,7 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Wed, 18 Dec 2024 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Thu, 22 Aug 2024 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://rhdemo.win/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
@@ -15,7 +15,67 @@
     <title>Understanding our lab environment</title>
     <link>https://rhdemo.win/workshop/exercise1</link>
     <description>Let&#39;s get familiar with our lab setup.</description>
-    <pubDate>Wed, 18 Dec 2024 00:00:00 GMT</pubDate>
+    <pubDate>Thu, 22 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise2</guid>
+    <title>Mirror required content</title>
+    <link>https://rhdemo.win/workshop/exercise2</link>
+    <description>You want features? Mirror them in!🪞</description>
+    <pubDate>Fri, 23 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise3</guid>
+    <title>Install operators</title>
+    <link>https://rhdemo.win/workshop/exercise3</link>
+    <description>Operators?!? 🤔 - Think app store for Kubernetes 🌟</description>
+    <pubDate>Tue, 27 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise4</guid>
+    <title>Deploy advanced cluster security</title>
+    <link>https://rhdemo.win/workshop/exercise4</link>
+    <description>Time to up our security &amp; compliance game! 🔒</description>
+    <pubDate>Sat, 31 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise5</guid>
+    <title>Running a cluster compliance scan</title>
+    <link>https://rhdemo.win/workshop/exercise5</link>
+    <description>Let&#39;s check our cluster compliance against NIST 800-53 👀</description>
+    <pubDate>Sun, 01 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise6</guid>
+    <title>Retrieving raw compliance results</title>
+    <link>https://rhdemo.win/workshop/exercise6</link>
+    <description>Need to integrate results with another platform?</description>
+    <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise8</guid>
+    <title>Bonus - Installing red hat developer hub</title>
+    <link>https://rhdemo.win/workshop/exercise8</link>
+    <description>Upping our dx in a disconnected environment</description>
+    <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
     <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
   </item>
