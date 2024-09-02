@@ -1,0 +1,54 @@
+---
+title: Bonus - Making the most of rhacs
+exercise: 7
+date: '2024-09-02'
+tags: ['openshift','rhacs','container','security']
+draft: false
+authors: ['default']
+summary: "Optional challenge - if you have time"
+---
+
+So you've deployed Red Hat Advanced Cluster Security and completed some day one configuration. Now what?? One of the key day two activities for RHACS in a disconnected environment is ensuring you can keep the vulnerability database up to date.
+
+At a high level, the RHACS **Scanner** component maintains a database of vulnerabilities. When Red Hat Advanced Cluster Security for Kubernetes (RHACS) runs in normal mode, **Central** retrieves the latest vulnerability data from the internet, and Scanner retrieves vulnerability data from Central.
+
+However, if you are using RHACS in offline mode, **you must manually update the vulnerability data**. To manually update the vulnerability data, you must upload a definitions file to Central, and Scanner then retrieves the vulnerability data from Central.
+
+In both online and offline mode, Scanner checks for new data from Central every `5` minutes by default. In online mode, Central also checks for new data from the internet approximately every `5-20` minutes.
+
+The offline data source is updated approximately every 3 hours. After the data has been uploaded to Central, Scanner downloads the data and updates its local vulnerability database.
+
+
+## 7.1 - Update rhacs definitions with roxctl
+
+To update the definitions in offline mode, perform the following steps:
+
+1. Download the definitions.
+2. Upload the definitions to Central. 
+
+As a challenge, try following the documentation https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html/configuring/enable-offline-mode#download-scanner-definitions_enable-offline-mode to perform the update.
+
+> Note: I suggest exploring `roxctl` CLI as the method for downloading updates in your low side environment. You could then copy both `roxctl` and the definitions update to your high side environment and use `roxtctl` once more (this time with an API token) in order to update the definitions.
+
+
+## 7.2 - Prioritise security remediation by risk
+
+Completed your vulnerability definitions update? Awesome! Feel free to explore some of the other features of Red Hat Advanced Cluster Security using your web based vnc session and the RHACS dashboard.
+
+Let’s take a look at the **Risk** view, where we go beyond the basics of vulnerabilities to understand how deployment configuration and runtime activity impact the likelihood of an exploit occurring and how successful those exploits will be.
+
+<Zoom>
+|![workshop](/static/images/compliance/acs-risk.png)                            |
+|:-----------------------------------------------------------------------------:|
+| *Understanding risk exposure in Red Hat Advanced Cluster Security*            |
+</Zoom>
+
+Risk is also influenced by runtime activity - and Deployments that have activity that could indicate a breach in progress have a red dot on the left. Obviously - the first one in the list should be our first focus.
+
+The reality of security is that it’s just not possible to tackle all sources of Risk, so organizations end up prioritizing their efforts. We want RHACS to help inform that prioritization.
+
+As a challange have a go at mirroring and deploying a new additional container image into your disconnected environment repeating steps we completed earlier. Try creating a deployment for that image to bring it up on your cluster, the **Developer** perspective in the OpenShift Web Console can save you some time here.
+
+Once the container is running, use the RHACS dashboard to check what the deployments risk level is? What are the factors contributing to that?
+
+If you're ready for a different topic, head over to Exercise 8, for the final tasks today to deploy Red Hat Developer Hub 🙂

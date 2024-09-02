@@ -2,17 +2,23 @@
 title: Mirror required content
 exercise: 2
 date: '2024-08-23'
-tags: ['openshift','containers','kubernetes','disconnected']
+tags: ['oc-mirror','mirror-registry','openshift','disconnected']
 draft: false
 authors: ['default']
 summary: "You want features? Mirror them in!🪞"
 ---
 
-The disconnected OpenShift cluster you have been allocated is the result of a standard installation using the IPI install method, and does not have any post installation features added.
+The disconnected OpenShift cluster you have been allocated is the result of a standard installation for a private cluster on AWS using the [IPI install method](https://docs.openshift.com/container-platform/4.14/installing/installing_aws/installing-aws-private.html#installing-aws-private), and does not have any post installation features added.
 
-During this workshop we want to secure the cluster with Red Hat Advanced Cluster Security, understand our compliance posture against [NIST 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) with the OpenShift Compliance Operator and then make it easy for our Developers to do the right thing with Red Hat Developer Hub.
+During this workshop we want to secure the cluster with Red Hat Advanced Cluster Security, understand our compliance posture against [NIST 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) with the OpenShift Compliance Operator and then explore some bonus activities like deploying Red Hat Developer Hub.
 
 To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
+
+<Zoom>
+|![workshop](/static/images/compliance/workshop-environment.svg)                |
+|:-----------------------------------------------------------------------------:|
+| *Workshop environment summary*                                                |
+</Zoom>
 
 
 ## 2.1 - Open a terminal on your low side
@@ -37,18 +43,18 @@ Your workspace will look similar to the one below:
 
 ```bash
 [lab-user@jump low-side-data]$ ls -lah
-total 25G
-drwxr-xr-x. 4 lab-user lab-user 4.0K Aug 22 00:22 .
-drwxr-xr-x. 3 root     root       27 Aug 19 04:10 ..
--rw-r--r--. 1 lab-user lab-user  473 Aug 22 00:10 imageset-config.yaml
--rw-r--r--. 1 lab-user lab-user 696M Aug 21 23:57 mirror-registry.tar.gz
--rw-r--r--. 1 lab-user lab-user  24G Aug 22 00:22 mirror_seq1_000000.tar
+total 21G
+drwxr-xr-x. 4 lab-user lab-user 4.0K Sep  2 12:46 .
+drwxr-xr-x. 3 root     root       27 Aug 31 22:00 ..
+-rw-r--r--. 1 lab-user lab-user  305 Sep  2 12:38 imageset-config.yaml
+-rw-r--r--. 1 lab-user lab-user 696M Sep  2 12:37 mirror-registry.tar.gz
+-rw-r--r--. 1 lab-user lab-user  20G Sep  2 12:46 mirror_seq1_000000.tar
 -rwxr-xr-x. 1 lab-user lab-user 146M Mar 26 22:17 oc
--rwxr-x--x. 1 lab-user lab-user 144M Mar 22 18:34 oc-mirror
--rw-------. 1 lab-user lab-user 183K Aug 22 00:16 .oc-mirror.log
-drwxr-xr-x. 3 lab-user lab-user   17 Aug 22 00:13 oc-mirror-workspace
--rwxr-xr-x. 1 lab-user lab-user 630M Mar 22 19:32 openshift-install
-drwxr-x---. 2 lab-user lab-user   28 Aug 22 00:22 publish
+-rwxr-x--x. 1 lab-user lab-user 144M Aug  7 06:30 oc-mirror
+-rw-------. 1 lab-user lab-user 160K Sep  2 12:41 .oc-mirror.log
+drwxr-xr-x. 3 lab-user lab-user   17 Sep  2 12:38 oc-mirror-workspace
+-rwxr-xr-x. 1 lab-user lab-user 631M Aug  7 07:40 openshift-install
+drwxr-x---. 2 lab-user lab-user   28 Sep  2 12:46 publish
 ```
 
 
@@ -74,6 +80,8 @@ oc-mirror list operators --catalogs --version=4.14
 # List all operators in a specific catalogs
 oc-mirror list operators --catalog registry.redhat.io/redhat/redhat-operator-index:v4.14
 ```
+
+Using the built in help have a go at using `oc-mirror` to identify details of a specific operator.
 
 We can also use the `oc-mirror` utility to understand the state of any existing mirror content bundles. We have a content bundle called `mirror_seq1_000000.tar` available from the initial installation of your OpenShift cluster, let's inspect that now.
 

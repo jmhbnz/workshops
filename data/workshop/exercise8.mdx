@@ -2,13 +2,18 @@
 title: Bonus - Installing red hat developer hub
 exercise: 8
 date: '2024-09-02'
-tags: ['openshift','containers','kubernetes','disconnected']
+tags: ['openshift','backstage','developer-hub','operator']
 draft: false
 authors: ['default']
 summary: "Upping our dx in a disconnected environment"
 ---
 
-We've had a good dig into cluster security and compliance. Let's change gears for this next exercise to get some experience deploying [Red Hat Developer Hub](https://developers.redhat.com/rhdh/overview) in a disconnected cluster.
+We've had a good dig into cluster security and compliance. Let's change gears for this final exercise to get some quick practice deploying [Red Hat Developer Hub](https://developers.redhat.com/rhdh/overview) in a disconnected cluster.
+
+<Zoom>
+|![workshop](/static/images/compliance/developer-hub-graphic.png)               |
+|:-----------------------------------------------------------------------------:|
+</Zoom>
 
 
 ## 8.1 - Deploying red hat developer hub
@@ -59,4 +64,15 @@ oc get route --namespace rhdh backstage-developer-hub --output jsonpath='{.spec.
 |:-----------------------------------------------------------------------------:|
 | *First login for Red Hat Developer Hub*                                       |
 </Zoom>
+
+
+## 8.2 - Understanding developer hub
+
+With Developer Hub deployed, you will notice by default there isn't much going on in the dashboard. This is because Developer Hub is a platform that has to be specifically customised for your environment through the extraordinary plugin ecosystem.
+
+Take a moment to explore what directions you could potentially take your deployment via the plugin marketplace https://backstage.io/plugins. 
+
+Red Hat support a curated and opinionated set of plugins, you can take a look at those here https://developers.redhat.com/rhdh/plugins
+
+We don't have time in this workshop to fully dig into Red Hat Developer Hub however if you do finish the security and compliance focused tasks ahead of schedule please feel free to review https://www.youtube.com/watch?v=tvVOC0mFR_4 to get a feel for how Developer Hub templates can be used.
 

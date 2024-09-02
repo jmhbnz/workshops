@@ -2,10 +2,10 @@
 title: Retrieving raw compliance results
 exercise: 6
 date: '2024-09-02'
-tags: ['openshift','containers','kubernetes','disconnected']
+tags: ['openshift','compliance','nist-800-53','scanning']
 draft: false
 authors: ['default']
-summary: "Need to integrate results with another platform?"
+summary: "Need to integrate results with another platform? No problem!"
 ---
 
 Often organisations will have dedicated software for managing governance, risk and compliance or need to provide results to external auditors. In these situations while the dashboards within Red Hat Advanced Cluster Security, or `ComplianceCheckResult` objects in the OpenShift APIServer are helpful, what we really need to do is integrate these results into our third party compliance management platform or pass results in a standardised format to third parties.
@@ -97,7 +97,7 @@ oc delete pod pv-extract --namespace openshift-compliance
 ```
 
 
-## 6.3 Reviewing raw result files
+## 6.3 - Reviewing raw result files
 
 Now that we have a copy of the raw result files, let's see what they look like.
 
@@ -148,7 +148,7 @@ You should see an xml document snippet similar to the example below:
 ```
 
 
-## 6.4 Generating reports with openscap tooling
+## 6.4 - Generating reports with openscap tooling
 
 To finish off this exercise let's go one step further and use OpenSCAP tooling to generate an html based report we can open in our vnc Firefox browser.
 
@@ -171,6 +171,4 @@ exit # Return to low side server
 rsync highside:/mnt/high-side-data/compliance-results/1/report.html /home/lab-user/Downloads/report.html
 ```
 
-Finally - we can open up our report in our web based Firefox vnc session!
-
-
+Finally - we can open up our report in our web based Firefox vnc session! Once you've reviewed the report you can move on to exercise 7 🚀
