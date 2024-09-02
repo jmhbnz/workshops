@@ -51,4 +51,26 @@ As a challange have a go at mirroring and deploying a new additional container i
 
 Once the container is running, use the RHACS dashboard to check what the deployments risk level is? What are the factors contributing to that?
 
+
+## 7.3 - Exploring the rhacs policy engine
+
+Red Hat Advanced Cluster Security for Kubernetes allows you to use out-of-the-box security policies and define custom multi-factor policies for your container environment.
+
+Configuring these policies enables you to automatically prevent high-risk service deployments in your environment and respond to runtime security incidents.
+
+All of the policies that ship with the product are designed with the goal of providing targeted remediation that improves security hardening.
+
+Take some time to reivew the default policies by clicking **Platform Configuration** > **Policy Management**. You’ll see this list contains many **Build** and **Deploy** time policies to catch misconfigurations early in the pipeline, but also **Runtime** policies that point back to specific hardening recommendations.
+
+These policies come from us at Red Hat - our expertise, our interpretation of industry best practice, and our interpretation of common compliance standards, but you can modify them or create your own.
+
+If you have some time take a look at the options for editing default policies to change their enforcement behavior or scope.
+
+<Zoom>
+|![workshop](/static/images/compliance/acs-policies.png)                        |
+|:-----------------------------------------------------------------------------:|
+| *Policy management in Red Hat Advanced Cluster Security*                      |
+</Zoom>
+
+
 If you're ready for a different topic, head over to Exercise 8, for the final tasks today to deploy Red Hat Developer Hub 🙂
