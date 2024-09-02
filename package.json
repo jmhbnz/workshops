@@ -51,7 +51,7 @@
     "cross-env": "^7.0.3",
     "dedent": "^1.5.3",
     "eslint": "^8.0.0",
-    "eslint-config-next": "14.2.6",
+    "eslint-config-next": "14.2.7",
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-prettier": "^5.2.1",
     "file-loader": "^6.2.0",
