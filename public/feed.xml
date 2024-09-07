@@ -1,9 +1,9 @@
 
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>Red Hat OpenShift Application Delivery Workshop</title>
+      <title>Red Hat OpenShift Security &amp; Compliance Workshop</title>
       <link>https://rhdemo.win/workshop</link>
-      <description>Red Hat OpenShift Application Delivery Workshop</description>
+      <description>Red Hat OpenShift Security &amp; Compliance Workshop</description>
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
@@ -17,7 +17,7 @@
     <description>Let&#39;s get familiar with our lab setup.</description>
     <pubDate>Thu, 22 Aug 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>ssh</category><category>novnc</category><category>workshop</category><category>setup</category>
   </item>
 
   <item>
@@ -27,17 +27,17 @@
     <description>You want features? Mirror them in!🪞</description>
     <pubDate>Fri, 23 Aug 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>oc-mirror</category><category>mirror-registry</category><category>openshift</category><category>disconnected</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise3</guid>
-    <title>Install operators</title>
+    <title>Install operators on a disconnected cluster</title>
     <link>https://rhdemo.win/workshop/exercise3</link>
     <description>Operators?!? 🤔 - Think app store for Kubernetes 🌟</description>
     <pubDate>Tue, 27 Aug 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>operators</category><category>operator-hub</category><category>disconnected</category>
   </item>
 
   <item>
@@ -47,7 +47,7 @@
     <description>Time to up our security &amp; compliance game! 🔒</description>
     <pubDate>Sat, 31 Aug 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>rhacs</category><category>container</category><category>security</category>
   </item>
 
   <item>
@@ -57,17 +57,27 @@
     <description>Let&#39;s check our cluster compliance against NIST 800-53 👀</description>
     <pubDate>Sun, 01 Sep 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>compliance</category><category>nist-800-53</category><category>scanning</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise6</guid>
     <title>Retrieving raw compliance results</title>
     <link>https://rhdemo.win/workshop/exercise6</link>
-    <description>Need to integrate results with another platform?</description>
+    <description>Need to integrate results with another platform? No problem!</description>
     <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>compliance</category><category>nist-800-53</category><category>scanning</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise7</guid>
+    <title>Bonus - Making the most of rhacs</title>
+    <link>https://rhdemo.win/workshop/exercise7</link>
+    <description>Optional challenge - if you have time</description>
+    <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>rhacs</category><category>container</category><category>security</category>
   </item>
 
   <item>
@@ -77,7 +87,7 @@
     <description>Upping our dx in a disconnected environment</description>
     <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category><category>disconnected</category>
+    <category>openshift</category><category>backstage</category><category>developer-hub</category><category>operator</category>
   </item>
 
     </channel>
