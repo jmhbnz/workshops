@@ -63,7 +63,7 @@
     "prettier": "^3.3.3",
     "prettier-plugin-tailwindcss": "^0.6.6",
     "socket.io": "^4.7.5",
-    "socket.io-client": "^4.7.5"
+    "socket.io-client": "^4.8.0"
   },
   "lint-staged": {
     "*.+(js|jsx|ts|tsx)": [
