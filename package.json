@@ -28,7 +28,7 @@
     "next": "^14.2.13",
     "next-themes": "^0.3.0",
     "postcss": "^8.4.47",
-    "preact": "^10.24.1",
+    "preact": "^10.24.3",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-medium-image-zoom": "^4.3.5",
