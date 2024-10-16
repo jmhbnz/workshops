@@ -21,3 +21,29 @@ Ultimately the ACME team wants to manage everything with GitOps, but for today A
 </Zoom>
 
 
+## 2.1 Installing the rhacs operator
+
+You’re in front of a screen together with the Web Console open. The first step of installing the operator should be easy, better get started!
+
+The only requirement Angie has requested for the Advanced Cluster Security operator installation is that all future operator updates must be approved **Manually**. She explains that several platform team members have PTSD from previous upgrades happening automatically and bringing down ACME's EFTPOS platform so now automatic updates are disabled everywhere.
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#install-acs-operator_install-central-ocp 
+
+
+## 2.2 Deploying central services
+
+With the operator installed and healthy we now need to deploy an instance of **Central** for Angie. This Central instance will provide the management interface, API and secure the full fleet of ACME’s OpenShift clusters along with some EKS clusters ACME are currently running in AWS.
+
+Angie has shared a high level design with you that states the Central services need to be deployed to the `prd-acme-rhacs` namespace.
+
+<Zoom>
+|![cluster](/static/images/security/central.png)                                | 
+|:-----------------------------------------------------------------------------:|
+| *Architecture for Red Hat Advanced Cluster Security*                          |
+</Zoom>
+
+
+
+
