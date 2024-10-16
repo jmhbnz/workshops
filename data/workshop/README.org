@@ -13,7 +13,6 @@ oc login --web https://api.cluster-wc9vg.wc9vg.sandbox1332.opentlc.com:6443
 
 * Update cluster logo
 
-
 #+begin_src tmux
 oc create configmap console-custom-logo --from-file=/home/james/Downloads/logo.png -n openshift-config
 
