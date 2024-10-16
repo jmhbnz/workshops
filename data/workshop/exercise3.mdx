@@ -1,0 +1,38 @@
+---
+title: Encrypting cluster internal network traffic
+exercise: 3
+date: '2024-10-18'
+tags: ['openshift','security','ipsec','encryption']
+draft: false
+authors: ['default']
+summary: ""
+---
+
+Day one with Angie done, after a refreshing break you're back on site with the ACME team for day two of the consulting engagement.
+
+Your first task is to address complaints from Brent in the ACME Security team who has done some initial cluster checks and is upset that OpenShift internal network traffic is currently un-encrypted and has been ever since their cluster was deployed! 
+
+Brent is pretty annoyed because the Red Hat sales team told him that OpenShift was "secure by default" so he wasn't expecting to see internal cluster traffic viewable in plain text between nodes in the cluster as this is a big no-no for the bank 🤬🙅
+
+You manage to talk him down by explaining how easily encryption can be turned on and how well OpenShift supports the feature. Whew. You note down to give some feedback to the local sales team to be more careful with the assurances they give.
+
+Turning on IPSec was already in the consulting engagement plan, you decide to make that top of your list to remediate for the morning.
+
+![brent](/static/images/security/brent.png)
+
+
+## 3.1 Encrypting internal cluster traffic
+
+With IPsec enabled, you can encrypt both internal pod-to-pod cluster traffic between nodes and external traffic between pods and IPsec endpoints external to your cluster. All pod-to-pod network traffic between nodes on the OVN-Kubernetes cluster network is encrypted with IPsec in Transport mode.
+
+Consulting further with Brent & Angie from the platform team you agree to update the high level design to enable IPSec for pod-to-pod traffic.
+
+<Zoom>
+|![ipsec architecture](/static/images/security/ipsec.png)                       | 
+|:-----------------------------------------------------------------------------:|
+| *Encryption implications when enabling pod-to-pod IPSec*                      |
+</Zoom>
+
+Documentation you may find helpful is:
+
+- https://docs.openshift.com/container-platform/4.16/networking/network_security/configuring-ipsec-ovn.html
