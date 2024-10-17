@@ -10,7 +10,7 @@ summary: ""
 
 IPSec was a quick job and the cluster is looking good after enabling it. Your afternoon job is to pair up with Angie again and review the vulnerability status of the ACME Financial Services workloads that are deployed on the cluster so far.
 
-Angie is really keen to tap into your knowledge on what she can do to make to the most of the Red Hat Advanced Cluster Security Platform.
+Angie is really keen to tap into your knowledge on what she can do to make to the most of the Red Hat Advanced Cluster Security Platform. This new security insight is something ACME have not really had access to historically for their container workloads.
 
 You're in a meeting room going over things together, so far so good.
 
@@ -21,6 +21,17 @@ You're looking over the **Vulnerability Management** > **Workload CVE's** > **Na
 
 You and Angie both spot it at the same time... 
 
+The core banking payments processor namespace `prd-acme-payments` is vulnerable to the critical log4j vulnerability 😱
+
 ![panic](/static/images/security/panik.png)
 
 
+## 4.2 What the %$^& do we do????
+
+In the minutes following the alarming discovery you listen in to a series of rushed conversations and Microsoft Skype for Business™ conversations between Angie and various security team members, service owners and incident management team members.
+
+A critical incident has been raised but at this point the consensus is the application simple cannot be turned off. It's a core component of the banks payments processing and must continue running.
+
+The ACME team now turn to you, seeking advice on how they could secure this existing vulnerable deployment in place, without scaling down the application, so that any attempt at exploiting the vulnerability would be automatically thwarted.
+
+The clocks ticking, how will you respond?
