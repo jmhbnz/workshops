@@ -1,0 +1,31 @@
+---
+title: Understanding cluster compliance
+exercise: 5
+date: '2024-10-23'
+tags: ['openshift','compliance','nist','rhacs']
+draft: false
+authors: ['default']
+summary: "Let's apply an industry benchmark!"
+---
+
+The first two days of the consulting engagement at ACME have whirled by. You're working remotely today for day three and are pairing up with Melissa from the banks compliance squad.
+
+On the agenda today is to harden the `acmd-prd-hub` cluster by understanding and remediating compliance against the [NIST 800-53 benchmark](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf).
+
+The bank must comply with this specific benchmark to meet the requirements of their regulation legislation known as APRA (ACME Penny Regulation Act, 1998).
+
+![meeting](/static/images/security/meeting.png)
+
+
+## 5.1 Installing the compliance operator
+
+You’re got an upcoming Microsoft Skype for Business™ video call with Melissa in 30 minutes to show her how compliant the cluster is currently.
+
+Time to quickly get the OpenShift Compliance Operator installed and run a scan via Red Hat Advanced Cluster Security. Better hurry!
+
+As with last time, to limit PTSD induced panic attacks among the ACME  platform team the operator must be set to update mode `Manual`.
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/security_and_compliance/compliance-operator#installing-compliance-operator-web-console_compliance-operator-installation
+
