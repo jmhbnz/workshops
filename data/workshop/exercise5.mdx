@@ -10,7 +10,7 @@ summary: "Let's apply an industry benchmark!"
 
 The first two days of the consulting engagement at ACME have whirled by. You're working remotely today for day three and are pairing up with Melissa from the banks compliance squad.
 
-On the agenda today is to harden the `acmd-prd-hub` cluster by understanding and remediating compliance against the [NIST 800-53 benchmark](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf).
+On the agenda today is to harden the `prd-acme-hub` cluster by understanding and remediating compliance against the [NIST 800-53 benchmark](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf).
 
 The bank must comply with this specific benchmark to meet the requirements of their regulation legislation known as APRA (ACME Penny Regulation Act, 1998).
 
@@ -28,4 +28,17 @@ As with last time, to limit PTSD induced panic attacks among the ACME  platform 
 Documentation you may find helpful is:
 
 - https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/security_and_compliance/compliance-operator#installing-compliance-operator-web-console_compliance-operator-installation
+
+
+## 5.2 Scheduling a compliance scan
+
+Operator installed it's time to join the virtual meeting with Melissa and step her through how to run a compliance scan against NIST 800-53 and visualise results using the Red Hat Advanced Cluster Security Dashboard.
+
+Create a new scan schedule named `prd-acme-hub-nist-daily` targeting the appropriate benchmarks.
+
+<Zoom>
+|![compliance report](/static/images/security/report.png)                       | 
+|:-----------------------------------------------------------------------------:|
+| *Viewing a compliance report in Red Hat Advanced Cluster Security*            |
+</Zoom>
 

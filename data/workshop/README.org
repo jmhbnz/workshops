@@ -8,7 +8,7 @@ This document captures the steps required to set up an instance of the workshop.
 * Log in to cluster
 
 #+begin_src tmux
-oc login --web https://api.cluster-dlljg.dlljg.sandbox1289.opentlc.com:6443
+oc login --web https://api.cluster-zwm4h.zwm4h.sandbox1572.opentlc.com:6443/
 #+end_src
 
 * Update cluster logo
