@@ -17,7 +17,7 @@ You're in a meeting room going over things together, so far so good.
 
 ## 4.1 Oh *$%# that is really bad
 
-You're looking over the **Vulnerability Management** > **Workload CVE's** > **Namespace View** together in the RHACS console.
+You're looking over the RHACS Dashboard together in the RHACS console.
 
 You and Angie both spot it at the same time... 
 
@@ -28,10 +28,23 @@ The core banking payments processor namespace `prd-acme-payments` is vulnerable 
 
 ## 4.2 What the %$^& do we do????
 
-In the minutes following the alarming discovery you listen in to a series of rushed conversations and Microsoft Skype for Business™ conversations between Angie and various security team members, service owners and incident management team members.
+In the minutes following the alarming discovery you observe a series of rushed conversations and Microsoft Skype for Business™ conversations between Angie and various security team members, service owners and incident management team members.
 
 A critical incident has been raised but at this point the consensus is the application simple cannot be turned off. It's a core component of the banks payments processing and must continue running.
 
 The ACME team now turn to you, seeking advice on how they could secure this existing vulnerable deployment in place, without scaling down the application, so that any attempt at exploiting the vulnerability would be automatically thwarted.
 
 The clocks ticking, how will you respond?
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html/operating/evaluate-security-risks#use-process-baselines_evaluate-security-risks
+
+
+## 4.3 - Check your work
+
+If you've successfully secured the banks vulnerable payments processor please post a message in `#event-anz-ocp-security-hackathon` with the message:
+
+> Please review [team name] solution for exercise 4, our payments processor application is now unhackable.
+
+This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score 🎉 
