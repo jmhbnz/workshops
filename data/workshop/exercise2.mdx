@@ -52,6 +52,8 @@ Documentation you may find helpful is:
 
 Alright, you've given Angie a quick tour around the Red Hat Advanced Cluster Security Console, now it's time to secure this hub cluster by generating an init bundle named `prd-acme-hub` and applying it to the cluster.
 
+You remember from the documentation that before you install the `SecuredCluster` resource on a cluster, you must create an init bundle. The cluster that has `SecuredCluster` resource then uses this bundle to authenticate with Central.
+
 Angie would prefer to use the **Operator** method for these tasks as she explains having repressed memories of trying to find indentation issues in helm chart templates and never ever wanting to touch helm ever again.
 
 <Zoom>
@@ -82,6 +84,8 @@ Documentation you may find helpful is:
 |:-----------------------------------------------------------------------------:|
 | *Secured cluster list in Red Hat Advanced Cluster Security*                   |
 </Zoom>
+
+> **Hint** If your SecuredCluster pods are in the right namespace and are not all starting successfully this can commonly occur because you have missed appending the `:443` to your central endpoint in the `SecuredCluster` resource.
 
 
 ## 2.5 - Check your work
