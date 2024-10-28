@@ -7,7 +7,7 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Thu, 26 Sep 2024 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Mon, 14 Oct 2024 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://rhdemo.win/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
@@ -15,9 +15,49 @@
     <title>Understanding our hackathon environment</title>
     <link>https://rhdemo.win/workshop/exercise1</link>
     <description>Let&#39;s get familiar with our hackathon setup.</description>
-    <pubDate>Thu, 26 Sep 2024 00:00:00 GMT</pubDate>
+    <pubDate>Mon, 14 Oct 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
     <category>openshift</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise2</guid>
+    <title>Laying the foundations for cluster security</title>
+    <link>https://rhdemo.win/workshop/exercise2</link>
+    <description>Can&#39;t have security without a security platform</description>
+    <pubDate>Thu, 17 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise3</guid>
+    <title>Encrypting cluster internal network traffic</title>
+    <link>https://rhdemo.win/workshop/exercise3</link>
+    <description>Is OpenShift secure by default?</description>
+    <pubDate>Fri, 18 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category><category>ipsec</category><category>encryption</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise4</guid>
+    <title>Securing vulnerable workloads</title>
+    <link>https://rhdemo.win/workshop/exercise4</link>
+    <description>How do we deal with vulnerable workloads we can&#39;t patch?</description>
+    <pubDate>Sat, 19 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category><category>cve management</category><category>rhacs</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise5</guid>
+    <title>Understanding cluster compliance</title>
+    <link>https://rhdemo.win/workshop/exercise5</link>
+    <description>Let&#39;s apply an industry benchmark!</description>
+    <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>compliance</category><category>nist</category><category>rhacs</category>
   </item>
 
     </channel>
