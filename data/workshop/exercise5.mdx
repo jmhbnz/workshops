@@ -17,11 +17,11 @@ The bank must comply with this specific benchmark to meet the requirements of th
 ![meeting](/static/images/security/meeting.png)
 
 
-## 5.1 Installing the compliance operator
+## 5.1 - Installing the compliance operator
 
 You’re got an upcoming Microsoft Skype for Business™ video call with Melissa in 30 minutes to show her how compliant the cluster is currently.
 
-Time to quickly get the OpenShift Compliance Operator installed and run a scan via Red Hat Advanced Cluster Security. Better hurry!
+Time to quickly get the [OpenShift Compliance Operator](https://docs.openshift.com/container-platform/4.16//security/compliance_operator/co-overview.html) installed and run a scan via Red Hat Advanced Cluster Security. Better hurry!
 
 As with last time, to limit PTSD induced panic attacks among the ACME  platform team the operator must be set to update mode `Manual`.
 
@@ -30,7 +30,7 @@ Documentation you may find helpful is:
 - https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/security_and_compliance/compliance-operator#installing-compliance-operator-web-console_compliance-operator-installation
 
 
-## 5.2 Scheduling a compliance scan
+## 5.2 - Scheduling a compliance scan
 
 Operator installed it's time to join the virtual meeting with Melissa and step her through how to run a compliance scan against NIST 800-53 and visualise results using the Red Hat Advanced Cluster Security Dashboard.
 
@@ -47,13 +47,16 @@ Documentation you may find helpful is:
 - https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html/operating/managing-compliance#scheduling-compliance-scans-and-assessing-profile-compliance
 
 
-## 5.3 Remediating a compliance issue
+## 5.3 - Remediating a compliance issue
 
-Scan finished you begin stepping through Melissa the individual results.
+Scan finished you begin stepping through Melissa the individual results, inspecting `ComplianceCheckResult` and `ComplianceRemediation` resources.
+
+To demonstrate to her how the compliance operator can make automated remediation of compliance issues easy you pick out the `ocp4-moderate-oauth-or-oauthclient-token-maxage` compliance remediation and apply it, then trigger a re-scan from the compliance operator to validate this issue is now remediated on the cluster.
+
 
 ## 5.4 - Check your work
 
-If you've successfully run the compliance scan and remediated the compliance issue please post an issue in `#event-anz-ocp-security-hackathon` with the message:
+If you've successfully run the compliance scan and remediated the compliance issue to show Melissa how things work please post an issue in `#event-anz-ocp-security-hackathon` with the message:
 
 > Please review [team name] solution for exercise 5, our cluster is now [percentage] compliant against NIST 800-53 at a cluster level.
 
