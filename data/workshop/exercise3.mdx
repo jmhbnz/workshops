@@ -38,7 +38,26 @@ Documentation you may find helpful is:
 - https://docs.openshift.com/container-platform/4.16/networking/network_security/configuring-ipsec-ovn.html
 
 
-## 3.2 - Check your work
+## 3.2 Observing cluster network rollout
+
+Your change window on the ACME cluster is 30 minutes for the cluster network update. You've advised the ACME team there could be some minor disruption to the cluster while the cluster network operator is progressing the update.
+
+The cluster network update can take around ten minutes to complete. Observe the progress of the operator using the **Administration** > **Cluster Settings** > **Cluster Operators** view.
+
+You can also verify ipsec status using the following command:
+
+```bash
+oc --namespace openshift-ovn-kubernetes rsh ovnkube-node-<XXXXX> ovn-nbctl --no-leader-only get nb_global . ipsec
+```
+
+<Zoom>
+|![cluster network](/static/images/security/cluster-network.png)                |
+|:-----------------------------------------------------------------------------:|
+| *Cluster operators administration*                                            |
+</Zoom>
+
+
+## 3.3 - Check your work
 
 If you've kept Brent happy by enabling encryption for internal cluster traffic please post a message in `#event-anz-ocp-security-hackathon` with the message:
 

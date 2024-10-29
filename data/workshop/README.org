@@ -27,6 +27,32 @@ spec:
       key: logo.png
       name: console-custom-logo
     customProductName: ACME Financial Services OpenShift Console
+  perspectives:
+    - id: admin
+      visibility:
+        state: Disabled
+    - id: dev
+      visibility:
+        state: Enabled
+EOF
+#+end_src
+
+* Add an interesting notification banner
+
+#+begin_src tmux
+cat << EOF | oc apply --filename -
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  name: acme-banner
+spec:
+  text: ACME Financial Services Production OpenShift
+  location: BannerTop
+  link:
+    href: 'https://www.youtube.com/watch?v=W31e9meX9S4'
+    text: Cluster Security Dashboard
+  color: '#fff'
+  backgroundColor: '#0000FF'
 EOF
 #+end_src
 
