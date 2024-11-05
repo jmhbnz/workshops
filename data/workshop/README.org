@@ -8,7 +8,7 @@ This document captures the steps required to set up an instance of the workshop.
 * Log in to cluster
 
 #+begin_src tmux
-oc login --web https://api.cluster-pnccw.pnccw.sandbox225.opentlc.com:6443/
+oc login --web https://api.cluster-bcfz8.bcfz8.sandbox1805.opentlc.com:6443
 #+end_src
 
 * Update cluster logo
@@ -121,4 +121,50 @@ spec:
 EOF
 
 oc adm policy add-scc-to-user privileged -z default -n prd-acme-payments
+#+end_src
+
+* Add spicy cluster users
+
+#+begin_src tmux
+# Create the namespace for the exercise
+oc new-project acme-prd-experimental
+
+# Retrive existing users htpasswd file
+oc get secret htpasswd -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ${HOME}/Downloads/users.htpasswd
+
+# Add additional users
+htpasswd -bB ${HOME}/Downloads/users.htpasswd specific-enhanced-ocelot admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd upset-benevolent-hacker admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd beaming-aggressive-squid admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd tame-threatening-otter admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd rebuked-placid-engineer admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd expert-invasive-meerkat admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd childish-shifty-caterpillar admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd silent-lively-heron admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd bountiful-soaked-crab admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd alienated-proud-snail admin
+
+# Replace the secret
+oc create secret generic htpasswd --from-file=htpasswd=${HOME}/Downloads/users.htpasswd --dry-run=client --output yaml --namespace openshift-config | oc replace --filename -
+
+# Login as a specified user
+oc login --username alienated-proud-snail --password admin
+oc login --username bountiful-soaked-crab --password admin
+oc login --username silent-lively-heron --password admin
+oc login --username childish-shifty-caterpillar --password admin
+oc login --username expert-invasive-meerkat --password admin
+oc login --username rebuked-placid-engineer --password admin
+oc login --username tame-threatening-otter --password admin
+oc login --username beaming-aggressive-squid --password admin
+oc login --username upset-benevolent-hacker --password admin
+oc login --username specific-enhanced-ocelot --password admin
+
+# Log back in as admin
+oc login --username admin
+
+# Grant user permission on project
+oc adm policy add-role-to-user admin childish-shifty-caterpillar --namespace prd-acme-experimental
+
+# Delete the namespace as a particular user
+oc delete project prd-acme-experimental --as childish-shifty-caterpillar
 #+end_src
