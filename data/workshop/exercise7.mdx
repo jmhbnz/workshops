@@ -1,0 +1,62 @@
+---
+title: Bonus challenge - Supply chain shmozzle
+exercise: 7
+date: '2024-11-08'
+tags: ['openshift','supply chain','rhtas']
+draft: false
+authors: ['default']
+summary: "Time to sign your life away..."
+---
+
+
+Whew - it's the last day of this weeks scheduled engagement 🥱. Tomorrow you're on leave to play the new Factorio Space Age expansion and you can't wait!
+
+Brushing aside thoughts of grandiose video game factories you review the task list for today. Top of the list is ironically a core component of software factories, addressing a supply chain security requirement from Brent about introducing capability to sign artifacts on premises.
+
+As part of the $5m AUD deal the sales team included [Red Hat Trusted Artifact Signer (RHTAS)](https://access.redhat.com/products/red-hat-trusted-artifact-signer) to enhance software supply chain security by simplifying cryptographic signing and verifying of software artifacts, such as container images, binaries, and Git commits.
+
+Brent is keen to get this up and running ASAP as the bank have planned to implement this capability for the prior 6 years in various forms, but always been "busy" with other things.
+
+Nothing to it but to do it!
+
+
+## 7.1 - Deploy the signing platform
+
+Brent's JIRA ticket explains that the signing platform should be deployed to the `prd-acme-rhtas` namespace on the production cluster.
+
+> **Note** Teams are free to use any OIDC provider from the options of Red Hat Single Sign-on (SSO), Google, Amazon Secure Token Service (STS), or GitHub.
+
+<Zoom>
+|![rhtas](/static/images/security/rhtas.png)                                    | 
+|:-----------------------------------------------------------------------------:|
+| *Installing the Red Hat Trusted Artifact Signer operator*                     |
+</Zoom>
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_trusted_artifact_signer/1/html-single/deployment_guide/index#installing-trusted-artifact-signer-using-the-operator-lifecycle-manager_deploy
+- https://developers.redhat.com/learning/learn:install-sign-verify-using-red-hat-trusted-artifact-signer/resource/resources:install-and-deploy-red-hat-trusted-artifact-signer
+
+
+## 7.2 - Sign a container image
+
+To test the platform out you join a quick call with Brent to walk him through how to sign a local container image with `cosign` and then inspect the hash in the Rekor web interface. 
+
+<Zoom>
+|![rekor](/static/images/security/rekor.png)                                    | 
+|:-----------------------------------------------------------------------------:|
+| *Searching for a record in Rekor*                                             |
+</Zoom>
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_trusted_artifact_signer/1/html-single/deployment_guide/index#signing-and-verifying-containers-by-using-cosign-from-the-command-line-interface_deploy
+
+
+## 7.3 - Check your work
+
+If you've successfully deployed a secure signing platform and showed Brent how it worked please post in `#event-anz-ocp-security-hackathon` with the message:
+
+> Please review [team name] solution for exercise 7, our Rekor record is <url>.
+
+This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score. Congratulations if you have reached this point you have completed the entire hackathon! 🎉 

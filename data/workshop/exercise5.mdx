@@ -10,7 +10,7 @@ summary: "Let's apply an industry benchmark!"
 
 The first two days of the consulting engagement at ACME have whirled by. You're working remotely today for day three and are pairing up with Melissa from the banks compliance squad.
 
-On the agenda today is to harden the `prd-acme-hub` cluster by understanding and remediating compliance against the [NIST 800-53 benchmark](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf).
+On the agenda today is to harden the `prd-acme-hub` cluster by understanding and remediating compliance against the [NIST 800-53 moderate benchmark](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf).
 
 The bank must comply with this specific benchmark to meet the requirements of their regulation legislation known as APRA (ACME Penny Regulation Act, 1998).
 
@@ -21,13 +21,13 @@ The bank must comply with this specific benchmark to meet the requirements of th
 
 You’re got an upcoming Microsoft Skype for Business™ video call with Melissa in 30 minutes to show her how compliant the cluster is currently.
 
-Time to quickly get the [OpenShift Compliance Operator](https://docs.openshift.com/container-platform/4.16//security/compliance_operator/co-overview.html) installed and run a scan via Red Hat Advanced Cluster Security. Better hurry!
+Time to quickly get the [OpenShift Compliance Operator](https://docs.openshift.com/container-platform/4.17//security/compliance_operator/co-overview.html) installed and run a scan via Red Hat Advanced Cluster Security. Better hurry!
 
 As with last time, to limit PTSD induced panic attacks among the ACME  platform team the operator must be set to update mode `Manual`.
 
 Documentation you may find helpful is:
 
-- https://docs.redhat.com/en/documentation/openshift_container_platform/4.16/html/security_and_compliance/compliance-operator#installing-compliance-operator-web-console_compliance-operator-installation
+- https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/security_and_compliance/compliance-operator#installing-compliance-operator-web-console_compliance-operator-installation
 
 
 ## 5.2 - Scheduling a compliance scan
@@ -55,14 +55,14 @@ To demonstrate to her how the compliance operator can make automated remediation
 
 Documentation you may find helpful is:
 
-- https://docs.openshift.com/container-platform/4.16//security/compliance_operator/co-scans/compliance-operator-remediation.html#compliance-applying_compliance-remediation
+- https://docs.openshift.com/container-platform/4.17//security/compliance_operator/co-scans/compliance-operator-remediation.html#compliance-applying_compliance-remediation
 
 
 ## 5.4 - Check your work
 
 If you've successfully run the compliance scan and remediated the compliance issue to show Melissa how things work please post in `#event-anz-ocp-security-hackathon` with the message:
 
-> Please review [team name] solution for exercise 5, our cluster is now [percentage] compliant against NIST 800-53 at a cluster level.
+> Please review [team name] solution for exercise 5, our cluster is now [percentage] compliant against NIST 800-53 moderate at a cluster level.
 
 This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score 🎉 
 
