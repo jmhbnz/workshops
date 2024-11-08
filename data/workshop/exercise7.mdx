@@ -11,7 +11,7 @@ summary: "Time to sign your life away..."
 
 Whew - it's the last day of this weeks scheduled engagement 🥱. Tomorrow you're on leave to play the new Factorio Space Age expansion and you can't wait!
 
-Brushing aside thoughts of grandiose video game factories you review the task list for today. Top of the list is ironically a core component of software factories, addressing a supply chain security requirement from Brent about introducing capability to sign artifacts on premises.
+Brushing aside thoughts of grandiose factories you review the task list for today. Top of the list is ironically a core component of [software factories](https://www.redhat.com/en/resources/benefits-building-software-factory-with-openshift-overview), addressing a supply chain security requirement from Brent about introducing capability to sign artifacts on premises and store this metadata in a secure tamper proof ledger.
 
 As part of the $5m AUD deal the sales team included [Red Hat Trusted Artifact Signer (RHTAS)](https://access.redhat.com/products/red-hat-trusted-artifact-signer) to enhance software supply chain security by simplifying cryptographic signing and verifying of software artifacts, such as container images, binaries, and Git commits.
 
@@ -24,7 +24,7 @@ Nothing to it but to do it!
 
 Brent's JIRA ticket explains that the signing platform should be deployed to the `prd-acme-rhtas` namespace on the production cluster.
 
-> **Note** Teams are free to use any OIDC provider from the options of Red Hat Single Sign-on (SSO), Google, Amazon Secure Token Service (STS), or GitHub.
+> **Note** Teams are free to use any OIDC provider from the options of Red Hat Single Sign-on (SSO), Google, Amazon Secure Token Service (STS), or GitHub. Think carefully which option you pick as this will impact how long it takes to complete the exercise...
 
 <Zoom>
 |![rhtas](/static/images/security/rhtas.png)                                    | 
@@ -40,7 +40,7 @@ Documentation you may find helpful is:
 
 ## 7.2 - Sign a container image
 
-To test the platform out you join a quick call with Brent to walk him through how to sign a local container image with `cosign` and then inspect the hash in the Rekor web interface. 
+To test the platform out you join a quick call with Brent to walk him through how to sign a local container image with `cosign` and then inspect the hash in the Rekor immutable ledger web interface. 
 
 <Zoom>
 |![rekor](/static/images/security/rekor.png)                                    | 

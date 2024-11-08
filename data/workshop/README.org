@@ -146,7 +146,7 @@ htpasswd -bB ${HOME}/Downloads/users.htpasswd alienated-proud-snail admin
 
 # Replace the secret
 oc create secret generic htpasswd --from-file=htpasswd=${HOME}/Downloads/users.htpasswd --dry-run=client --output yaml --namespace openshift-config | oc replace --filename -
-sleep 10
+sleep 20
 
 # Login as a specified user
 oc login --username alienated-proud-snail --password admin
