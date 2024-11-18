@@ -60,5 +60,25 @@
     <category>openshift</category><category>compliance</category><category>nist</category><category>rhacs</category>
   </item>
 
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise6</guid>
+    <title>Inspecting audit logs</title>
+    <link>https://rhdemo.win/workshop/exercise6</link>
+    <description>Ahh the classic who dunnit!?!??</description>
+    <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>audit</category><category>logging</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise7</guid>
+    <title>Bonus challenge - Supply chain shmozzle</title>
+    <link>https://rhdemo.win/workshop/exercise7</link>
+    <description>Time to sign your life away...</description>
+    <pubDate>Fri, 08 Nov 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>supply chain</category><category>rhtas</category>
+  </item>
+
     </channel>
   </rss>
