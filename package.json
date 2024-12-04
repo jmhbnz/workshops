@@ -28,7 +28,7 @@
     "next": "^15.0.3",
     "next-themes": "^0.4.3",
     "postcss": "^8.4.49",
-    "preact": "^10.25.0",
+    "preact": "^10.25.1",
     "react": "18.3.1",
     "react-dom": "18.3.1",
     "react-medium-image-zoom": "^4.3.5",
@@ -43,7 +43,7 @@
     "remark-gfm": "^3.0.1",
     "remark-math": "^6.0.0",
     "sharp": "^0.33.5",
-    "tailwindcss": "^3.4.15",
+    "tailwindcss": "^3.4.16",
     "unist-util-visit": "^5.0.0"
   },
   "devDependencies": {
@@ -60,7 +60,7 @@
     "inquirer": "^12.1.0",
     "lint-staged": "^15.2.10",
     "next-remote-watch": "^2.0.0",
-    "prettier": "^3.4.1",
+    "prettier": "^3.4.2",
     "prettier-plugin-tailwindcss": "^0.6.9",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1"
