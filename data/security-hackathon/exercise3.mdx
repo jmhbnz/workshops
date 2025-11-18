@@ -1,0 +1,66 @@
+---
+title: Encrypting cluster internal network traffic
+exercise: 3
+date: '2024-10-18'
+tags: ['openshift','security','ipsec','encryption']
+draft: false
+authors: ['default']
+summary: "Is OpenShift secure by default?"
+---
+
+Day one with Angie went great. After a refreshing overnight break spent watching the cinematic masterpiece of Shrek 2 you're back on site with the ACME team for day two of the consulting engagement.
+
+Your first task is to address a complaint from Brent in the ACME Security team who has done some initial cluster security checks to get a baseline. Brent is upset that OpenShift internal network traffic is currently un-encrypted and has been ever since their cluster was deployed! 
+
+Brent is pretty annoyed because the Red Hat sales team told him that OpenShift was **"secure by default"** so he wasn't expecting to see internal cluster traffic viewable in plain text between nodes in the cluster as this is a big no-no for the bank 🤬🙅
+
+You manage to talk him down by explaining how easily encryption can be turned on and how well OpenShift supports the feature. Whew. You note down to give some feedback to the local sales team to be more careful with the assurances they give.
+
+You decide to make enabling encryption top of your list for the morning to try and keep Brent happy.
+
+![brent](/static/images/security/brent.png)
+
+
+## 3.1 - Encrypting internal cluster traffic
+
+With IPsec enabled, you can encrypt internal pod-to-pod cluster traffic on the OVN-Kubernetes cluster network between nodes.
+
+You confirm the required mode with Angie & Brent as `Full` and then run the `oc patch` command to get the job done after giving Angie a heads up there will be some brief disruption on the cluster while the change is rolled out.
+
+<Zoom>
+|![ipsec architecture](/static/images/security/ipsec.png)                       | 
+|:-----------------------------------------------------------------------------:|
+| *Encryption implications when enabling pod-to-pod IPSec*                      |
+</Zoom>
+
+Documentation you may find helpful is:
+
+- https://docs.openshift.com/container-platform/4.17/networking/network_security/configuring-ipsec-ovn.html
+
+
+## 3.2 - Observing cluster network rollout
+
+Your change window on the ACME cluster is 30 minutes for the cluster network update. You've advised the ACME team there could be some minor disruption to the cluster while the cluster network operator is progressing the update.
+
+The cluster network update can take around ten minutes to complete. Observe the progress of the operator using the **Administration** > **Cluster Settings** > **Cluster Operators** view.
+
+You can also verify ipsec status using the following command:
+
+```bash
+oc --namespace openshift-ovn-kubernetes rsh ovnkube-node-<XXXXX> ovn-nbctl --no-leader-only get nb_global . ipsec
+```
+
+<Zoom>
+|![cluster network](/static/images/security/cluster-network.png)                |
+|:-----------------------------------------------------------------------------:|
+| *Cluster operators administration*                                            |
+</Zoom>
+
+
+## 3.3 - Check your work
+
+If you've kept Brent happy by enabling encryption for internal cluster traffic please post in `#event-anz-ocp-security-hackathon` with the message:
+
+> Please review [team name] solution for exercise 3, our cluster internal traffic is now encrypted with cipher [cipher].
+
+This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score 🎉 

@@ -1,62 +1,90 @@
 ---
-title: Bonus challenge - Supply chain shmozzle
+title: Optional - Deploying an application via gitops
 exercise: 7
-date: '2024-11-08'
-tags: ['openshift','supply chain','rhtas']
+date: '2024-07-25'
+tags: ['openshift','containers','kubernetes','argocd','gitops']
 draft: false
 authors: ['default']
-summary: "Time to sign your life away..."
+summary: "Keen to explore a more advanced deployment pattern?"
 ---
+  
 
+Now that you've had a taste of most of the more basic deployment methods let's introduce the concept of [GitOps](https://www.redhat.com/en/topics/devops/what-is-gitops) and deploy an application using this more advanced approach.
 
-Whew - it's the last day of this weeks scheduled engagement 🥱. Tomorrow you're on leave to play the new Factorio Space Age expansion and you can't wait!
-
-Brushing aside thoughts of grandiose factories you review the task list for today. Top of the list is ironically a core component of [software factories](https://www.redhat.com/en/resources/benefits-building-software-factory-with-openshift-overview), addressing a supply chain security requirement from Brent about introducing capability to sign artifacts on premises and store this metadata in a secure tamper proof ledger.
-
-As part of the $5m AUD deal the sales team included [Red Hat Trusted Artifact Signer (RHTAS)](https://access.redhat.com/products/red-hat-trusted-artifact-signer) to enhance software supply chain security by simplifying cryptographic signing and verifying of software artifacts, such as container images, binaries, and Git commits.
-
-Brent is keen to get this up and running ASAP as the bank have planned to implement this capability for the prior 6 years in various forms, but always been "busy" with other things.
-
-Nothing to it but to do it!
-
-
-## 7.1 - Deploy the signing platform
-
-Brent's JIRA ticket explains that the signing platform should be deployed to the `prd-acme-rhtas` namespace on the production cluster.
-
-> **Note** Teams are free to use any OIDC provider from the options of Red Hat Single Sign-on (SSO), Google, Amazon Secure Token Service (STS), or GitHub. Think carefully which option you pick as this will impact how long it takes to complete the exercise...
+In simple terms GitOps uses Git repositories as a single source of truth to deliver applications or infrastructure as code. Whenever you merge or push code into a specifc Git branch in a repository, an GitOps continuous delivery tool such as [ArgoCD](https://argo-cd.readthedocs.io/en/stable) can then automatically sync that to one or more Kubernetes clusters.
 
 <Zoom>
-|![rhtas](/static/images/security/rhtas.png)                                    | 
-|:-----------------------------------------------------------------------------:|
-| *Installing the Red Hat Trusted Artifact Signer operator*                     |
+|![argocd](/static/images/argocd-ui.gif)                              |
+|:-------------------------------------------------------------------:|
+| *ArgoCD user interface*                                             |
 </Zoom>
 
-Documentation you may find helpful is:
+For many organisations GitOps is a goal deployment methodology as application definitions, configurations, and environments should ideally be declarative and version controlled. Application deployment and lifecycle management should be automated, auditable, and easy to understand.
 
-- https://docs.redhat.com/en/documentation/red_hat_trusted_artifact_signer/1/html-single/deployment_guide/index#installing-trusted-artifact-signer-using-the-operator-lifecycle-manager_deploy
-- https://developers.redhat.com/learning/learn:install-sign-verify-using-red-hat-trusted-artifact-signer/resource/resources:install-and-deploy-red-hat-trusted-artifact-signer
+Since 2021 OpenShift has included a fully supported [OpenShift GitOps](https://www.redhat.com/en/blog/announcing-openshift-gitops) operator, based on the upstream ArgoCD project.
 
+This operator has already been installed on your cluster so let's take it for a spin now! 🚀
 
-## 7.2 - Sign a container image
+## 7.1 - Deploy openshift gitops
 
-To test the platform out you join a quick call with Brent to walk him through how to sign a local container image with `cosign` and then inspect the hash in the Rekor immutable ledger web interface. 
+To get started with OpenShift GitOps we will need an instance of ArgoCD deployed.
+
+Click the **+** button in the top right corner menu bar of the OpenShift web console. This is a fast way to quickly import snippets of YAML for testing or exploration purposes.
+
+Paste the below snippet of YAML into the editor and replace the instance of `userX` with your assigned user.
+
+Click **Create**. In a minute or so you should see the ArgoCD instance running successfully in your project.
+
+```bash
+apiVersion: argoproj.io/v1beta1
+kind: ArgoCD
+metadata:
+  finalizers:
+  - argoproj.io/finalizer
+  name: argocd
+  namespace: userX
+spec:
+  rbac:
+    defaultPolicy: role:admin
+    scopes: '[groups]' 
+  server:
+    route:
+      enabled: true
+  sso:
+    dex:
+      openShiftOAuth: true
+    provider: dex
+```
+
+## 7.2 Login to argocd
+
+With ArgoCD running let's open the route in a new tab in our browser and click **Log in with OpenShift**.  You can retrieve the ~Route~ by running the following command in your web terminal:
+
+```bash
+oc get route argocd-server
+```
 
 <Zoom>
-|![rekor](/static/images/security/rekor.png)                                    | 
-|:-----------------------------------------------------------------------------:|
-| *Searching for a record in Rekor*                                             |
+|![argocd login](/static/images/argocd-login.png)                     |
+|:-------------------------------------------------------------------:|
+| *ArgoCD login*                                                      |
 </Zoom>
 
-Documentation you may find helpful is:
+## 7.3 Deploy an application
 
-- https://docs.redhat.com/en/documentation/red_hat_trusted_artifact_signer/1/html-single/deployment_guide/index#signing-and-verifying-containers-by-using-cosign-from-the-command-line-interface_deploy
+Now that you're logged into ArgoCD, have a go at creating a new `Application` using the ArgoCD web interface by clicking **+ New App**. The workload we'll deploy is a new mission critical training simulator called "Quake 3 Arena".
 
+Use the following values for your Application:
 
-## 7.3 - Check your work
+|Field|Value|
+|-----|-----|
+|Name |`quake`|
+|Project|`default`|
+|Repository URL|`https://github.com/jmhbnz/workshops`|
+|Path|`data/app-delivery`|
+|Cluster URL| `https://kubernetes.default.svc`|
+|Namespace|`userX`|
 
-If you've successfully deployed a secure signing platform and showed Brent how it worked please post in `#event-anz-ocp-security-hackathon` with the message:
+## 7.4 Access the mission critical simulator - challenge
 
-> Please review [team name] solution for exercise 7, our Rekor record is [url].
-
-This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score. Congratulations if you have reached this point you have completed the entire hackathon! 🎉 
+Your final challenge for this exercise is to access the mission critical training simulator by creating a `Route`.

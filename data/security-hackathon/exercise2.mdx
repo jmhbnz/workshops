@@ -1,0 +1,99 @@
+---
+title: Laying the foundations for cluster security
+exercise: 2
+date: '2024-10-17'
+tags: ['openshift','security']
+draft: false
+authors: ['default']
+summary: "Can't have security without a security platform"
+---
+
+It’s your first day of the consulting engagement with ACME. You’ve paired up with one of their Senior Platform Engineers Angie who has just given you a tour of their newly deployed OpenShift cluster which is looking healthy 🥦 (whew!) .
+
+Time to tackle the first task on our consulting engagement list, installing [Red Hat Advanced Cluster Security](https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index) via the operator.
+
+Ultimately the ACME team wants to manage everything with GitOps, but for today Angie would prefer a guided walkthrough on how to do things using the OpenShift Web Console so she has an opportunity to learn more about each step of the process.
+
+![cluster](/static/images/security/pairing.png)
+
+
+## 2.1 - Installing the rhacs operator
+
+You’re in front of a screen together with the Web Console open. The first step of installing the operator should be easy, better get started!
+
+The only requirement Angie has requested for the Advanced Cluster Security operator installation is that all future operator updates must be approved **Manually**. She explains that several platform team members have PTSD from previous upgrades happening automatically and bringing down ACME's EFTPOS platform so now automatic updates are disabled everywhere.
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#install-acs-operator_install-central-ocp 
+
+
+## 2.2 - Deploying central services
+
+With the operator installed and healthy we now need to deploy an instance of **Central** for Angie. This Central instance will provide the management interface, API and secure the full fleet of ACME’s OpenShift clusters along with some EKS clusters ACME are currently running in AWS.
+
+Angie has shared a high level design with you that states the Central resources need to be deployed to the `prd-acme-rhacs` namespace.
+
+<Zoom>
+|![central architecture](/static/images/security/central.png)                   | 
+|:-----------------------------------------------------------------------------:|
+| *Architecture for Red Hat Advanced Cluster Security*                          |
+</Zoom>
+
+After deploying Central ensure you can log in to the web console using the automatically generated credentials.
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#install-central-operator_install-central-ocp
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#verify-central-install-operator_install-central-ocp
+
+
+## 2.3 - Generating an init bundle
+
+Alright, you've given Angie a quick tour around the Red Hat Advanced Cluster Security Console, now it's time to secure this hub cluster by generating an init bundle named `prd-acme-hub`.
+
+You remember from the documentation that before you install the `SecuredCluster` resource on a cluster, you must create an init bundle. The cluster that has `SecuredCluster` resource then uses this bundle to authenticate with Central.
+
+Angie would prefer to use the **Operator** method for these tasks as she explains having repressed memories of trying to find indentation issues in helm chart templates and never ever wanting to touch helm ever again.
+
+<Zoom>
+|![cluster](/static/images/security/init-bundle.png)                            | 
+|:-----------------------------------------------------------------------------:|
+| *Create an init bundle in Red Hat Advanced Cluster Security*                  |
+</Zoom>
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#portal-generate-init-bundle_init-bundle-ocp
+
+
+## 2.4 - Securing the hub cluster
+
+The pair session is going well, Angie is impressed how quickly you got to this point. You now have the init bundle downloaded and explain to her that you just need to import it on the cluster and create the `SecuredCluster` resource to finish the process.
+
+Consulting the high level design she lets you know the init bundle and `SecuredCluster` resources need to be deployed to the `prd-acme-secured` namespace, with the cluster being named `prd-acme-hub` within RHACS.
+
+Reading further in the design Angie points out that the **Contact Image Scanners** setting should be set to `ScanIfMissing` as this makes the admission control process more secure by ensuring all images are scanned before they can be admitted to the cluster.
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#installing-sc-operator
+
+<Zoom>
+|![secured cluster](/static/images/security/secured-cluster.png)                | 
+|:-----------------------------------------------------------------------------:|
+| *Secured cluster list in Red Hat Advanced Cluster Security*                   |
+</Zoom>
+
+> **Hint** If your SecuredCluster pods are in the right namespace and are not all starting successfully this can commonly occur because you have missed appending the `:443` to your central endpoint in the `SecuredCluster` resource.
+
+
+## 2.5 - Check your work
+
+If your pair session with Angie has finished and the hub cluster is secured please post in `#event-anz-ocp-security-hackathon` with the message:
+
+> Please review [team name] solution for exercise 2, we have laid the foundations for cluster security.
+
+This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score 🎉 
+
+![completed pair session](/static/images/security/completed.png)

@@ -1,68 +1,136 @@
 ---
-title: Understanding cluster compliance
+title: Deploying an application via operator
 exercise: 5
-date: '2024-10-23'
-tags: ['openshift','compliance','nist','rhacs']
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','operator-framework']
 draft: false
 authors: ['default']
-summary: "Let's apply an industry benchmark!"
+summary: "Exploring alternative deployment approaches."
 ---
 
-The first two days of the consulting engagement at ACME have whirled by. You're working remotely today for day three and are pairing up with Melissa from the banks compliance squad.
+Another alternative approach for deploying and managing the lifecycle of more complex applications is via the [Operator Framework](https://operatorframework.io).
 
-On the agenda today is to harden the `prd-acme-hub` cluster by understanding and remediating compliance against the [NIST 800-53 moderate benchmark](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-53r5.pdf).
+The goal of an **Operator** is to put operational knowledge into software. Previously this knowledge only resided in the minds of administrators, various combinations of shell scripts or automation software like Ansible. It was outside of your Kubernetes cluster and hard to integrate. **Operators** change that.
 
-The bank must comply with this specific benchmark to meet the requirements of their regulation legislation known as APRA (ACME Penny Regulation Act, 1998).
+**Operators** are the missing piece of the puzzle in Kubernetes to implement and automate common Day-1 (installation, configuration, etc.) and Day-2 (re-configuration, update, backup, failover, restore, etc.) activities in a piece of software running inside your Kubernetes cluster, by integrating natively with Kubernetes concepts and APIs.
 
-![meeting](/static/images/security/meeting.png)
+With Operators you can stop treating an application as a collection␃of primitives like **Pods**, **Deployments**, **Services** or **ConfigMaps**, but instead as a singular, simplified custom object that only exposes the specific configuration values that make sense for the specific application.
 
+## 5.1 - Deploying an operator
 
-## 5.1 - Installing the compliance operator
+Deploying an application via an **Operator** is generally a two step process. The first step is to deploy the **Operator** itself.
 
-You’re got an upcoming Microsoft Skype for Business™ video call with Melissa in 30 minutes to show her how compliant the cluster is currently.
+Once the **Operator** is installed we can deploy the application.
 
-Time to quickly get the [OpenShift Compliance Operator](https://docs.openshift.com/container-platform/4.17//security/compliance_operator/co-overview.html) installed and run a scan via Red Hat Advanced Cluster Security. Better hurry!
+For this exercise we will install the **Operator** for the [Grafana](https://grafana.com) observability platform.
 
-As with last time, to limit PTSD induced panic attacks among the ACME  platform team the operator must be set to update mode `Manual`.
+Let's start in the **Topology** view of the **Developer** perspective.
 
-Documentation you may find helpful is:
+Copy the following YAML snippet to your clipboard:
 
-- https://docs.redhat.com/en/documentation/openshift_container_platform/4.17/html/security_and_compliance/compliance-operator#installing-compliance-operator-web-console_compliance-operator-installation
+```yaml
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: grafana-operator
+  namespace: userX
+spec:
+  channel: v5
+  installPlanApproval: Automatic
+  name: grafana-operator
+  source: community-operators
+  sourceNamespace: openshift-marketplace
+```
 
+Click the **+** button in the top right corner menu bar of the OpenShift web console. This is a fast way to quickly import snippets of YAML for testing or exploration purposes.
 
-## 5.2 - Scheduling a compliance scan
+Paste the above snippet of YAML into the editor and replace the instance of `userX` with your assigned user.
 
-Operator installed it's time to join the virtual meeting with Melissa and step her through how to run a compliance scan against NIST 800-53 moderate and visualise results using the Red Hat Advanced Cluster Security Dashboard.
-
-Create a new scan schedule named `prd-acme-hub-nist-daily` targeting the appropriate benchmarks.
+Click **Create**. In a minute or so you should see the Grafana operator installed and running in your project.
 
 <Zoom>
-|![compliance report](/static/images/security/report.png)                       | 
-|:-----------------------------------------------------------------------------:|
-| *Viewing a compliance report in Red Hat Advanced Cluster Security*            |
+|![operator-deployment](/static/images/operator-deployment.gif)       |
+|:-------------------------------------------------------------------:|
+| *Deploying grafana operator via static yaml*                        |
 </Zoom>
 
-Documentation you may find helpful is:
+## 5.2 - Deploying an operator driven application
 
-- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html/operating/managing-compliance#scheduling-compliance-scans-and-assessing-profile-compliance
+With our Grafana operator now running it will be listening for the creation of a `grafana` custom resource. When one is detected the operator will deploy the Grafana application according to the specifcation we supplied.
 
+Let's switch over to the **Administrator** perspective for this next task to deploy our Grafana instance.
 
-## 5.3 - Remediating a compliance issue
+Under the **Operators** category in the left hand menu click on **Installed Operators**.
 
-Scan finished you begin stepping through Melissa the individual results, inspecting `ComplianceCheckResult` and `ComplianceRemediation` resources.
+In the **Installed Operators** list you should see a **Grafana Operator** entry, click into that.
 
-To demonstrate to her how the compliance operator can make automated remediation of compliance issues easy you pick out the `ocp4-moderate-oauth-or-oauthclient-token-maxage` compliance remediation and apply it, then trigger a re-scan from the compliance operator to validate this issue is now remediated on the cluster.
+On the **Operator details** screen you will see a list of "Provided APIs". These are custom resource types that we can now deploy with the help of the operator.
 
-Documentation you may find helpful is:
+Click on **Create instance** under the provided API titled `Grafana`.
 
-- https://docs.openshift.com/container-platform/4.17//security/compliance_operator/co-scans/compliance-operator-remediation.html#compliance-applying_compliance-remediation
+On the next **Create Grafana** screen click on **YAML View** radio button and enter the following, replacing the two instances of `userX` with your assigned user then click **Create**.
 
+```yaml
+apiVersion: grafana.integreatly.org/v1beta1
+kind: Grafana
+metadata:
+  labels:
+    dashboards: grafana
+    folders: grafana
+  name: grafana
+  namespace: userX
+spec:
+  config:
+    auth:
+      disable_login_form: 'false'
+    log:
+      mode: console
+    security:
+      admin_password: example
+      admin_user: example
+  route:
+    spec:
+      tls:
+        termination: edge
+      host: grafana-userX.apps.cluster-xxz98.xxz98.sandbox619.opentlc.com
+```
 
-## 5.4 - Check your work
+<Zoom>
+|![grafana-deployment](/static/images/grafana-deployment.gif)         |
+|:-------------------------------------------------------------------:|
+| *Deploying grafana application via the grafana operator*            |
+</Zoom>
 
-If you've successfully run the compliance scan and remediated the compliance issue to show Melissa how things work please post in `#event-anz-ocp-security-hackathon` with the message:
+## 5.3 Logging into the application
 
-> Please review [team name] solution for exercise 5, our cluster is now [percentage] compliant against NIST 800-53 moderate at a cluster level.
+While we are in the **Administrator** perspective of the web console let's take a look at a couple of sections to confirm our newly deployed Grafana application is running as expected.
 
-This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score 🎉 
+For our first step click on the **Workloads** category on the left hand side menu and then click **Pods**.
 
+We should see that a `grafana-deployment-<id>` pod with a **Status** of `Running`.
+
+<Zoom>
+|![grafana-pod](/static/images/grafana-pod.png)                       |
+|:-------------------------------------------------------------------:|
+| *Confirming the grafana pod is running*                             |
+</Zoom>
+
+Now that we know the Grafana application **Pod** is running let's open the application and confirm we can log in.
+
+Click the **Networking** category on the left hand side menu and then click **Routes**.
+
+Click the **Route** named `grafana-route` and open the url on the right hand side under the **Location** header.
+
+Once the new tab opens we should be able to login to Grafana using the credentials we supplied in the previous step in the YAML configuration.
+
+<Zoom>
+|![grafana-route](/static/images/grafana-route.gif) | 
+|:-------------------------------------------------------------------:|
+| *Confirming the grafana route is working*                           |
+</Zoom>
+
+## 5.4 - Bonus objective: Grafana dashboards
+
+If you have time, take a while to learn about the https://grafana.com/grafana/dashboards and how Grafana can be used to visualise just about anything.
+
+Well done, you've finished exercise 5! 🎉

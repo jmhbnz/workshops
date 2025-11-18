@@ -1,55 +1,133 @@
 ---
-title: Securing vulnerable workloads
+title: Deploying an application via helm chart
 exercise: 4
-date: '2024-10-19'
-tags: ['openshift','security','cve management','rhacs']
+date: '2023-12-06'
+tags: ['openshift','containers','kubernetes','deployments','helm']
 draft: false
 authors: ['default']
-summary: "How do we deal with vulnerable workloads we can't patch?"
+summary: "Exploring alternative deployment approaches."
 ---
 
-IPSec was a quick job and the cluster is looking good after enabling it. Your afternoon job is to pair up with Angie again and review the vulnerability status of the ACME Financial Services workloads that are deployed on the cluster so far.
+In **Exercise 2** we deployed our ParksMap application in the most simplistic way. Just throwing an individual container image at the cluster via the web console and letting OpenShift automate everything else for us.
 
-Angie is really keen to tap into your knowledge on what she can do to make to the most of the Red Hat Advanced Cluster Security Platform. This new security insight is something ACME have not really had access to historically for their container workloads.
+With more complex applications comes the need to more finely customise the details of our application **Deployments** along with any other associated resources the application requires.
 
-You're in a meeting room going over things together, so far so good.
+Enter the [**Helm**](https://www.redhat.com/en/topics/devops/what-is-helm) project, which can package up our application resources and distribute them as something called a **Helm chart**.
 
+In simple terms, a **Helm chart** is basically a directory containing a collection of YAML template files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
 
-## 4.1 - Ruh roh...
+## 4.1 - Deploying a helm chart via the web console 
 
-You're looking over the RHACS Dashboard together in the RHACS console.
+It is common for organisations that produce and ship applications to provide their applications to organisations as a **Helm chart**.
 
-You and Angie both spot it at the same time... 
+Let's get started by deploying a **Helm chart** for the [Gitea](https://about.gitea.com) application which is a git oriented devops platform similar to GitHub or GitLab.
 
-The core banking payments processor namespace `prd-acme-payments` is vulnerable to the critical log4shell vulnerability 😱
+Start in the **+Add** view of the **Developer** perspective.
 
-![panic](/static/images/security/panik.png)
+Scroll down and click the **Helm chart** tile. OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
 
+Click on the search result and click **Create**.
 
-## 4.2 - What the %$^& do we do????
+In the YAML configuration window enter the following, substituting `userX` with your assigned user and then click **Create** once more.
 
-In the minutes following the alarming discovery you observe a series of rushed conversations and Microsoft Skype for Business™ chats between Angie and various security team members, service owners and incident management team members.
+```yaml
+db:
+  password: userX
+hostname: userX-gitea.apps.cluster-xxz98.xxz98.sandbox619.opentlc.com
+tlsRoute: true
+```
 
-A critical incident has been raised but at this point the consensus is the application simple cannot be turned off. It's a core component of the banks payments processing and must continue running.
+<Zoom>
+|![gitea-deployment](/static/images/gitea-deployment.gif)             |
+|:-------------------------------------------------------------------:|
+| *Gitea application deployment via helm chart*                       |
+</Zoom>
 
-The ACME team now turn to you, seeking advice on how they could secure this existing vulnerable deployment in place, without scaling down the application, so that any attempt at exploiting the vulnerability would be automatically thwarted.
+## 4.2 - Examine deployed application
 
-The clocks ticking, how will you respond?
+Returning to the **Topology** view of the **Developer** perspective you will now see the Gitea application being deployed in your `userX` project (this can take a few minutes to complete). Notice how the application is made up of two separate pods, the `gitea-db` database and the `gitea` frontend web server.
 
-Documentation you may find helpful is:
+Once your gitea pods are both running open the **Route** for the `gitea` web frontend and confirm you can see the application web interface.
 
-- https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html/operating/evaluate-security-risks#use-process-baselines_evaluate-security-risks
+Next, if we click on the overall gitea **Helm release** by clicking on the shaded box surrounding our two Gitea pods we can see the full list of resources deployed by this helm chart, which in addition to the two running pods includes the following:
 
+- 1 **ConfigMap**
+- 1 **ImageStream**
+- 2 **PersistentVolumeClaims**
+- 1 **Route**
+- 1 **Secret**
+- 2 **Services**
 
-## 4.3 - Check your work
+> Note: Feel free to try out a `oc explain <resource>` command in your web terminal to learn more about each of the resource types mentioned above, for example `oc explain service`.
 
-If you've successfully secured the banks vulnerable payments processor please post in `#event-anz-ocp-security-hackathon` with the message:
+<Zoom>
+|![helm-resources](/static/images/helm-resources.png)                 |
+|:-------------------------------------------------------------------:|
+| *Gitea helm release resources created*                              |
+</Zoom>
 
-> Please review [team name] solution for exercise 4, our payments processor application is now unhackable.
+## 4.3 - Upgrade helm chart
 
-**WARNING: The hackathon team will perform a brief penetration test of the application. If your application is not actually secured and remains exploitable by the log4shell vulnerability one of your OpenShift cluster nodes will be deleted for the lulz. No pressure!**
+If we want to make a change to the configuration of our Gitea application we can perform a `helm upgrade`. OpenShift has built in support to perform helm upgrades through the web console.
 
-This exercise is worth `25` points. The event team will reply in slack to confirm your updated team total score 🎉 
+Start in the **Helm** view of the **Developer** perspective.
 
-![safe](/static/images/security/hack-prevented.png)
+In the **Helm Releases** tab you should see one release called `gitea`.
 
+Click the three dot menu to the right hand side of the that helm release and click **Upgrade**.
+
+Now let's intentionally modify the `hostname:` field in the yaml configuration to `hostname: bogushostname.example.com` and click **Upgrade**.
+
+We will be returned to the **Helm releases** view. Notice how the release status is now Failed (due to our bogus configuration), however the previous release of the application is still running. OpenShift has validated the helm release, determined the updates will not work, and prevented the release from proceeding.
+
+From here it is trivial to perform a **Rollback** to remove our misconfigured update. We'll do that in the next step.
+
+<Zoom>
+|![helm-upgrade](/static/images/helm-upgrade.gif)                     |
+|:-------------------------------------------------------------------:|
+| *Attempting a gitea helm upgrade*                                   |
+</Zoom>
+
+## 4.4 - Rollback to a previous helm release
+
+Our previous helm upgrade for the Gitea application didn't succeed due to the misconfiguration we supplied. **Helm** has features for rolling back to a previous release through the `helm rollback` command line interface. OpenShift has made this even easier by adding native support for interactive rollbacks in the OpenShift web console so let's give that a go now.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Rollback**.
+
+Select the radio button for revision `1` which should be showing a status of `Deployed`, then click **Rollback**.
+
+<Zoom>
+|![helm-rollback](/static/images/helm-rollback.gif)                   |
+|:-------------------------------------------------------------------:|
+| *Rolling back to a previous gitea helm release*                     |
+</Zoom>
+
+## 4.5 - Deleting an application deployed via helm
+
+Along with upgrades and rollbacks **Helm** also makes deleting deployed applications (along with all of their associated resources) straightforward.
+
+Before we move on to exercise 5 let's delete the gitea application.
+
+Start in the **Helm** view of the **Developer** perspective.
+
+In the **Helm Releases** tab you should see one release called `gitea`.
+
+Click the three dot menu to the right hand side of the that helm release and click **Delete Helm Release**.
+
+Enter the `gitea` confirmation at the prompt and click **Delete**. If you now return to the **Topology** view you will see the gitea application deleting.
+
+<Zoom>
+|![helm-delete](/static/images/helm-delete.gif)                       |
+|:-------------------------------------------------------------------:|
+| *Deleting the gitea application helm release*                       |
+</Zoom>
+
+## 4.6 - Bonus objective: Artifact Hub
+
+If you have time, take a while to explore https://artifacthub.io/packages/search to see the kinds of applications available in the most popular publicly available Helm Chart repository Artifact Hub.
+
+You've finished exercise 4, time to deploy an application with an Operator! 🎉

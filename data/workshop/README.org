@@ -1,171 +1,106 @@
-#+TITLE: Openshift security hackathon
-#+DATE: <2024-09-26 Thu>
+#+TITLE: OpenShift Workshops
 #+AUTHOR: James Blair
+#+DATE: <2024-07-24 Wed>
+
+This repository contains a basic [[https://nextjs.org/][nextjs]] frontend designed to be exported as a static site and served via [[https://pages.github.com/][github pages]].
+
+The frontend is used to serve workshop instructions for several workshops.
 
 
-This document captures the steps required to set up an instance of the workshop.
+* Setting up a cluster for the workshop
 
-* Log in to cluster
+The workshop expects an OpenShift 4.14 cluster with a few pre-requisites.
 
-#+begin_src tmux
-oc login --web https://api.cluster-bcfz8.bcfz8.sandbox1805.opentlc.com:6443
-#+end_src
+** Add redhat-cop helm chart repository
 
-* Update cluster logo
+Required so the Gitea helm chart will be available for all users.
 
-#+begin_src tmux
-oc create configmap console-custom-logo --from-file=/home/james/Downloads/logo.png -n openshift-config
-
+#+begin_src bash
 cat << EOF | oc apply --filename -
-apiVersion: operator.openshift.io/v1
-kind: Console
+apiVersion: helm.openshift.io/v1beta1
+kind: HelmChartRepository
 metadata:
-  name: cluster
+  name: redhat-cop
 spec:
-  customization:
-    customLogoFile:
-      key: logo.png
-      name: console-custom-logo
-    customProductName: ACME Financial Services OpenShift Console
-  perspectives:
-    - id: admin
-      visibility:
-        state: Disabled
-    - id: dev
-      visibility:
-        state: Enabled
+  connectionConfig:
+    url: 'https://redhat-cop.github.io/helm-charts'
+  name: Red Hat Community
 EOF
 #+end_src
 
-* Add an interesting notification banner
 
-#+begin_src tmux
+** Install web terminal operator
+
+So our workshop participants don't need to install ~oc~ locally.
+
+#+begin_src bash
 cat << EOF | oc apply --filename -
-apiVersion: console.openshift.io/v1
-kind: ConsoleNotification
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
 metadata:
-  name: acme-banner
+  name: web-terminal
+  namespace: openshift-operators
 spec:
-  text: ACME Financial Services Production OpenShift
-  location: BannerTop
-  link:
-    href: 'https://www.youtube.com/watch?v=W31e9meX9S4'
-    text: Cluster Security Dashboard
-  color: '#fff'
-  backgroundColor: '#0000FF'
+  channel: fast
+  installPlanApproval: Automatic
+  name: web-terminal
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
 EOF
 #+end_src
 
-* Deploy the vulnerable workload
 
-#+begin_src tmux
-cat << EOF | oc apply --filename -
----
-kind: Namespace
-apiVersion: v1
-metadata:
-  name: prd-acme-payments
+** Create an operatorgroup for each user
 
----
-kind: Deployment
-apiVersion: apps/v1
+We want each user to be able to install the same operator so we can pre-create namespaces and seed them with OperatorGroups to reduce complexity.
+
+#+begin_src bash
+cat << EOF > operatorgroup.yaml
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
 metadata:
-  name: prd-acme-payments-processor
-  namespace: prd-acme-payments
-  labels:
-    app: payments-processor
+  name: grafana-og
 spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      deployment: prd-acme-payments-processor
-  template:
-    metadata:
-      labels:
-        deployment: prd-acme-payments-processor
-    spec:
-      containers:
-        - name: literally-log4shell
-          image: quay.io/smileyfritz/log4shell-app:v0.5
-          securityContext:
-            capabilities:
-              add:
-                - SYS_ADMIN
-                - NET_ADMIN
-          ports:
-            - containerPort: 8080
-              protocol: TCP
-          resources: {}
-          terminationMessagePath: /dev/termination-log
-          terminationMessagePolicy: File
-          imagePullPolicy: IfNotPresent
-          volumeMounts:
-            - name: unix-socket
-              mountPath: /var/run/crio/crio.sock
-      restartPolicy: Always
-      terminationGracePeriodSeconds: 30
-      dnsPolicy: ClusterFirst
-      securityContext: {}
-      schedulerName: default-scheduler
-      volumes:
-        - name: unix-socket
-          hostPath:
-            path: /var/run/crio/crio.sock
-  strategy:
-    type: RollingUpdate
-    rollingUpdate:
-      maxUnavailable: 25%
-      maxSurge: 25%
-  revisionHistoryLimit: 10
-  progressDeadlineSeconds: 600
+  targetNamespaces:
+    - user$user
+  upgradeStrategy: Default
 EOF
 
-oc adm policy add-scc-to-user privileged -z default -n prd-acme-payments
+for user in $(seq 1 30); do
+    export user=${user}
+    oc new-project user"${user}"
+    envsubst < operatorgroup.yaml | oc create --filename - --namespace user"${user}"
+    oc adm policy add-role-to-user --namespace user"${user}" admin user"${user}"
+done
 #+end_src
 
-* Add spicy cluster users
 
-#+begin_src tmux
-# Create the namespace for the exercise
-oc new-project prd-acme-experimental
+** Install openshift gitops operator
 
-# Retrive existing users htpasswd file
-oc get secret htpasswd -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ${HOME}/Downloads/users.htpasswd
+Each user will deploy their own argocd instance so we need to install the openshift gitops operator for all namespaces.
 
-# Add additional users
-htpasswd -bB ${HOME}/Downloads/users.htpasswd specific-enhanced-ocelot admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd upset-benevolent-hacker admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd beaming-aggressive-squid admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd tame-threatening-otter admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd rebuked-placid-engineer admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd expert-invasive-meerkat admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd childish-shifty-caterpillar admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd silent-lively-heron admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd bountiful-soaked-crab admin
-htpasswd -bB ${HOME}/Downloads/users.htpasswd alienated-proud-snail admin
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: openshift-gitops-operator
+  namespace: openshift-gitops-operator                                                                                                                       
+spec:
+  channel: latest
+  installPlanApproval: Automatic
+  name: openshift-gitops-operator
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+  startingCSV: openshift-gitops-operator.v1.13.0
+EOF
+#+end_src
 
-# Replace the secret
-oc create secret generic htpasswd --from-file=htpasswd=${HOME}/Downloads/users.htpasswd --dry-run=client --output yaml --namespace openshift-config | oc replace --filename -
-sleep 30
 
-# Login as a specified user
-oc login --username alienated-proud-snail --password admin
-oc login --username bountiful-soaked-crab --password admin
-oc login --username silent-lively-heron --password admin
-oc login --username childish-shifty-caterpillar --password admin
-oc login --username expert-invasive-meerkat --password admin
-oc login --username rebuked-placid-engineer --password admin
-oc login --username tame-threatening-otter --password admin
-oc login --username beaming-aggressive-squid --password admin
-oc login --username upset-benevolent-hacker --password admin
-oc login --username specific-enhanced-ocelot --password admin
+** Scale cluster worker nodes
 
-# Log back in as admin
-oc login --username admin
+We are going to have ~25 workshop attendees all deploying applications, let's ensure the cluster has enough capacity to handle it!
 
-# Grant user permission on project
-oc adm policy add-role-to-user admin childish-shifty-caterpillar --namespace prd-acme-experimental
-
-# Delete the namespace as a particular user
-oc delete project prd-acme-experimental --as childish-shifty-caterpillar
+#+begin_src bash
+oc scale machineset cluster-xxz98-mk8x7-worker-ap-southeast-1b -n openshift-machine-api --replicas 10
 #+end_src

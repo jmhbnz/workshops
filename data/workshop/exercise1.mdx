@@ -1,72 +1,182 @@
 ---
-title: Understanding our hackathon environment
+title: Getting familiar with OpenShift
 exercise: 1
-date: '2024-10-14'
-tags: ['openshift','security']
+date: '2023-12-04'
+tags: ['openshift','containers','kubernetes']
 draft: false
 authors: ['default']
-summary: "Let's get familiar with our hackathon setup."
+summary: "In this first exercise we'll get familiar with OpenShift."
 ---
 
-Welcome to the OpenShift 4 security hackathon! Here you'll be able to practice your prowess operating a secure and compliant OpenShift 4 cluster. Exercises will award points for each correct solution. 
+Red Hat [OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. In this first excercise we'll get logged into our cluster and familarise ourselves with the OpenShift web console and web terminal.
 
-You're in a race to reach the highest score before the session concludes! If multiple teams complete all exercises so share points totals a further ranking will be done by elapsed time based on when slack messages are sent.
+The OpenShift Container Platform web console is a feature-rich user interface with both an **Administrator** perspective and a **Developer** perspective accessible through any modern web browser. You can use the web console to visualize, browse, and manage your OpenShift cluster and the applications running on it.
 
- 
+In addition to the web console, OpenShift includes command line tools to provide users with a nice interface to work with applications deployed to the platform. The `oc` command line tool is available for Linux, macOS or Windows.
+
 **Let's get started!**
 
+## 1.1 - Login to lab environment
 
-## 1.1 - The hackathon scenario
+An OpenShift `4.16` cluster has already been provisioned for you to complete these excercises. Open your web browser and navigate to the workshop login page https://demo.redhat.com/workshop/qrz23h.
 
-We're returning to ACME Financial Services, a large bank based in Australia. Thanks to the efforts of the local account team after a long procurement journey Red Hat has landed a massive **$5m AUD** deal including a significant portion of Red Hat Services 🚀.
-
-Your hackathon team are the post-sales consultants engaging with ACME to improve their OpenShift platform security hardening. The bank have been running OpenShift for a while but the account team have said *"they are basically YOLO'ing it"* from a security perspective. Thankfully you're on site now to help iron things out!
-
-![acme](/static/images/security/acme.png)
-
-
-## 1.2 - Understanding the environment
-
-For this challenge you'll be given access to the ACME Financial Services OpenShift `4.17` cluster which is not currently operating in a secure and compliant manner. All challenge tasks must be performed on this cluster so your solutions can be graded successfully.
-
-You can and are encouraged to use any supporting documentation or other resources in order to tackle each of the challenge tasks.
+Once the page loads you can login with the details provided by your workshop facilitator.
 
 <Zoom>
-|![cluster](/static/images/security/cluster.png)                                | 
+|![workshop](/static/images/workshop.png)                                       |
 |:-----------------------------------------------------------------------------:|
-| *OpenShift cluster console*                                                   |
+| *Workshop login page*                                                         |
 </Zoom>
 
+## 1.2 - Login to the cluster web console
 
-## 1.2 - Obtain your environment
+Once you're logged into the lab environnment we can open up the OpenShift web console and login with the credentials provided. 
 
-Working in a small team you will have one shared cluster for team members to share. Your team will have a name allocated already.
-
-To get underway open your web browser and navigate to this link to allocate an environment for your team https://catalog.demo.redhat.com/workshop/w949gy.
-
-Register for an environment using the team email address and password provided by your hackathon organisers. Registering with a team email will mean all your team members will be able to see the same cluster details for your shared team cluster.
+When first logging in you will be prompted to take a tour of the **Developer** console view, let's do that now. 
 
 <Zoom>
-|![workshop](/static/images/security/workshop.png)                              | 
+| ![tour](/static/images/tour.gif)                                              |
 |:-----------------------------------------------------------------------------:|
-| *Hackathon team registration page*                                            |
+| *Developer perspective web console tour*                                      |
 </Zoom>
 
+## 1.3 - Understanding projects
 
-## 1.4 - Confirm environment access
+[Projects](https://docs.openshift.com/container-platform/4.16/applications/projects/working-with-projects.html) are a logical boundary to help you organize your applications. An OpenShift project allows a community of users (or a single user) to organize and manage their work in isolation from other projects.
 
-If your team have secured an environment and are ready to start the challenge please post in `#event-anz-ocp-security-hackathon` with the message:
+Each project has its own resources, role based access control (who can or cannot perform actions), and constraints (quotas and limits on resources, etc).
 
-> [team name] have logged into an environment and are starting the challenge!
+Projects act as a "wrapper" around all the application services you (or your teams) are using for your work.
 
-The event team will reply in slack to confirm your team has been recorded and start you with a base score of `10` points.
+In this lab environment, you already have access to single project: `userX` (Where X is the number of your user allocted for the workshop from the previous step.)
 
+Let's click into our `Project` from the left hand panel of the **Developer** web console perspective. We should be able to see that our project has no `Deployments` and there are no compute cpu or memory resources currently being consumed.
 
-## 1.5 - Hints!
+<Zoom>
+|![project](/static/images/project.png)                                         |
+|:-----------------------------------------------------------------------------:|
+| *Developer perspective project view*                                          |
+</Zoom>
 
-If you get stuck on a question, fear not, perhaps try a different approach. If you have tried everything you can think of and are still stuck you can unlock a hint for `5` points by posting a message in the `#event-anz-ocp-security-hackathon` channel with the message:
+## 1.4 - Switching between perspectives
 
-> [team name] are stuck on [exercise] and are unlocking a hint.
+Different roles have different needs when it comes to viewing details within the OpenShift web console. At the top of the left navigation menu, you can toggle between the Administrator perspective and the Developer perspective.
 
-A hackathon organiser will join your breakout room to share the hint with you 🤫.
+Select **Administrator** to switch to the Administrator perspective. 
 
+Once the Administrator perspective loads, you should be in the "Home" view and see a wider array of menu sections in the left hand navigation panel.
+
+Switch back to the **Developer** perspective. Once the Developer perspective loads, select the **Topology** view.
+
+Right now, there are no applications or components to view in your `userX`  project, but once you begin working on the lab, you’ll be able to visualize and interact with the components in your application here.
+
+<Zoom>
+|![perspectives](/static/images/perspectives.gif)                               |
+|:-----------------------------------------------------------------------------:|
+| *Switching web console perspectives*                                          |
+</Zoom>
+
+## 1.5 - Launching a web terminal
+
+While web interfaces are comfortable and easy to use, sometimes we want to quickly run more advanced commands to get things done. That is where the `oc` command line utility comes in.
+
+One handy feature of the OpenShift web console is we can launch a web terminal that will create a browser based terminal that already has the `oc` command logged in and ready to use.
+
+Let's launch a web terminal now by clicking the terminal button in the top right hand corner and then clicking **Start** with our `userX` project selected.
+
+<Zoom>
+|![web-terminal](/static/images/web-terminal.gif)                               |
+|:-----------------------------------------------------------------------------:|
+| *Launching your web terminal*                                                 |
+</Zoom>
+
+## 1.6 - Running oc commands
+
+The [`oc` command line utility](https://docs.openshift.com/container-platform/4.16/cli_reference/openshift_cli/getting-started-cli.html) is a superset of the upstream kubernetes `kubectl` command line utility. This means it can do everything that `kubectl` can do, plus some additional OpenShift specific commands.
+
+Let's try a few commands now:
+
+### Checking our current project
+
+Most actions we take in OpenShift will be in relation to a particular project. We can check which project we are currently actively using by running the `oc project` command.
+
+We should see output similar to below showing we are currently using our `userX` project:
+
+```bash
+bash-4.4 ~ $ oc project
+Using project "user1" from context named "user1-context" on server "https://172.31.0.1:443".
+```
+
+### Getting help and explaining concepts
+
+As with any command line utility, there can be complexity that quickly surfaces. Thankfully the `oc` command line utility has excellent built in help.
+
+Let's take a look at that now.
+
+To get an understanding of all the options available, try running `oc help`. You should see options similar to the below sample:
+
+```text
+bash-4.4 ~ $ oc help
+OpenShift Client
+
+This client helps you develop, build, deploy, and run your applications on any
+OpenShift or Kubernetes cluster. It also includes the administrative
+commands for managing a cluster under the 'adm' subcommand.
+
+Basic Commands:
+  login             Log in to a server
+  new-project       Request a new project
+  new-app           Create a new application
+  status            Show an overview of the current project
+  project           Switch to another project
+  projects          Display existing projects
+  explain           Get documentation for a resource
+
+Build and Deploy Commands:
+  rollout           Manage a Kubernetes deployment or OpenShift deployment config
+  rollback          Revert part of an application back to a previous deployment
+  new-build         Create a new build configuration
+  start-build       Start a new build
+  cancel-build      Cancel running, pending, or new builds
+  import-image      Import images from a container image registry
+  tag               Tag existing images into image streams
+
+```
+
+To get a more detailed explanataion about a specific concept we can use the `oc explain` command.
+
+Let's run `oc explain project` now to learn more about the concept of a project we introduced earlier:
+
+```text
+bash-4.4 ~ $ oc explain project
+KIND:     Project
+VERSION:  project.openshift.io/v1
+
+DESCRIPTION:
+     Projects are the unit of isolation and collaboration in OpenShift. A
+     project has one or more members, a quota on the resources that the project
+     may consume, and the security controls on the resources in the project.
+     Within a project, members may have different roles - project administrators
+     can set membership, editors can create and manage the resources, and
+     viewers can see but not access running containers. In a normal cluster
+     project administrators are not able to alter their quotas - that is
+     restricted to cluster administrators.
+
+     Listing or watching projects will return only projects the user has the
+     reader role on.
+
+     An OpenShift project is an alternative representation of a Kubernetes
+     namespace. Projects are exposed as editable to end users while namespaces
+     are not. Direct creation of a project is typically restricted to
+     administrators, while end users should use the requestproject resource.
+```
+
+That's a quick introduction to the `oc` command line utility. Let's close our web terminal now so we can move on to the next excercise.
+
+<Zoom>
+|![close-terminal](/static/images/close-terminal.gif)                           |
+|:-----------------------------------------------------------------------------:|
+| *Closing your web terminal*                                                   |
+</Zoom>
+
+Well done, you're now ready to move on to Exercise 2 and deploy an application! 🎉

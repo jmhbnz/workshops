@@ -1,0 +1,171 @@
+#+TITLE: Openshift security hackathon
+#+DATE: <2024-09-26 Thu>
+#+AUTHOR: James Blair
+
+
+This document captures the steps required to set up an instance of the workshop.
+
+* Log in to cluster
+
+#+begin_src tmux
+oc login --web https://api.cluster-bcfz8.bcfz8.sandbox1805.opentlc.com:6443
+#+end_src
+
+* Update cluster logo
+
+#+begin_src tmux
+oc create configmap console-custom-logo --from-file=/home/james/Downloads/logo.png -n openshift-config
+
+cat << EOF | oc apply --filename -
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  customization:
+    customLogoFile:
+      key: logo.png
+      name: console-custom-logo
+    customProductName: ACME Financial Services OpenShift Console
+  perspectives:
+    - id: admin
+      visibility:
+        state: Disabled
+    - id: dev
+      visibility:
+        state: Enabled
+EOF
+#+end_src
+
+* Add an interesting notification banner
+
+#+begin_src tmux
+cat << EOF | oc apply --filename -
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  name: acme-banner
+spec:
+  text: ACME Financial Services Production OpenShift
+  location: BannerTop
+  link:
+    href: 'https://www.youtube.com/watch?v=W31e9meX9S4'
+    text: Cluster Security Dashboard
+  color: '#fff'
+  backgroundColor: '#0000FF'
+EOF
+#+end_src
+
+* Deploy the vulnerable workload
+
+#+begin_src tmux
+cat << EOF | oc apply --filename -
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: prd-acme-payments
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  name: prd-acme-payments-processor
+  namespace: prd-acme-payments
+  labels:
+    app: payments-processor
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      deployment: prd-acme-payments-processor
+  template:
+    metadata:
+      labels:
+        deployment: prd-acme-payments-processor
+    spec:
+      containers:
+        - name: literally-log4shell
+          image: quay.io/smileyfritz/log4shell-app:v0.5
+          securityContext:
+            capabilities:
+              add:
+                - SYS_ADMIN
+                - NET_ADMIN
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: unix-socket
+              mountPath: /var/run/crio/crio.sock
+      restartPolicy: Always
+      terminationGracePeriodSeconds: 30
+      dnsPolicy: ClusterFirst
+      securityContext: {}
+      schedulerName: default-scheduler
+      volumes:
+        - name: unix-socket
+          hostPath:
+            path: /var/run/crio/crio.sock
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 25%
+      maxSurge: 25%
+  revisionHistoryLimit: 10
+  progressDeadlineSeconds: 600
+EOF
+
+oc adm policy add-scc-to-user privileged -z default -n prd-acme-payments
+#+end_src
+
+* Add spicy cluster users
+
+#+begin_src tmux
+# Create the namespace for the exercise
+oc new-project prd-acme-experimental
+
+# Retrive existing users htpasswd file
+oc get secret htpasswd -ojsonpath={.data.htpasswd} -n openshift-config | base64 --decode > ${HOME}/Downloads/users.htpasswd
+
+# Add additional users
+htpasswd -bB ${HOME}/Downloads/users.htpasswd specific-enhanced-ocelot admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd upset-benevolent-hacker admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd beaming-aggressive-squid admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd tame-threatening-otter admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd rebuked-placid-engineer admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd expert-invasive-meerkat admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd childish-shifty-caterpillar admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd silent-lively-heron admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd bountiful-soaked-crab admin
+htpasswd -bB ${HOME}/Downloads/users.htpasswd alienated-proud-snail admin
+
+# Replace the secret
+oc create secret generic htpasswd --from-file=htpasswd=${HOME}/Downloads/users.htpasswd --dry-run=client --output yaml --namespace openshift-config | oc replace --filename -
+sleep 30
+
+# Login as a specified user
+oc login --username alienated-proud-snail --password admin
+oc login --username bountiful-soaked-crab --password admin
+oc login --username silent-lively-heron --password admin
+oc login --username childish-shifty-caterpillar --password admin
+oc login --username expert-invasive-meerkat --password admin
+oc login --username rebuked-placid-engineer --password admin
+oc login --username tame-threatening-otter --password admin
+oc login --username beaming-aggressive-squid --password admin
+oc login --username upset-benevolent-hacker --password admin
+oc login --username specific-enhanced-ocelot --password admin
+
+# Log back in as admin
+oc login --username admin
+
+# Grant user permission on project
+oc adm policy add-role-to-user admin childish-shifty-caterpillar --namespace prd-acme-experimental
+
+# Delete the namespace as a particular user
+oc delete project prd-acme-experimental --as childish-shifty-caterpillar
+#+end_src
