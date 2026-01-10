@@ -38,7 +38,7 @@ Leave all other fields at their defaults (but take your time to scroll down and 
 
 Click **Create** to deploy the application.
 
-OpenShift will create a [`Deployment`](https://docs.openshift.com/container-platform/4.16/applications/deployments/what-deployments-are.html) that will pull this container image if it does not exist already on the cluster and create a [`Pod`](https://docs.openshift.com/container-platform/4.16/nodes/pods/nodes-pods-using.html) that our container will run inside. You will be taken back to the **Topology** view in the **Developer** perspective which will show the new "Parksmap" application.
+OpenShift will create a [`Deployment`](https://docs.openshift.com/container-platform/4.20/applications/deployments/what-deployments-are.html) that will pull this container image if it does not exist already on the cluster and create a [`Pod`](https://docs.openshift.com/container-platform/4.20/nodes/pods/nodes-pods-using.html) that our container will run inside. You will be taken back to the **Topology** view in the **Developer** perspective which will show the new "Parksmap" application.
 
 <Zoom>
 |![first-app](/static/images/first-app.gif)                           |
@@ -64,7 +64,7 @@ The **Resources** tab may be displayed by default. If so, click on the **Details
 
 Now that we have the ParksMap application deployed. How do we access it??
 
-This is where OpenShift [`Routes`](https://docs.openshift.com/container-platform/4.16/networking/routes/route-configuration.html) and [`Services`](https://docs.openshift.com/container-platform/4.16/rest_api/network_apis/service-v1.html) come in.
+This is where OpenShift [`Routes`](https://docs.openshift.com/container-platform/4.20/networking/routes/route-configuration.html) and [`Services`](https://docs.openshift.com/container-platform/4.20/rest_api/network_apis/service-v1.html) come in.
 
 While **Services** provide internal abstraction and load balancing within an OpenShift cluster, sometimes clients outside of the OpenShift cluster need to access an application. The way that external clients are able to access applications running in OpenShift is through an OpenShift **Route**.
 
