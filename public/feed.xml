@@ -7,77 +7,77 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Mon, 14 Oct 2024 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Mon, 04 Dec 2023 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://rhdemo.win/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
     <guid>https://rhdemo.win/workshop/exercise1</guid>
-    <title>Understanding our hackathon environment</title>
+    <title>Getting familiar with OpenShift</title>
     <link>https://rhdemo.win/workshop/exercise1</link>
-    <description>Let&#39;s get familiar with our hackathon setup.</description>
-    <pubDate>Mon, 14 Oct 2024 00:00:00 GMT</pubDate>
+    <description>In this first exercise we&#39;ll get familiar with OpenShift.</description>
+    <pubDate>Mon, 04 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise2</guid>
-    <title>Laying the foundations for cluster security</title>
+    <title>Deploying your first application</title>
     <link>https://rhdemo.win/workshop/exercise2</link>
-    <description>Can&#39;t have security without a security platform</description>
-    <pubDate>Thu, 17 Oct 2024 00:00:00 GMT</pubDate>
+    <description>Time to deploy your first app!</description>
+    <pubDate>Tue, 05 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>images</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise3</guid>
-    <title>Encrypting cluster internal network traffic</title>
+    <title>Scaling and self-healing applications</title>
     <link>https://rhdemo.win/workshop/exercise3</link>
-    <description>Is OpenShift secure by default?</description>
-    <pubDate>Fri, 18 Oct 2024 00:00:00 GMT</pubDate>
+    <description>Let&#39;s scale our application up 📈</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category><category>ipsec</category><category>encryption</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>autoscaling</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise4</guid>
-    <title>Securing vulnerable workloads</title>
+    <title>Deploying an application via helm chart</title>
     <link>https://rhdemo.win/workshop/exercise4</link>
-    <description>How do we deal with vulnerable workloads we can&#39;t patch?</description>
-    <pubDate>Sat, 19 Oct 2024 00:00:00 GMT</pubDate>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category><category>cve management</category><category>rhacs</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>deployments</category><category>helm</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise5</guid>
-    <title>Understanding cluster compliance</title>
+    <title>Deploying an application via operator</title>
     <link>https://rhdemo.win/workshop/exercise5</link>
-    <description>Let&#39;s apply an industry benchmark!</description>
-    <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Wed, 06 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>compliance</category><category>nist</category><category>rhacs</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>operator-framework</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise6</guid>
-    <title>Inspecting audit logs</title>
+    <title>Deploying an application from source</title>
     <link>https://rhdemo.win/workshop/exercise6</link>
-    <description>Ahh the classic who dunnit!?!??</description>
-    <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
+    <description>Exploring alternative deployment approaches.</description>
+    <pubDate>Thu, 07 Dec 2023 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>audit</category><category>logging</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>s2i</category><category>shipwright</category>
   </item>
 
   <item>
     <guid>https://rhdemo.win/workshop/exercise7</guid>
-    <title>Bonus challenge - Supply chain shmozzle</title>
+    <title>Optional - Deploying an application via gitops</title>
     <link>https://rhdemo.win/workshop/exercise7</link>
-    <description>Time to sign your life away...</description>
-    <pubDate>Fri, 08 Nov 2024 00:00:00 GMT</pubDate>
+    <description>Keen to explore a more advanced deployment pattern?</description>
+    <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>supply chain</category><category>rhtas</category>
+    <category>openshift</category><category>containers</category><category>kubernetes</category><category>argocd</category><category>gitops</category>
   </item>
 
     </channel>
