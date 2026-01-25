@@ -1,8 +1,8 @@
 const siteMetadata = {
-  title: 'Red Hat OpenShift Security Hackathon',
+  title: 'Red Hat OpenShift Introduction Workshop',
   author: 'Red Hat',
   headerTitle: 'Red Hat',
-  description: 'Red Hat OpenShift Security Hackathon',
+  description: 'Red Hat OpenShift Introduction Workshop',
   language: 'en-us',
   siteUrl: 'https://rhdemo.win',
   siteRepo: 'https://github.com/jmhbnz/workshops',
