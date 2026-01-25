@@ -7,19 +7,9 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Mon, 04 Dec 2023 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Tue, 05 Dec 2023 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://rhdemo.win/feed.xml" rel="self" type="application/rss+xml"/>
       
-  <item>
-    <guid>https://rhdemo.win/workshop/exercise1</guid>
-    <title>Getting familiar with OpenShift</title>
-    <link>https://rhdemo.win/workshop/exercise1</link>
-    <description>In this first exercise we&#39;ll get familiar with OpenShift.</description>
-    <pubDate>Mon, 04 Dec 2023 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>containers</category><category>kubernetes</category>
-  </item>
-
   <item>
     <guid>https://rhdemo.win/workshop/exercise2</guid>
     <title>Deploying your first application</title>
@@ -78,6 +68,16 @@
     <pubDate>Thu, 25 Jul 2024 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
     <category>openshift</category><category>containers</category><category>kubernetes</category><category>argocd</category><category>gitops</category>
+  </item>
+
+  <item>
+    <guid>https://rhdemo.win/workshop/exercise1</guid>
+    <title>Getting familiar with OpenShift</title>
+    <link>https://rhdemo.win/workshop/exercise1</link>
+    <description>In this first exercise we&#39;ll get familiar with OpenShift.</description>
+    <pubDate>Sat, 10 Jan 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>containers</category><category>kubernetes</category>
   </item>
 
     </channel>
