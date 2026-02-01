@@ -1,7 +1,7 @@
 ---
 title: Deploying your first application
 exercise: 2
-date: '2023-12-05'
+date: '2026-01-29'
 tags: ['openshift','containers','kubernetes','deployments','images']
 draft: false
 authors: ['default']
@@ -12,23 +12,20 @@ Now that we have had a tour of the OpenShift web console to get familiar, let's 
 
 Let’s start by doing the simplest thing possible - get a plain old [OCI](https://opencontainers.org) format container image to run on OpenShift. This is incredibly simple to do. With OpenShift it can be done directly from the web console.
 
-Before we begin, if you would like a bit more background on what a container is or why they are important click the following link to learn more: https://www.redhat.com/en/topics/containers#overview
+Before we begin, if you would like a bit more background on what a container is or why they are important click the following link to learn more: [https://www.redhat.com/en/topics/containers#overview](https://www.redhat.com/en/topics/containers#overview)
 
 ## 2.1 - Deploying the container image
 
 In this exercise, we’re going to deploy the **web** component of the ParksMap application which uses OpenShift's service discovery mechanism to discover any accompanying backend services deployed and shows their data on the map. Below is a visual overview of the complete ParksMap application.
 
 <Zoom>
-|![parksmap-architecture](/static/images/parksmap-architecture.png)   |
-|:-------------------------------------------------------------------:|
-| *ParksMap application architecture*                                 |
+![parksmap-architecture](/static/images/parksmap-architecture.png)
+*ParksMap application architecture*
 </Zoom>
 
-Within the **Developer** perspective, click the **+Add** entry on the left hand menu.
+Click the **Quick create** button in the top right menu and select **Container images**.
 
-Once on the **+Add** page, click **Container images** to open a dialog that will allow you to quickly deploy an image.
-
-In the **Image name** field enter the following:
+In the **Image name from external registry** field enter the following:
 
 ```text
 quay.io/openshiftroadshow/parksmap:latest
@@ -38,12 +35,11 @@ Leave all other fields at their defaults (but take your time to scroll down and 
 
 Click **Create** to deploy the application.
 
-OpenShift will create a [`Deployment`](https://docs.openshift.com/container-platform/4.20/applications/deployments/what-deployments-are.html) that will pull this container image if it does not exist already on the cluster and create a [`Pod`](https://docs.openshift.com/container-platform/4.20/nodes/pods/nodes-pods-using.html) that our container will run inside. You will be taken back to the **Topology** view in the **Developer** perspective which will show the new "Parksmap" application.
+OpenShift will create a [`Deployment`](https://docs.openshift.com/container-platform/4.20/applications/deployments/what-deployments-are.html) that will pull this container image if it does not exist already on the cluster and create a [`Pod`](https://docs.openshift.com/container-platform/4.20/nodes/pods/nodes-pods-using.html) that our container will run inside. You will be taken back to the **Topology** view in the web console which will show the new "Parksmap" application.
 
 <Zoom>
-|![first-app](/static/images/first-app.gif)                           |
-|:-------------------------------------------------------------------:|
-| *Deploying the container image*                                     |
+![first-app](/static/images/first-app.gif)
+*Deploying the container image*
 </Zoom>
 
 ## 2.2 - Reviewing our deployed application
@@ -53,12 +49,11 @@ If you click on the **parksmap** entry in the **Topology** view, you will see so
 The **Resources** tab may be displayed by default. If so, click on the **Details** tab. On that tab, you will see that there is a single `Pod` that was created by your actions.
 
 <Zoom>
-|![app-details](/static/images/app-details.gif)                       |
-|:-------------------------------------------------------------------:|
-| *Deploying the container image*                                     |
+![app-details](/static/images/app-details.gif)
+*Reviewing deployment details*
 </Zoom>
 
-> Note: A pod is the smallest deployable unit in Kubernetes and is effectively a grouping of one or more individual containers. Any containers deployed within a pod are guaranteed to run on the same machine. It is very common for pods in kubernetes to only hold a single container, although sometimes auxiliary services can be included as additional containers in a pod when we want them to run alongside our application container.
+> Note: A pod is the smallest deployable unit in Kubernetes and is effectively a grouping of one or more individual containers. Any containers deployed within a pod are guaranteed to run on the same machine. It is very common for pods in kubernetes to only hold a single container, although sometimes auxiliary services can be included as additional containers in a pod when we want them to run directly alongside our application container.
 
 ## 2.2 - Accessing the application
 
