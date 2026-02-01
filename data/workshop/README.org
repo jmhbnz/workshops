@@ -9,7 +9,7 @@ The frontend is used to serve workshop instructions for several workshops.
 
 * Setting up a cluster for the workshop
 
-The workshop expects an OpenShift 4.14 cluster with a few pre-requisites.
+The workshop expects an OpenShift 4.20 cluster with a few pre-requisites.
 
 ** Add redhat-cop helm chart repository
 
@@ -27,6 +27,9 @@ spec:
   name: Red Hat Community
 EOF
 #+end_src
+
+#+RESULTS:
+: helmchartrepository.helm.openshift.io/redhat-cop created
 
 
 ** Install web terminal operator
@@ -48,6 +51,11 @@ spec:
   sourceNamespace: openshift-marketplace
 EOF
 #+end_src
+
+#+RESULTS:
+#+begin_example
+subscription.operators.coreos.com/web-terminal created
+#+end_example
 
 
 ** Create an operatorgroup for each user
