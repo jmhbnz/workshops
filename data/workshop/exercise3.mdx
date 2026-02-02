@@ -65,7 +65,7 @@ As a best practice, wherever possible we should try to run multiple replicas of 
 
 Let's scale up our application and confirm it is now fault tolerant.
 
-In the **Topology** view of the **Developer** perspective click your Parksmap application icon.
+In the **Topology** view of the **Workloads** perspective click your Parksmap application icon.
 
 In the **Details** tab of the information pane click the **^ Increase the pod count** arrow to increase our replicas to `2`.  You will see the second pod starting up and becoming ready.
 
@@ -74,9 +74,8 @@ In the **Details** tab of the information pane click the **^ Increase the pod co
 Once the new pod is ready, repeat the steps from task `3.2` to crash one of the pods. You should see that the application continues to serve traffic thanks to our OpenShift **Service** load balancing traffic to the second **Pod**.
 
 <Zoom>
-|![parksmap-scale](/static/images/app-scale.gif)                      |
-|:-------------------------------------------------------------------:|
-| *Scaling up the ParksMap application*                               |
+![parksmap-scale](/static/images/app-scale.gif)
+*Scaling up the ParksMap application frontend*
 </Zoom>
 
 ## 3.4 - Self healing to desired state
@@ -90,7 +89,7 @@ Let's start by launching back into our web terminal now by clicking the terminal
 Once our terminal opens let's check our list of **Pods** with `oc get pods`. You should see something similar to the output below:
 
 ```bash
-bash-4.4 ~ $ oc get pods
+bash-5.1 ~ $ oc get pods
 NAME                                         READY   STATUS    RESTARTS   AGE
 parksmap-ff7477dc4-2nxd2                     1/1     Running   0          79s
 parksmap-ff7477dc4-n26jl                     1/1     Running   0          31m
@@ -100,7 +99,7 @@ workspace45c88f4d4f2b4885-74b6d4898f-57dgh   2/2     Running   0          108s
 Copy one of the pod names and delete it via `oc delete pods <podname>`, i.e `oc delete pod parksmap-ff7477dc4-2nxd2`.
 
 ```bash
-bash-4.4 ~ $ oc delete pod parksmap-ff7477dc4-2nxd2
+bash-5.1 ~ $ oc delete pod parksmap-ff7477dc4-2nxd2
 pod "parksmap-ff7477dc4-2nxd2" deleted
 ```
 
