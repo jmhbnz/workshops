@@ -40,7 +40,7 @@ With our ParksMap application only having one pod replica currently it will not 
 
 Let's see that in practice by intentionally causing an error in our application.
 
-Start in the **Topology** view of the **Developer** perspective and click your Parksmap application icon.
+Start in the **Topology** view of the **Workloads** perspective and click your Parksmap application icon.
 
 In the **Resources** tab of the information pane open a second browser tab showing the ParksMap application **Route** that we explored in the previous exercise. The application should be running as normal.
 
@@ -55,9 +55,8 @@ kill 1
 The pod will automatically be restarted by OpenShift however if you refresh your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
 
 <Zoom>
-|![parksmap-crash](/static/images/app-crash.gif)                      |
-|:-------------------------------------------------------------------:|
-| *Intentionally crashing the ParksMap application*                   |
+![parksmap-crash](/static/images/app-crash.gif)
+*Intentionally crashing the ParksMap application*
 </Zoom>
 
 ## 3.3 - Scaling up the application
