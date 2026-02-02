@@ -1,7 +1,7 @@
 ---
 title: Scaling and self-healing applications
 exercise: 3
-date: '2023-12-06'
+date: '2026-01-30'
 tags: ['openshift','containers','kubernetes','deployments','autoscaling']
 draft: false
 authors: ['default']
@@ -18,7 +18,7 @@ While **Services** provide discovery and load balancing for **Pods**, the higher
 
 Let's start by confirming how many `replicas` we currently specify for our ParksMap application. We'll also use this exercise step to take a look at how all resources within OpenShift can be viewed and managed as [YAML](https://www.redhat.com/en/topics/automation/what-is-yaml) formatted text files which is extremely useful for more advanced automation and GitOps concepts.
 
-Start in the **Topology** view of the **Developer** perspective.
+Start in the **Topology** view of the web console.
 
 Click on your "Parksmap" application icon and click on the **D parksmap** deployment name at the top of the right hand panel.
 
@@ -30,9 +30,8 @@ spec:
 ```
 
 <Zoom>
-|![parksmap-replicas](/static/images/app-replicas.gif)                |
-|:-------------------------------------------------------------------:|
-| *ParksMap application deployment replicas*                          |
+![parksmap-replicas](/static/images/app-replicas.gif)
+*ParksMap application deployment replicas*
 </Zoom>
 
 ## 3.2 - Intentionally crashing the application
