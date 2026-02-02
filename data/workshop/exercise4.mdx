@@ -91,18 +91,17 @@ From here it is trivial to perform a **Rollback** to remove our misconfigured up
 
 Our previous helm upgrade for the Gitea application didn't succeed due to the misconfiguration we supplied. **Helm** has features for rolling back to a previous release through the `helm rollback` command line interface. OpenShift has made this even easier by adding native support for interactive rollbacks in the OpenShift web console so let's give that a go now.
 
-Start in the **Helm** view of the **Developer** perspective.
+Start in the **Releases** view of the **Workloads** perspective.
 
-In the **Helm Releases** tab you should see one release called `gitea`.
+In this view you should see one release called `gitea`.
 
 Click the three dot menu to the right hand side of the that helm release and click **Rollback**.
 
 Select the radio button for revision `1` which should be showing a status of `Deployed`, then click **Rollback**.
 
 <Zoom>
-|![helm-rollback](/static/images/helm-rollback.gif)                   |
-|:-------------------------------------------------------------------:|
-| *Rolling back to a previous gitea helm release*                     |
+![helm-rollback](/static/images/helm-rollback.gif)
+*Rolling back to a previous gitea helm release*
 </Zoom>
 
 ## 4.5 - Deleting an application deployed via helm
@@ -111,9 +110,9 @@ Along with upgrades and rollbacks **Helm** also makes deleting deployed applicat
 
 Before we move on to exercise 5 let's delete the gitea application.
 
-Start in the **Helm** view of the **Developer** perspective.
+Start in the **Releases** view of the **Helm** perspective.
 
-In the **Helm Releases** tab you should see one release called `gitea`.
+In this view you should see one release called `gitea`.
 
 Click the three dot menu to the right hand side of the that helm release and click **Delete Helm Release**.
 
