@@ -1,7 +1,7 @@
 ---
 title: Deploying an application via helm chart
 exercise: 4
-date: '2023-12-06'
+date: '2026-02-01'
 tags: ['openshift','containers','kubernetes','deployments','helm']
 draft: false
 authors: ['default']
@@ -14,7 +14,7 @@ With more complex applications comes the need to more finely customise the detai
 
 Enter the [**Helm**](https://www.redhat.com/en/topics/devops/what-is-helm) project, which can package up our application resources and distribute them as something called a **Helm chart**.
 
-In simple terms, a **Helm chart** is basically a directory containing a collection of YAML template files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
+In simple terms, a **Helm chart** is a directory containing a collection of YAML template text files, which is zipped into an archive. However the `helm` command line utility has a lot of additional features and is good for customising and overriding specific values in our application templates when we deploy them onto our cluster as well as easily deploying, upgrading or rolling back our application.
 
 ## 4.1 - Deploying a helm chart via the web console 
 
@@ -22,9 +22,11 @@ It is common for organisations that produce and ship applications to provide the
 
 Let's get started by deploying a **Helm chart** for the [Gitea](https://about.gitea.com) application which is a git oriented devops platform similar to GitHub or GitLab.
 
-Start in the **+Add** view of the **Developer** perspective.
+Start by clicking the **Helm** perspective in the left menu and selecting the **Releases** view.
 
-Scroll down and click the **Helm chart** tile. OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
+In the top right click the **Create Helm Release** button.
+
+OpenShift includes a visual catalog for any helm chart repositories your cluster has available, for this exercise we will search for **Gitea**.
 
 Click on the search result and click **Create**.
 
@@ -38,9 +40,8 @@ tlsRoute: true
 ```
 
 <Zoom>
-|![gitea-deployment](/static/images/gitea-deployment.gif)             |
-|:-------------------------------------------------------------------:|
-| *Gitea application deployment via helm chart*                       |
+![gitea-deployment](/static/images/gitea-deployment.gif)
+*Gitea application deployment via helm chart*
 </Zoom>
 
 ## 4.2 - Examine deployed application
