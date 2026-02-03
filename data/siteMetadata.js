@@ -4,7 +4,7 @@ const siteMetadata = {
   headerTitle: 'Red Hat',
   description: 'Red Hat OpenShift Introduction Workshop',
   language: 'en-us',
-  siteUrl: 'https://rhdemo.win',
+  siteUrl: 'https://jmhbnz.github.io/workshops',
   siteRepo: 'https://github.com/jmhbnz/workshops',
   siteLogo: '/static/images/redhat.png',
   image: '/static/images/avatar.png',

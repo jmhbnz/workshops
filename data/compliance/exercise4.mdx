@@ -21,7 +21,7 @@ Fundamentally you install RHACS as a set of containers in your OpenShift Contain
 2. **Secured cluster** services you install on each cluster you want to secure by RHACS. This installs the Collector, Sensor, and Admission Controller services. Collector collects runtime information on container security and network activity. It then sends data to Sensor, which monitors your Kubernetes cluster for policy detection and enforcement. Admission Controller monitors workloads and prevents users from creating them in RHACS when they violate security policies.
 
 <Zoom>
-|![workshop](/static/images/compliance/acs-architecture-kubernetes.png)         |
+|![workshop](/workshops/static/images/compliance/acs-architecture-kubernetes.png)         |
 |:-----------------------------------------------------------------------------:|
 | *Red Hat Advanced Cluster Security high level architecture*                   |
 </Zoom>
@@ -65,7 +65,7 @@ EOF
 Once the `Central` resource has been created you can check the state of the RHACS pods by running `oc get pods -n acs-central` in your highside terminal. Or navigating to **Workloads** > **Pods** for the `acs-central` project in the OpenShift Web Console.
 
 <Zoom>
-|![workshop](/static/images/compliance/acs-central-pods.png)                    |
+|![workshop](/workshops/static/images/compliance/acs-central-pods.png)                    |
 |:-----------------------------------------------------------------------------:|
 | *Red Hat Advanced Cluster Security central pods*                              |
 </Zoom>
@@ -89,7 +89,7 @@ Time to bring up our RHACS dashboard. We'll first retrieve the `admin` user pass
 > Note: Ironically (given the subject matter), you may receive a tls verification warning when opening the rhacs dashboard. This is expected in this short lived workshop environment (because James is lazy) and should be accepted (Kids please don't do this at home 😂).
 
 <Zoom>
-|![workshop](/static/images/compliance/central-login.gif)                       |
+|![workshop](/workshops/static/images/compliance/central-login.gif)                       |
 |:-----------------------------------------------------------------------------:|
 | *Logging into Red Hat Advanced Cluster Security dashboard*                    |
 </Zoom>
@@ -115,7 +115,7 @@ Once the `hub-Operator-secrets-cluster-init-bundle.yaml` file has been downloade
 5. Paste the contents into the **Import YAML** text field and click the blue **Create** button.
 
 <Zoom>
-|![workshop](/static/images/compliance/init-bundle-import.gif)                  |
+|![workshop](/workshops/static/images/compliance/init-bundle-import.gif)                  |
 |:-----------------------------------------------------------------------------:|
 | *Importing an init bundle into our hub cluster*                               |
 </Zoom>
@@ -182,7 +182,7 @@ EOF
 After a short wait for pods to initialise in the `acs-securedcluster` namespace you should be able to see the cluster is now secured in RHACS by checking the **Platform Configuration** > **Clusters** overview which should show the `hub` cluster as `✅ Healthy`.
 
 <Zoom>
-|![workshop](/static/images/compliance/securedcluster-completed.png)            |
+|![workshop](/workshops/static/images/compliance/securedcluster-completed.png)            |
 |:-----------------------------------------------------------------------------:|
 | *Hub cluster is now secured by Red Hat Advanced Cluster Security*             |
 </Zoom>

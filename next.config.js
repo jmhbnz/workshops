@@ -8,8 +8,8 @@ module.exports = withBundleAnalyzer({
   images: {
     unoptimized: true
   },
-  basePath: '',
-  assetPrefix: '',
+  basePath: '/workshops',
+  assetPrefix: '/workshops/',
   experimental: { esmExternals: true },
   webpack: (config, { dev, isServer }) => {
     config.module.rules.push({

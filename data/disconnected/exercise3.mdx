@@ -14,7 +14,7 @@ In this exercise, we'll prepare the **High side**. This involves creating a bast
 > 
 > We could rectify this by running `sudo dnf install -y podman` on the bastion system, but the bastion server won't have Internet access, so we need another option for this lab. To solve this problem, we need to build our own RHEL image with podman pre-installed. Real customer environments will likely already have a solution for this, but one approach is to use the [Image Builder](https://console.redhat.com/insights/image-builder) in the Hybrid Cloud Console, and that's exactly what has been done for this lab.
 >
-> [workshop](/static/images/disconnected/image-builder.png)
+> [workshop](/workshops/static/images/disconnected/image-builder.png)
 > 
 > In the home directory of your web terminal you will find an `ami.txt` file containng our custom image AMI which will be used by the command that creates our bastion ec2 instance.
 
@@ -47,7 +47,7 @@ aws ec2 run-instances --image-id $(cat ami.txt) \
 ```
 
 <Zoom>
-|![workshop](/static/images/disconnected/launch-bastion-ec2.gif)      | 
+|![workshop](/workshops/static/images/disconnected/launch-bastion-ec2.gif)      | 
 |:-----------------------------------------------------------------------------:|
 | *Launching bastion ec2 instance*                                              |
 </Zoom>
@@ -87,7 +87,7 @@ ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGH
 ```
 
 <Zoom>
-|![workshop](/static/images/disconnected/connect-bastion-ec2.gif)     | 
+|![workshop](/workshops/static/images/disconnected/connect-bastion-ec2.gif)     | 
 |:-----------------------------------------------------------------------------:|
 | *Connecting to our bastion ec2 instance*                                      |
 </Zoom>
@@ -111,7 +111,7 @@ ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "rsync -avP -e 'ssh -i disco_key' /
 ```
 
 <Zoom>
-|![workshop](/static/images/disconnected/sneakernet-transfer.gif)     | 
+|![workshop](/workshops/static/images/disconnected/sneakernet-transfer.gif)     | 
 |:-----------------------------------------------------------------------------:|
 | *Initiating the sneakernet transfer via rsync*                                |
 </Zoom>

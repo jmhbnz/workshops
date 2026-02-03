@@ -18,7 +18,7 @@ You manage to talk him down by explaining how easily encryption can be turned on
 
 You decide to make enabling encryption top of your list for the morning to try and keep Brent happy.
 
-![brent](/static/images/security/brent.png)
+![brent](/workshops/static/images/security/brent.png)
 
 
 ## 3.1 - Encrypting internal cluster traffic
@@ -28,7 +28,7 @@ With IPsec enabled, you can encrypt internal pod-to-pod cluster traffic on the O
 You confirm the required mode with Angie & Brent as `Full` and then run the `oc patch` command to get the job done after giving Angie a heads up there will be some brief disruption on the cluster while the change is rolled out.
 
 <Zoom>
-|![ipsec architecture](/static/images/security/ipsec.png)                       | 
+|![ipsec architecture](/workshops/static/images/security/ipsec.png)                       | 
 |:-----------------------------------------------------------------------------:|
 | *Encryption implications when enabling pod-to-pod IPSec*                      |
 </Zoom>
@@ -51,7 +51,7 @@ oc --namespace openshift-ovn-kubernetes rsh ovnkube-node-<XXXXX> ovn-nbctl --no-
 ```
 
 <Zoom>
-|![cluster network](/static/images/security/cluster-network.png)                |
+|![cluster network](/workshops/static/images/security/cluster-network.png)                |
 |:-----------------------------------------------------------------------------:|
 | *Cluster operators administration*                                            |
 </Zoom>

@@ -16,7 +16,7 @@ In this first hands on excercise we will prepare our cluster for running Windows
 To install Operators on OpenShift we use Operator Hub. A simplistic way of thinking about Operator Hub is as the "App Store" for your OpenShift cluster.
 
 <Zoom>
-|![workshop](/static/images/windows/operator-hub.png)                 | 
+|![workshop](/workshops/static/images/windows/operator-hub.png)                 | 
 |:-----------------------------------------------------------------------------:|
 | *OpenShift Operator Hub*                                                      |
 </Zoom>
@@ -51,7 +51,7 @@ oc patch networks.operator.openshift.io cluster --type=merge \
 ```
 
 <Zoom>
-|![workshop](/static/images/windows/hybrid-networking.gif)            | 
+|![workshop](/workshops/static/images/windows/hybrid-networking.gif)            | 
 |:-----------------------------------------------------------------------------:|
 | *Patching an OpenShift cluster network to enable hybrid networking*           |
 </Zoom>
@@ -70,7 +70,7 @@ Follow the steps below to install the operator:
 4. Leave all settings as the default and click **Install** once more.
 
 <Zoom>
-|![workshop](/static/images/windows/operator-install.gif)             | 
+|![workshop](/workshops/static/images/windows/operator-install.gif)             | 
 |:-----------------------------------------------------------------------------:|
 | *Installing the windows machine config operator*                              |
 </Zoom>
@@ -94,7 +94,7 @@ oc create secret generic cloud-private-key \
 ```
 
 <Zoom>
-|![workshop](/static/images/windows/create-secret.gif)                | 
+|![workshop](/workshops/static/images/windows/create-secret.gif)                | 
 |:-----------------------------------------------------------------------------:|
 | *Create a private key secret*                                                 |
 </Zoom>

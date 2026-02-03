@@ -39,7 +39,7 @@ Complete the steps below to create your scan schedule:
 7. Click **Next** once more on the **Reports** screen and the click **Save**.
 
 <Zoom>
-|![workshop](/static/images/compliance/compliance-scan-results.gif)             |
+|![workshop](/workshops/static/images/compliance/compliance-scan-results.gif)             |
 |:-----------------------------------------------------------------------------:|
 | *Creating a compliance scan schedule in Red Hat Advanced Cluster Security*    |
 </Zoom>
@@ -96,13 +96,13 @@ Once your cluster scan completes return to your vnc browser tab with the Red Hat
 Navigate to **Compliance** > **Coverage** and review the overall result for the `ocp4-moderate` and `ocp4-moderate-node` profiles. The results should look something similar to the examples below:
 
 <Zoom>
-|![workshop](/static/images/compliance/compliance-scan-results-1.png)           |
+|![workshop](/workshops/static/images/compliance/compliance-scan-results-1.png)           |
 |:-----------------------------------------------------------------------------:|
 | *Compliance scan results in Red Hat Advanced Cluster Security*                |
 </Zoom>
 
 <Zoom>
-|![workshop](/static/images/compliance/compliance-scan-results-2.png)           |
+|![workshop](/workshops/static/images/compliance/compliance-scan-results-2.png)           |
 |:-----------------------------------------------------------------------------:|
 | *Compliance scan results in Red Hat Advanced Cluster Security*                |
 </Zoom>
@@ -117,7 +117,7 @@ Reviewing the detailed results any checks that are not passing will either be ca
 Looking at the `ocp4-moderate` results for our `hub` cluster. A good example of a `Manual` check is `ocp4-moderate-accounts-restrict-service-account-tokens`. Let's get an overview of the check, the rationale and our instructions to address it manually by clicking into that check in the list, and opening the **Details** tab. You can jump directly to it with this url: https://central-acs-central.apps.disco.lab/main/compliance/coverage/profiles/ocp4-moderate/checks/ocp4-moderate-accounts-restrict-service-account-tokens?detailsTab=Details
 
 <Zoom>
-|![workshop](/static/images/compliance/compliance-scan-results-3.png)           |
+|![workshop](/workshops/static/images/compliance/compliance-scan-results-3.png)           |
 |:-----------------------------------------------------------------------------:|
 | *Compliance scan result details in Red Hat Advanced Cluster Security*         |
 </Zoom>
@@ -136,7 +136,7 @@ A default policy is available out of the box called **Pod Service Account Token 
 4. The policy should already be enabled so let's click on **Violations** in the left hand menu to review any current instances where this policy is currently being violated. You should have one entry in the list for the `kube-rbac-proxy`. This is actually a standard openshift pod in the `openshift-machine-config-operator` namespace, and does actually require the api token mounted, so we could safely add this deployment to our policy exclusions.
 
 <Zoom>
-|![workshop](/static/images/compliance/rhacs-violation-exclude.gif)             |
+|![workshop](/workshops/static/images/compliance/rhacs-violation-exclude.gif)             |
 |:-----------------------------------------------------------------------------:|
 | *Reviewing a policy & policy violations in Red Hat Advanced Cluster Security* |
 </Zoom>

@@ -30,7 +30,7 @@ spec:
 ```
 
 <Zoom>
-![parksmap-replicas](/static/images/app-replicas.gif)
+![parksmap-replicas](/workshops/static/images/app-replicas.gif)
 *ParksMap application deployment replicas*
 </Zoom>
 
@@ -55,7 +55,7 @@ kill 1
 The pod will automatically be restarted by OpenShift however if you refresh your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
 
 <Zoom>
-![parksmap-crash](/static/images/app-crash.gif)
+![parksmap-crash](/workshops/static/images/app-crash.gif)
 *Intentionally crashing the ParksMap application*
 </Zoom>
 
@@ -74,7 +74,7 @@ In the **Details** tab of the information pane click the **^ Increase the pod co
 Once the new pod is ready, repeat the steps from task `3.2` to crash one of the pods. You should see that the application continues to serve traffic thanks to our OpenShift **Service** load balancing traffic to the second **Pod**.
 
 <Zoom>
-![parksmap-scale](/static/images/app-scale.gif)
+![parksmap-scale](/workshops/static/images/app-scale.gif)
 *Scaling up the ParksMap application frontend*
 </Zoom>
 

@@ -40,7 +40,7 @@ tlsRoute: true
 ```
 
 <Zoom>
-![gitea-deployment](/static/images/gitea-deployment.gif)
+![gitea-deployment](/workshops/static/images/gitea-deployment.gif)
 *Gitea application deployment via helm chart*
 </Zoom>
 
@@ -62,7 +62,7 @@ Next, if we click on the overall gitea **Helm release** by clicking on the shade
 > Note: Feel free to try out a `oc explain <resource>` command in your web terminal to learn more about each of the resource types mentioned above, for example `oc explain service`.
 
 <Zoom>
-![helm-resources](/static/images/helm-resources.png)
+![helm-resources](/workshops/static/images/helm-resources.png)
 *Gitea helm release resources created*
 </Zoom>
 
@@ -83,7 +83,7 @@ We will be returned to the **Helm releases** view. Notice how the release status
 From here it is trivial to perform a **Rollback** to remove our misconfigured update. We'll do that in the next step.
 
 <Zoom>
-![helm-upgrade](/static/images/helm-upgrade.gif)
+![helm-upgrade](/workshops/static/images/helm-upgrade.gif)
 *Attempting a gitea helm upgrade*
 </Zoom>
 
@@ -100,7 +100,7 @@ Click the three dot menu to the right hand side of the that helm release and cli
 Select the radio button for revision `1` which should be showing a status of `Deployed`, then click **Rollback**.
 
 <Zoom>
-![helm-rollback](/static/images/helm-rollback.gif)
+![helm-rollback](/workshops/static/images/helm-rollback.gif)
 *Rolling back to a previous gitea helm release*
 </Zoom>
 
@@ -119,7 +119,7 @@ Click the three dot menu to the right hand side of the that helm release and cli
 Enter the `gitea` confirmation at the prompt and click **Delete**. If you now return to the **Topology** view you will see the gitea application deleting.
 
 <Zoom>
-![helm-delete](/static/images/helm-delete.gif)
+![helm-delete](/workshops/static/images/helm-delete.gif)
 *Deleting the gitea application helm release*
 </Zoom>
 
