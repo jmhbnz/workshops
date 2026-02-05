@@ -76,7 +76,7 @@ EOF
 
 for user in $(seq 1 30); do
     export user=${user}
-    oc new-project user"${user}"
+    oc new-project user"${user}" > /dev/null
     envsubst < operatorgroup.yaml | oc create --filename - --namespace user"${user}"
     oc adm policy add-role-to-user --namespace user"${user}" admin user"${user}"
 done
@@ -120,9 +120,9 @@ EOF
 
 #+RESULTS:
 #+begin_example
-namespace "openshift-gitops-operator" deleted
-operatorgroup.operators.coreos.com "openshift-gitops-operator" deleted from openshift-gitops-operator namespace
-subscription.operators.coreos.com "openshift-gitops-operator" deleted from openshift-gitops-operator namespace
+namespace/openshift-gitops-operator created
+operatorgroup.operators.coreos.com/openshift-gitops-operator created
+subscription.operators.coreos.com/openshift-gitops-operator created
 #+end_example
 
 
