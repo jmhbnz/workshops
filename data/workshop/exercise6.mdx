@@ -20,9 +20,9 @@ OpenShift runs the S2I process inside a special **Pod**, called a **Build Pod**,
 
 Deploying an application via an **Source to Image** is straightforward. Let's try it out.
 
-Start in the **+Add** view of the **Developer** perspective.
+Start by clicking **Quick create** in the top right corner.
 
-Click **Import from Git** under the **Git Repository** tile.
+Click **Import from Git**.
 
 **Source to Image** supports a number of popular programming languages as the source. For this example we will use **Python**.
 
@@ -45,14 +45,13 @@ Scroll down and under the **General** header click the **Application** drop down
 Scroll down reviewing the other options then click **Create**.
 
 <Zoom>
-|![s2i-build](/workshops/static/images/s2i-build.gif)                           |
-|:-------------------------------------------------------------------:|
-| *Creating a source to image build in OpenShift*                     |
+![s2i-build](/workshops/static/images/s2i-build.gif)
+*Creating a source to image build in OpenShift*
 </Zoom>
 
 ## 6.2 - Monitoring the build
 
-To see the build logs, in **Topology** view of the **Developer** perspective, click the nationalparks python icon, then click on **View Logs** in the **Builds** section of the **Resources** tab.
+To see the build logs, in **Topology** view of the **Workloads** perspective, click the nationalparks python icon, then click on **View Logs** in the **Builds** section of the **Resources** tab.
 
 Based on the application’s language, the build process will be different. However, the initial build will take a few minutes as the dependencies are downloaded. You can see all of this happening in real time!
 
