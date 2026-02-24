@@ -1,135 +1,168 @@
-#+TITLE: OpenShift Workshops
+#+TITLE: Openshift disconnected security & compliance workshop
+#+DATE: <2024-08-26 Mon>
 #+AUTHOR: James Blair
-#+DATE: <2024-07-24 Wed>
-
-This repository contains a basic [[https://nextjs.org/][nextjs]] frontend designed to be exported as a static site and served via [[https://pages.github.com/][github pages]].
-
-The frontend is used to serve workshop instructions for several workshops.
 
 
-* Setting up a cluster for the workshop
+This document captures the steps required to set up an instance of the workshop.
 
-The workshop expects an OpenShift 4.20 cluster with a few pre-requisites.
+* Connect to the low side instance
 
-** Add redhat-cop helm chart repository
-
-Required so the Gitea helm chart will be available for all users.
-
-#+begin_src bash
-cat << EOF | oc apply --filename -
-apiVersion: helm.openshift.io/v1beta1
-kind: HelmChartRepository
-metadata:
-  name: redhat-cop
-spec:
-  connectionConfig:
-    url: 'https://redhat-cop.github.io/helm-charts'
-  name: Red Hat Community
-EOF
-#+end_src
-
-#+RESULTS:
-: helmchartrepository.helm.openshift.io/redhat-cop created
-
-
-** Install web terminal operator
-
-So our workshop participants don't need to install ~oc~ locally.
-
-#+begin_src bash
-cat << EOF | oc apply --filename -
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: web-terminal
-  namespace: openshift-operators
-spec:
-  channel: fast
-  installPlanApproval: Automatic
-  name: web-terminal
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
-EOF
-#+end_src
-
-#+RESULTS:
-#+begin_example
-subscription.operators.coreos.com/web-terminal created
-#+end_example
-
-
-** Create an operatorgroup for each user
-
-We want each user to be able to install the same operator so we can pre-create namespaces and seed them with OperatorGroups to reduce complexity.
-
-#+begin_src bash
-cat << EOF > operatorgroup.yaml
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: grafana-og
-spec:
-  targetNamespaces:
-    - user$user
-  upgradeStrategy: Default
-EOF
-
-for user in $(seq 1 30); do
-    export user=${user}
-    oc new-project user"${user}" > /dev/null
-    envsubst < operatorgroup.yaml | oc create --filename - --namespace user"${user}"
-    oc adm policy add-role-to-user --namespace user"${user}" admin user"${user}"
-done
+#+begin_src tmux
+ssh lab-user@3.143.149.146
 #+end_src
 
 
-** Install openshift gitops operator
+* Install required tools low side
 
-Each user will deploy their own argocd instance so we need to install the openshift gitops operator for all namespaces.
+#+begin_src tmux
+cd /mnt/low-side-data/
+curl -L -o oc-mirror.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.35/oc-mirror.tar.gz
+tar -xzf oc-mirror.tar.gz
+rm -f oc-mirror.tar.gz
+chmod +x oc-mirror
+sudo cp -v oc-mirror /bin
+curl -L -o mirror-registry.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/mirror-registry/latest/mirror-registry.tar.gz
+curl -L -o openshift-install.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.35/openshift-install-linux.tar.gz
+tar -xzf openshift-install.tar.gz openshift-install
+rm -f openshift-install.tar.gz
+curl -L -o oc.tar.gz https://mirror.openshift.com/pub/openshift-v4/clients/ocp/4.14.19/openshift-client-linux.tar.gz
+tar -xzf oc.tar.gz oc
+rm -f oc.tar.gz
+sudo cp -v oc /bin
+ls -1 /mnt/low-side-data/
+#+end_src
 
-#+begin_src bash
-cat << EOF | oc apply --filename -
+
+* Mirror installation content low side
+
+#+begin_src tmux
+mkdir -v $HOME/.docker
+cp -v $HOME/pull-secret-example.json $HOME/.docker/config.json
+cat << EOF > /mnt/low-side-data/imageset-config.yaml
+---
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  local:
+    path: ./
+mirror:
+  platform:
+    channels:
+    - name: stable-4.14
+      type: ocp
+      minVersion: 4.14.35
+      maxVersion: 4.14.35
+  additionalImages:
+  - name: registry.redhat.io/rhel8/support-tools
+EOF
+cd /mnt/low-side-data
+oc-mirror --config imageset-config.yaml file:///mnt/low-side-data
+#+end_src
+
+
+* Install mirror registry high side
+
+#+begin_src tmux
+rsync -avP /mnt/low-side-data/mirror-registry.tar.gz highside:/mnt/high-side-data/
+ssh highside
+cd /mnt/high-side-data
+tar -xzvf mirror-registry.tar.gz
+./mirror-registry install --initPassword discopass
+#+end_src
+
+
+* Trust mirror registry high side
+
+#+begin_src tmux
+sudo cp -v $HOME/quay-install/quay-rootCA/rootCA.pem /etc/pki/ca-trust/source/anchors/
+sudo update-ca-trust
+podman login -u init -p discopass $(hostname):8443
+#+end_src
+
+
+* Transfer mirror content from low to high
+
+#+begin_src tmux
+exit
+rsync -avP /mnt/low-side-data/ highside:/mnt/high-side-data/
+ssh highside
+sudo mv -v /mnt/high-side-data/oc /bin/
+sudo mv -v /mnt/high-side-data/oc-mirror /bin/
+sudo mv -v /mnt/high-side-data/openshift-install /bin/
+cd /mnt/high-side-data
+oc-mirror --from=/mnt/high-side-data/mirror_seq1_000000.tar docker://$(hostname):8443
+#+end_src
+
+
+* Install openshift high side
+
+#+begin_src tmux
+cat << EOF > /mnt/high-side-data/install-config.yaml
+---
 apiVersion: v1
-kind: Namespace
 metadata:
-  name: openshift-gitops-operator
-
----
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: openshift-gitops-operator
-  namespace: openshift-gitops-operator
-spec:
-  upgradeStrategy: Default
-
----
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: openshift-gitops-operator
-  namespace: openshift-gitops-operator
-spec:
-  channel: latest
-  installPlanApproval: Automatic
-  name: openshift-gitops-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
+  name: disco
+baseDomain: lab
+compute:
+- architecture: amd64
+  hyperthreading: Enabled
+  name: worker
+  replicas: 0
+controlPlane:
+  architecture: amd64
+  hyperthreading: Enabled
+  name: master
+  replicas: 1
+  platform:
+    aws:
+      type: m5.8xlarge
+networking:
+  clusterNetwork:
+  - cidr: 10.128.0.0/14
+    hostPrefix: 23
+  machineNetwork:
+  - cidr: 10.0.0.0/16
+  networkType: OVNKubernetes
+  serviceNetwork:
+  - 172.30.0.0/16
+platform:
+  aws:
+    region: us-east-2
+    subnets:
+    - $(aws ec2 describe-subnets --output json | jq '.Subnets[0].SubnetId' -r)
+publish: Internal
+additionalTrustBundlePolicy: Always
 EOF
+if ! test -f "/mnt/high-side-data/id_rsa"; then
+    ssh-keygen -C "OpenShift Debug" -N "" -f /mnt/high-side-data/id_rsa
+fi
+echo "sshKey: $(cat /mnt/high-side-data/id_rsa.pub)" | tee -a /mnt/high-side-data/install-config.yaml
+echo "pullSecret: '$(jq -c . $XDG_RUNTIME_DIR/containers/auth.json)'" | tee -a /mnt/high-side-data/install-config.yaml
+if (test -e /mnt/high-side-data/oc-mirror-workspace/results-*/imageContentSourcePolicy.yaml)
+  then
+     echo -e "\n\n Looks good, go ahead! \n\n"
+   else
+     echo -e "\n\n Uh oh, something is wrong... \n\n"
+fi
+cat << EOF >> /mnt/high-side-data/install-config.yaml
+imageContentSources:
+$(grep "mirrors:" -A 2 --no-group-separator /mnt/high-side-data/oc-mirror-workspace/results-*/imageContentSourcePolicy.yaml)
+EOF
+tail -22 /mnt/high-side-data/install-config.yaml
+cat << EOF >> /mnt/high-side-data/install-config.yaml
+additionalTrustBundle: |
+$(sed 's/^/  /' /home/lab-user/quay-install/quay-rootCA/rootCA.pem)
+EOF
+cat /mnt/high-side-data/install-config.yaml
+cp -v /mnt/high-side-data/install-config.yaml /mnt/high-side-data/install-config.yaml.backup
+openshift-install create cluster --dir /mnt/high-side-data
 #+end_src
 
-#+RESULTS:
-#+begin_example
-namespace/openshift-gitops-operator created
-operatorgroup.operators.coreos.com/openshift-gitops-operator created
-subscription.operators.coreos.com/openshift-gitops-operator created
-#+end_example
 
+* Disable default catalog sources high side
 
-** Scale cluster worker nodes
-
-We are going to have ~25 workshop attendees all deploying applications, let's ensure the cluster has enough capacity to handle it!
-
-#+begin_src bash
-oc scale machineset cluster-xxz98-mk8x7-worker-ap-southeast-1b -n openshift-machine-api --replicas 10
+#+begin_src tmux
+oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)" --insecure-skip-tls-verify=true
+oc patch OperatorHub cluster --type merge -p '{"spec": {"disableAllDefaultSources": true}}'
+oc create -f /mnt/high-side-data/oc-mirror-workspace/results-*/catalogSource-cs-redhat-operator-index.yaml
 #+end_src

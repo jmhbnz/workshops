@@ -1,116 +1,150 @@
 ---
-title: Scaling and self-healing applications
+title: Install operators on a disconnected cluster
 exercise: 3
-date: '2026-01-30'
-tags: ['openshift','containers','kubernetes','deployments','autoscaling']
+date: '2024-08-27'
+tags: ['openshift','operators','operator-hub','disconnected']
 draft: false
 authors: ['default']
-summary: "Let's scale our application up 📈"
+summary: "Operators?!? 🤔 - Think app store for Kubernetes 🌟"
 ---
 
-We have our application deployed, let's scale it up to make sure it will be resilient to failures.
+The disconnected OpenShift cluster you have been allocated is the result of a standard installation using the IPI install method, and does not have any post installation features added.
 
-While **Services** provide discovery and load balancing for **Pods**, the higher level **Deployment** resource specifies how many replicas (pods) of our application will be created and is a simplistic way to configure scaling for the application.
+In a broad sense many OpenShift features are added via [Operators](https://www.redhat.com/en/technologies/cloud-computing/openshift/what-are-openshift-operators). Operators automate the creation, configuration, and management of instances of Kubernetes-native applications. Operators can provide automation at every level of the stack—from managing the parts that make up the platform all the way to applications that are provided as a managed service.
 
-> Note: To learn more about **Deployments** refer to this [documentation](https://docs.openshift.com/container-platform/4.20/applications/deployments/what-deployments-are.html).
+In the previous exercise we mirrored some new operator bundles into our disconnected network. In this exercise we'll install those operators and explore the features they provide us via [Custom Resource Definitions](https://kubernetes.io/docs/concepts/extend-kubernetes/api-extension/custom-resources) they provide.
 
-## 3.1 - Reviewing the parksmap deployment
+> Note: For some trivia, Red Hat created and open sourced the [Operator Framework](https://github.com/operator-framework), then later contributed the project to the Cloud Native Computing Foundation in 2021, ensuring all organisations can benefit from our experience building and supporting operator driven clusters since ~2016.
+> 
+> ![workshop](/workshops/static/images/compliance/operator-framework.png)
 
-Let's start by confirming how many `replicas` we currently specify for our ParksMap application. We'll also use this exercise step to take a look at how all resources within OpenShift can be viewed and managed as [YAML](https://www.redhat.com/en/topics/automation/what-is-yaml) formatted text files which is extremely useful for more advanced automation and GitOps concepts.
 
-Start in the **Topology** view of the web console.
+## 3.1 - Installing compliance operator
 
-Click on your "Parksmap" application icon and click on the **D parksmap** deployment name at the top of the right hand panel.
+First up let's install the [Red Hat OpenShift Compliance Operator](https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-overview.html).
 
-From the **Deployment details** view we can click on the **YAML** tab and scroll down to confirm that we only specify `1` replica for the ParksMap application currently.
+For some brief context the Compliance Operator assists platform teams by automating the inspection of numerous technical implementations and compares those against certain aspects of industry standards. For our purposes today that industry standard will be **NIST 800-53**.
 
-```yaml
+The Compliance Operator assesses compliance of both the Kubernetes API resources of OpenShift Container Platform, as well as the nodes running the cluster. The Compliance Operator uses [OpenSCAP](https://www.open-scap.org), a NIST-certified tool, to scan and enforce security policies provided by the content.
+
+To install the operator we can use either the OpenShift Web Console, or the terminal with `oc` cli. In this workshop we will install the operator with the Web Console using our vnc browser tab. Thanks to our previous exercise mirroring content and making it available via the cluster disconnected OperatorHub catalogs we can enjoy the same user experience to install the operator as if our cluster was fully connected.
+
+1. Open your vnc browser tab and return to the OpenShift Web Console browser tab you opened in the previous exercise.
+2. Click on the **Compliance Operator** in **OperatorHub** to open the right hand panel, then click the blue **Install** button at the top of the panel.
+3. On the install details screen stick with all the default values and simply click **Install**
+4. After a short wait the Compliance Operator will be installed and ready for use 🎉
+
+<Zoom>
+|![workshop](/workshops/static/images/compliance/install-compliance-operator.gif)         |
+|:-----------------------------------------------------------------------------:|
+| *Install OpenShift Compliance Operator*                                       |
+</Zoom>
+
+With the Compliance Operator installed feel free to explore which new Custom Resources the Operator makes available. We'll return to these in future exercises to begin using them.
+
+
+## 3.2 - Installing the rhacs operator
+
+Next up we'll install the [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes) Operator.
+
+Red Hat Advanced Cluster Security (RHACS) has direct integration with the Compliance Operator to provide a frontend user experience for running compliance scans along with viewing results.
+
+To try the alternative operator installation method this time we will install the operator via the `oc` cli in our terminal.
+
+Run the commands below in your terminal session to create the required `Namespace` and `Subscription` resources which will trigger the operator installation.
+
+```bash
+cat << EOF | oc apply --filename -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rhacs-operator
 spec:
-  replicas: 1
+  finalizers:
+  - kubernetes
+
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: rhacs-operator
+  namespace: rhacs-operator
+
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhacs-operator
+  namespace: rhacs-operator
+spec:
+  channel: stable
+  installPlanApproval: Automatic
+  name: rhacs-operator
+  source: cs-redhat-operator-index
+  sourceNamespace: openshift-marketplace
+  startingCSV: rhacs-operator.v4.5.1
+EOF
 ```
+
+If you check back on your web console, after a short wait the **Advanced Cluser Security for Kubernetes** operator should now show as `✅ Succeeded`.
 
 <Zoom>
-![parksmap-replicas](/workshops/static/images/app-replicas.gif)
-*ParksMap application deployment replicas*
+|![workshop](/workshops/static/images/compliance/installed-operators-1.png)               |
+|:-----------------------------------------------------------------------------:|
+| *List of installed operators*                                                 |
 </Zoom>
 
-## 3.2 - Intentionally crashing the application
 
-With our ParksMap application only having one pod replica currently it will not be tolerant to failures. OpenShift will automatically restart the single pod if it encounters a failure, however during the time the application pod takes to start back up our users will not be able to access the application.
+## 3.3 - Installing the developer hub operator
 
-Let's see that in practice by intentionally causing an error in our application.
+The final operator we will install for this workshop relates to [Red Hat Developer Hub](https://developers.redhat.com/rhdh/overview).
 
-Start in the **Topology** view of the **Workloads** perspective and click your Parksmap application icon.
+Red Hat Developer Hub is an Internal Developer Portal (IDP) based on the upstream [Backstage](https://backstage.io) project initially created at Spotify. With Red Hat Developer Hub combined with Red Hat OpenShift we can enable platform engineering teams to offer software templates and pre-architected and supported approaches to make life easier for development teams, ease onboarding and reduce friction and frustration.
 
-In the **Resources** tab of the information pane open a second browser tab showing the ParksMap application **Route** that we explored in the previous exercise. The application should be running as normal.
-
-Click on the pod name under the **Pods** header of the **Resources** tab and then click on the **Terminal** tab. This will open a terminal within our running ParksMap application container.
-
-Inside the terminal run the following to intentionally crash the application:
+We'll also install the Red Hat Developer Hub using the `oc` cli in our terminal.  Run the commands below in your terminal session to create the required `Namespace` and `Subscription` resources which will trigger the operator installation.
 
 ```bash
-kill 1 
+cat << EOF | oc apply --filename -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: rhdh-operator
+spec:
+  finalizers:
+  - kubernetes
+
+---
+apiVersion: operators.coreos.com/v1
+kind: OperatorGroup
+metadata:
+  name: rhdh-operator
+  namespace: rhdh-operator
+
+---
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: rhdh
+  namespace: rhdh-operator
+spec:
+  channel: fast
+  installPlanApproval: Automatic
+  name: rhdh
+  source: cs-redhat-operator-index
+  sourceNamespace: openshift-marketplace
+  startingCSV: rhdh-operator.v1.1.1
+EOF
 ```
 
-The pod will automatically be restarted by OpenShift however if you refresh your second browser tab with the application **Route** you should be able to see the application is momentarily unavailable.
+If you check back on your web console, after a short wait the **Red Hat Developer Hub** operator should now show as `✅ Succeeded`.
 
 <Zoom>
-![parksmap-crash](/workshops/static/images/app-crash.gif)
-*Intentionally crashing the ParksMap application*
+|![workshop](/workshops/static/images/compliance/installed-operators-2.png)               |
+|:-----------------------------------------------------------------------------:|
+| *List of installed operators*                                                 |
 </Zoom>
 
-## 3.3 - Scaling up the application
+If all three operators are now installed congratulations you are ready to move on to Exercise 4 🎉
 
-As a best practice, wherever possible we should try to run multiple replicas of our pods so that if one pod is unavailable our application will continue to be available to users.
-
-Let's scale up our application and confirm it is now fault tolerant.
-
-In the **Topology** view of the **Workloads** perspective click your Parksmap application icon.
-
-In the **Details** tab of the information pane click the **^ Increase the pod count** arrow to increase our replicas to `2`.  You will see the second pod starting up and becoming ready.
-
-> Note: You can also scale the replicas of a deployment in automated and event driven fashions in response to factors like incoming traffic or resource consumption, or by using the `oc` cli for example `oc scale --replicas=2 deployment/parksmap`.
-
-Once the new pod is ready, repeat the steps from task `3.2` to crash one of the pods. You should see that the application continues to serve traffic thanks to our OpenShift **Service** load balancing traffic to the second **Pod**.
-
-<Zoom>
-![parksmap-scale](/workshops/static/images/app-scale.gif)
-*Scaling up the ParksMap application frontend*
-</Zoom>
-
-## 3.4 - Self healing to desired state
-
-In the previous example we saw what happened when we intentionally crashed our application. Let's see what happens if we just outright delete one of our ParksMap applications two **Pods**.
-
-For this step we'll use the `oc` command line utility to build some more familiarity.
-
-Let's start by launching back into our web terminal now by clicking the terminal button in the top right hand corner and then clicking **Start** with our `userX` project selected.
-
-Once our terminal opens let's check our list of **Pods** with `oc get pods`. You should see something similar to the output below:
-
-```bash
-bash-5.1 ~ $ oc get pods
-NAME                                         READY   STATUS    RESTARTS   AGE
-parksmap-ff7477dc4-2nxd2                     1/1     Running   0          79s
-parksmap-ff7477dc4-n26jl                     1/1     Running   0          31m
-workspace45c88f4d4f2b4885-74b6d4898f-57dgh   2/2     Running   0          108s
-```
-
-Copy one of the pod names and delete it via `oc delete pods <podname>`, i.e `oc delete pod parksmap-ff7477dc4-2nxd2`.
-
-```bash
-bash-5.1 ~ $ oc delete pod parksmap-ff7477dc4-2nxd2
-pod "parksmap-ff7477dc4-2nxd2" deleted
-```
-
-If we now run `oc get pods` again we will see a new **Pod** has automatically been created by OpenShift to replace the one we fully deleted. This is because OpenShift is a container orchestration engine that will always try and enforce the desired state that we declare.
-
-In our ParksMap **Deployment** we have declared we always want two replicas of our application running at all times. Even if we (possibly accidentally) delete one, OpenShift will always attempt to self heal to return to our desired state.
-
-## 3.5 - Bonus objective: Autoscaling
-
-Before moving on feel free to take a moment to review the concepts of [HorizontalPodAutoscaling](https://docs.openshift.com/container-platform/4.20/nodes/pods/nodes-pods-autoscaling.html), [VerticalPodAutoscaling](https://docs.openshift.com/container-platform/4.20/nodes/pods/nodes-pods-vertical-autoscaler.html) and [Cluster autoscaling](https://docs.openshift.com/container-platform/4.20/machine_management/applying-autoscaling.html).
-
-Well done, you've finished exercise 3! 🎉
-
-Feel free to explore these concepts further and when you're ready you can move on to [Exercise 4](/workshop/exercise4).

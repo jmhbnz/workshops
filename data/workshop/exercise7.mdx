@@ -1,90 +1,76 @@
 ---
-title: Optional - Deploying an application via gitops
+title: Bonus - Making the most of rhacs
 exercise: 7
-date: '2024-07-25'
-tags: ['openshift','containers','kubernetes','argocd','gitops']
-draft: true
+date: '2024-09-02'
+tags: ['openshift','rhacs','container','security']
+draft: false
 authors: ['default']
-summary: "Keen to explore a more advanced deployment pattern?"
+summary: "Optional challenge - if you have time"
 ---
-  
 
-Now that you've had a taste of most of the more basic deployment methods let's introduce the concept of [GitOps](https://www.redhat.com/en/topics/devops/what-is-gitops) and deploy an application using this more advanced approach.
+So you've deployed Red Hat Advanced Cluster Security and completed some day one configuration. Now what?? One of the key day two activities for RHACS in a disconnected environment is ensuring you can keep the vulnerability database up to date.
 
-In simple terms GitOps uses Git repositories as a single source of truth to deliver applications or infrastructure as code. Whenever you merge or push code into a specifc Git branch in a repository, an GitOps continuous delivery tool such as [ArgoCD](https://argo-cd.readthedocs.io/en/stable) can then automatically sync that to one or more Kubernetes clusters.
+At a high level, the RHACS **Scanner** component maintains a database of vulnerabilities. When Red Hat Advanced Cluster Security for Kubernetes (RHACS) runs in normal mode, **Central** retrieves the latest vulnerability data from the internet, and Scanner retrieves vulnerability data from Central.
 
-<Zoom>
-|![argocd](/workshops/static/images/argocd-ui.gif)                              |
-|:-------------------------------------------------------------------:|
-| *ArgoCD user interface*                                             |
-</Zoom>
+However, if you are using RHACS in offline mode, **you must manually update the vulnerability data**. To manually update the vulnerability data, you must upload a definitions file to Central, and Scanner then retrieves the vulnerability data from Central.
 
-For many organisations GitOps is a goal deployment methodology as application definitions, configurations, and environments should ideally be declarative and version controlled. Application deployment and lifecycle management should be automated, auditable, and easy to understand.
+In both online and offline mode, Scanner checks for new data from Central every `5` minutes by default. In online mode, Central also checks for new data from the internet approximately every `5-20` minutes.
 
-Since 2021 OpenShift has included a fully supported [OpenShift GitOps](https://www.redhat.com/en/blog/announcing-openshift-gitops) operator, based on the upstream ArgoCD project.
+The offline data source is updated approximately every 3 hours. After the data has been uploaded to Central, Scanner downloads the data and updates its local vulnerability database.
 
-This operator has already been installed on your cluster so let's take it for a spin now! 🚀
 
-## 7.1 - Deploy openshift gitops
+## 7.1 - Update rhacs definitions with roxctl
 
-To get started with OpenShift GitOps we will need an instance of ArgoCD deployed.
+To update the definitions in offline mode, perform the following steps:
 
-Click the **+** button in the top right corner menu bar of the OpenShift web console. This is a fast way to quickly import snippets of YAML for testing or exploration purposes.
+1. Download the definitions.
+2. Upload the definitions to Central. 
 
-Paste the below snippet of YAML into the editor and replace the instance of `userX` with your assigned user.
+As a challenge, try following the documentation https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html/configuring/enable-offline-mode#download-scanner-definitions_enable-offline-mode to perform the update.
 
-Click **Create**. In a minute or so you should see the ArgoCD instance running successfully in your project.
+> Note: I suggest exploring `roxctl` CLI as the method for downloading updates in your low side environment. You could then copy both `roxctl` and the definitions update to your high side environment and use `roxtctl` once more (this time with an API token) in order to update the definitions.
 
-```bash
-apiVersion: argoproj.io/v1beta1
-kind: ArgoCD
-metadata:
-  finalizers:
-  - argoproj.io/finalizer
-  name: argocd
-  namespace: userX
-spec:
-  rbac:
-    defaultPolicy: role:admin
-    scopes: '[groups]' 
-  server:
-    route:
-      enabled: true
-  sso:
-    dex:
-      openShiftOAuth: true
-    provider: dex
-```
 
-## 7.2 Login to argocd
+## 7.2 - Prioritise security remediation by risk
 
-With ArgoCD running let's open the route in a new tab in our browser and click **Log in with OpenShift**.  You can retrieve the ~Route~ by running the following command in your web terminal:
+Completed your vulnerability definitions update? Awesome! Feel free to explore some of the other features of Red Hat Advanced Cluster Security using your web based vnc session and the RHACS dashboard.
 
-```bash
-oc get route argocd-server
-```
+Let’s take a look at the **Risk** view, where we go beyond the basics of vulnerabilities to understand how deployment configuration and runtime activity impact the likelihood of an exploit occurring and how successful those exploits will be.
 
 <Zoom>
-|![argocd login](/workshops/static/images/argocd-login.png)                     |
-|:-------------------------------------------------------------------:|
-| *ArgoCD login*                                                      |
+|![workshop](/workshops/static/images/compliance/acs-risk.png)                            |
+|:-----------------------------------------------------------------------------:|
+| *Understanding risk exposure in Red Hat Advanced Cluster Security*            |
 </Zoom>
 
-## 7.3 Deploy an application
+Risk is also influenced by runtime activity - and Deployments that have activity that could indicate a breach in progress have a red dot on the left. Obviously - the first one in the list should be our first focus.
 
-Now that you're logged into ArgoCD, have a go at creating a new `Application` using the ArgoCD web interface by clicking **+ New App**. The workload we'll deploy is a new mission critical training simulator called "Quake 3 Arena".
+The reality of security is that it’s just not possible to tackle all sources of Risk, so organizations end up prioritizing their efforts. We want RHACS to help inform that prioritization.
 
-Use the following values for your Application:
+As a challange have a go at mirroring and deploying a new additional container image into your disconnected environment repeating steps we completed earlier. Try creating a deployment for that image to bring it up on your cluster, the **Developer** perspective in the OpenShift Web Console can save you some time here.
 
-|Field|Value|
-|-----|-----|
-|Name |`quake`|
-|Project|`default`|
-|Repository URL|`https://github.com/jmhbnz/workshops`|
-|Path|`data/app-delivery`|
-|Cluster URL| `https://kubernetes.default.svc`|
-|Namespace|`userX`|
+Once the container is running, use the RHACS dashboard to check what the deployments risk level is? What are the factors contributing to that?
 
-## 7.4 Access the mission critical simulator - challenge
 
-Your final challenge for this exercise is to access the mission critical training simulator by creating a `Route`.
+## 7.3 - Exploring the rhacs policy engine
+
+Red Hat Advanced Cluster Security for Kubernetes allows you to use out-of-the-box security policies and define custom multi-factor policies for your container environment.
+
+Configuring these policies enables you to automatically prevent high-risk service deployments in your environment and respond to runtime security incidents.
+
+All of the policies that ship with the product are designed with the goal of providing targeted remediation that improves security hardening.
+
+Take some time to reivew the default policies by clicking **Platform Configuration** > **Policy Management**. You’ll see this list contains many **Build** and **Deploy** time policies to catch misconfigurations early in the pipeline, but also **Runtime** policies that point back to specific hardening recommendations.
+
+These policies come from us at Red Hat - our expertise, our interpretation of industry best practice, and our interpretation of common compliance standards, but you can modify them or create your own.
+
+If you have some time take a look at the options for editing default policies to change their enforcement behavior or scope.
+
+<Zoom>
+|![workshop](/workshops/static/images/compliance/acs-policies.png)                        |
+|:-----------------------------------------------------------------------------:|
+| *Policy management in Red Hat Advanced Cluster Security*                      |
+</Zoom>
+
+
+If you're ready for a different topic, head over to Exercise 8, for the final tasks today to deploy Red Hat Developer Hub 🙂

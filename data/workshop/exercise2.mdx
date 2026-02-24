@@ -1,116 +1,228 @@
 ---
-title: Deploying your first application
+title: Mirror required content
 exercise: 2
-date: '2026-01-29'
-tags: ['openshift','containers','kubernetes','deployments','images']
+date: '2024-08-23'
+tags: ['oc-mirror','mirror-registry','openshift','disconnected']
 draft: false
 authors: ['default']
-summary: "Time to deploy your first app!"
+summary: "You want features? Mirror them in!🪞"
 ---
 
-Now that we have had a tour of the OpenShift web console to get familiar, let's use the web console to deploy our first application.
+The disconnected OpenShift cluster you have been allocated is the result of a standard installation for a private cluster on AWS using the [IPI install method](https://docs.openshift.com/container-platform/4.14/installing/installing_aws/installing-aws-private.html#installing-aws-private), and does not have any post installation features added.
 
-Let’s start by doing the simplest thing possible - get a plain old [OCI](https://opencontainers.org) format container image to run on OpenShift. This is incredibly simple to do. With OpenShift it can be done directly from the web console.
+During this workshop we want to secure the cluster with Red Hat Advanced Cluster Security, understand our compliance posture against [NIST 800-53](https://csrc.nist.gov/pubs/sp/800/53/r5/upd1/final) with the OpenShift Compliance Operator and then explore some bonus activities like deploying Red Hat Developer Hub.
 
-Before we begin, if you would like a bit more background on what a container is or why they are important click the following link to learn more: [https://www.redhat.com/en/topics/containers#overview](https://www.redhat.com/en/topics/containers#overview)
-
-## 2.1 - Deploying the container image
-
-In this exercise, we’re going to deploy the **web** component of the ParksMap application which uses OpenShift's service discovery mechanism to discover any accompanying backend services deployed and shows their data on the map. Below is a visual overview of the complete ParksMap application.
+To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
 
 <Zoom>
-![parksmap-architecture](/workshops/static/images/parksmap-architecture.png)
-*ParksMap application architecture*
+|![workshop](/workshops/static/images/compliance/workshop-environment.svg)                |
+|:-----------------------------------------------------------------------------:|
+| *Workshop environment summary*                                                |
 </Zoom>
 
-Click the **Quick create** button in the top right menu and select **Container images**.
 
-In the **Image name from external registry** field enter the following:
+## 2.1 - Open a terminal on your low side
 
-```text
-quay.io/openshiftroadshow/parksmap:latest
+Our first step to prepare to mirror content is to get connected to our low side jump host via `ssh`. You can use the web terminal link in your browser or alternatively your own local terminal with the command below (replacing the placeholder ip with the one you have been allocated). 
+
+```bash
+ssh lab-user@<ip address>
 ```
 
-Leave all other fields at their defaults (but take your time to scroll down and review each one to familiarise yourself! 🎓)
+You'll be prompted to enter a password which you can find in your allocated environment details.
 
-Click **Create** to deploy the application.
+After connecting change directory to the low side workspace where the intial cluster installation was already completed for you and review the folder contents:
 
-OpenShift will create a [`Deployment`](https://docs.openshift.com/container-platform/4.20/applications/deployments/what-deployments-are.html) that will pull this container image if it does not exist already on the cluster and create a [`Pod`](https://docs.openshift.com/container-platform/4.20/nodes/pods/nodes-pods-using.html) that our container will run inside. You will be taken back to the **Topology** view in the web console which will show the new "Parksmap" application.
+```bash
+cd /mnt/low-side-data
+
+ls -lah
+```
+
+Your workspace will look similar to the one below:
+
+```bash
+[lab-user@jump low-side-data]$ ls -lah
+total 21G
+drwxr-xr-x. 4 lab-user lab-user 4.0K Sep  2 12:46 .
+drwxr-xr-x. 3 root     root       27 Aug 31 22:00 ..
+-rw-r--r--. 1 lab-user lab-user  305 Sep  2 12:38 imageset-config.yaml
+-rw-r--r--. 1 lab-user lab-user 696M Sep  2 12:37 mirror-registry.tar.gz
+-rw-r--r--. 1 lab-user lab-user  20G Sep  2 12:46 mirror_seq1_000000.tar
+-rwxr-xr-x. 1 lab-user lab-user 146M Mar 26 22:17 oc
+-rwxr-x--x. 1 lab-user lab-user 144M Aug  7 06:30 oc-mirror
+-rw-------. 1 lab-user lab-user 160K Sep  2 12:41 .oc-mirror.log
+drwxr-xr-x. 3 lab-user lab-user   17 Sep  2 12:38 oc-mirror-workspace
+-rwxr-xr-x. 1 lab-user lab-user 631M Aug  7 07:40 openshift-install
+drwxr-x---. 2 lab-user lab-user   28 Sep  2 12:46 publish
+```
+
+
+## 2.2 - Get familiar with oc-mirror
+
+To mirror content into our disconnected environment we will be using the [`oc-mirror`](https://github.com/openshift/oc-mirror) openshift client utility.
+
+To configure what content `oc-mirror` will download and mirror for us we use a YAML formatted file called an `ImageSetConfiguration`. This file declares:
+
+1. **What to download** which can include (OpenShift itself, operator bundles, helm charts, or specific container images)
+2. **What versions of each item to download**
+3. **Where to store the downloaded content**
+
+The `oc-mirror` utility also has some features for listing available content for mirroring, let's try that now! Run the following commands in your ssh terminal:
+
+```bash
+# List available openshift release versions
+oc-mirror list releases
+
+# List operator catalogs for a specific openshift release
+oc-mirror list operators --catalogs --version=4.14
+
+# List all operators in a specific catalogs
+oc-mirror list operators --catalog registry.redhat.io/redhat/redhat-operator-index:v4.14
+```
+
+Using the built in help have a go at using `oc-mirror` to identify details of a specific operator.
+
+We can also use the `oc-mirror` utility to understand the state of any existing mirror content bundles. We have a content bundle called `mirror_seq1_000000.tar` available from the initial installation of your OpenShift cluster, let's inspect that now.
+
+```bash
+oc-mirror describe mirror_seq1_000000.tar | more
+```
+
+This bundle archive was created by the `oc-mirror` utility using the configuration file called `imageset-config.yaml` which is also in the same directory. Let's review that file:
+
+```bash
+cat imageset-config.yaml
+```
+
+Your file should look something like the example below, we can see the the `4.14.35` version of OpenShift is specified to be downloaded, along with the `registry.redhat.io/rhel8/support-tools` additional standalone container image.
+
+```yaml
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  local:
+    path: ./
+mirror:
+  platform:
+    channels:
+    - name: stable-4.14
+      type: ocp
+      minVersion: 4.14.35
+      maxVersion: 4.14.35
+
+  additionalImages:
+  - name: registry.redhat.io/rhel8/support-tools
+```
+
+
+## 2.3 - Confirm local cache is up to date
+
+A local cache of content already exists from when the cluster installation was initially performed in advance of this workshop. Let's confirm everything is still up to date by re-running the `oc-mirror` command specifying our configuration file and the location on our disk.
+
+```bash
+oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
+```
+
+> Note: This command may take several minutes to complete but should complete with `No new images detected, process stopping` to confirm the existing cache is up to date.
+
+
+## 2.4 - Add new mirror content
+
+For our workshop exercises today we need to mirror some additional operators, namely the **OpenShift Compliance Operator**, **Red Hat Advanced Cluster Security**, and **Red Hat Developer Hub**. Run the command below to update your `imageset-config.yaml` file to match the example below
+
+```bash
+cat << EOF > /mnt/low-side-data/imageset-config.yaml
+kind: ImageSetConfiguration
+apiVersion: mirror.openshift.io/v1alpha2
+storageConfig:
+  local:
+    path: ./
+mirror:
+  platform:
+    channels:
+    - name: stable-4.14
+      type: ocp
+      minVersion: 4.14.35
+      maxVersion: 4.14.35
+  operators:
+  - catalog: registry.redhat.io/redhat/redhat-operator-index:v4.14
+    packages:
+    - name: rhdh
+      channels:
+      - name: fast
+        minVersion: '1.1.1'
+        maxVersion: '1.1.1'
+    - name: compliance-operator
+      channels:
+      - name: stable
+    - name: rhacs-operator
+      channels:
+      - name: stable
+  additionalImages:
+  - name: registry.redhat.io/rhel8/support-tools
+  helm: {}
+EOF
+```
+
+After updating the configuration file we can re-run our `oc-mirror` command to bring the new content into our local collection on disk in `/mnt/low-side-data`.
+
+```bash
+oc-mirror --config imageset-config.yaml file:///mnt/low-side-data --verbose 3
+```
+
+> Note: This command may take up to 10 minutes to complete depending on connection speeds.
+
+
+## 2.5 - Mirror updated content to high side registry
+
+Once the local mirror update has completed we now need to transfer this content to our high side and mirror it from disk into the OpenShift Mirror Registry running in our disconnected high side.
+
+In this workshop we will use `rsync` to copy our content to our high side system, let's do that now:
+
+```bash
+rsync -avP /mnt/low-side-data/ highside:/mnt/high-side-data/
+```
+
+> Note: `oc-mirror` creates incremental mirror content files in order to prevent duplicating content. You will notice your low side mirror workspace includes a new file `mirror_seq2_000000.tar` which is significantly smaller than the original mirror archive.
+
+Once the transfer has completed we need to log into our high side disconnected system and run `oc-mirror` from that side to upload the content from the new archive into our disconnected container registry
+
+```bash
+ssh highside
+```
+
+```bash
+cd /mnt/high-side-data
+podman login -u init -p discopass $(hostname):8443
+oc-mirror --from=/mnt/high-side-data/mirror_seq2_000000.tar docker://$(hostname):8443
+```
+
+## 2.6 - Verify new operators are available
+
+After a couple of minutes the mirror process will complete. We then need to tell OpenShift about the new content that is available by running the commands below.
+
+```bash
+oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)" --insecure-skip-tls-verify=true
+for file in $(find ./oc-mirror-workspace -type f -name '*.yaml'); do oc apply -f $file; done
+```
+
+> Note: In our `oc-mirror-workspace` directory each time we mirror new content a new `results-<id>` directory will be created which may contain `imageContentSourcePolicy.yaml` or `catalogSource-cs-<index>.yaml` files which we need to apply to our cluster to tell it about the new content that is available.
+
+Once the updates are applied we can then check that our new operators are available in the OpenShift Web Console using our browser based vnc session:
+
+1. Open your vnc browser tab
+2. Use the left menu panel, click **Settings** and then select **Remote Resizing** as the scaling mode to improve viewing experience.
+3. Click **Connect** and when prompted enter the password in your environment spreadsheet row, then click **Send credentials**.
+4. A Firefox browser window should already be open, you can manually start if using the top left applications menu if needed.
+5. Click the bookmark toolbar option for **DISCO - OpenShift**.
+6. Log in when prompted with the username **kubeadmin** and the kubeadmin password listed in your environment spreadsheet (you can also find this password in your highside bastion ssh session by running `cat /mnt/high-side-data/auth/kubeadmin-password`). Note that to paste in the web based vnc session you need to use the left hand panel to pass the clipboard content through to the session.
+7. Navigate to **Operators** on the left menu, and then click **OperatorHub**, you should see the newly mirrored operators are now available in your disconnected cluster!
 
 <Zoom>
-![first-app](/workshops/static/images/first-app.gif)
-*Deploying the container image*
+|![workshop](/workshops/static/images/compliance/check-operators.gif)                     |
+|:-----------------------------------------------------------------------------:|
+| *Check disconnected operator hub*                                             |
 </Zoom>
 
-## 2.2 - Reviewing our deployed application
-
-If you click on the **parksmap** entry in the **Topology** view, you will see some information about that deployed application.
-
-The **Resources** tab may be displayed by default. If so, click on the **Details** tab. On that tab, you will see that there is a single `Pod` that was created by your actions.
-
-<Zoom>
-![app-details](/workshops/static/images/app-details.gif)
-*Reviewing deployment details*
-</Zoom>
-
-> Note: A pod is the smallest deployable unit in Kubernetes and is effectively a grouping of one or more individual containers. Any containers deployed within a pod are guaranteed to run on the same machine. It is very common for pods in kubernetes to only hold a single container, although sometimes auxiliary services can be included as additional containers in a pod when we want them to run directly alongside our application container.
-
-## 2.3 - Accessing the application
-
-Now that we have the ParksMap application deployed. How do we access it??
-
-This is where OpenShift [`Routes`](https://docs.openshift.com/container-platform/4.20/networking/routes/route-configuration.html) and [`Services`](https://docs.openshift.com/container-platform/4.20/rest_api/network_apis/service-v1.html) come in.
-
-While **Services** provide internal abstraction and load balancing within an OpenShift cluster, sometimes clients outside of the OpenShift cluster need to access an application. The way that external clients are able to access applications running in OpenShift is through an OpenShift **Route**.
-
-You may remember that when we deployed the ParksMap application, there was a checkbox ticked to automatically create a **Route**. Thanks to this, all we need to do to access the application is go the **Resources** tab of the application details pane and click the url shown under the **Routes** header.
-
-<Zoom>
-![app-details](/workshops/static/images/app-route.gif)
-*Opening ParksMap application Route*
-</Zoom>
-
-Clicking the link you should now see the ParksMap application frontend 🎉
-
-> Note: If this is the first time opening this page, the browser will ask permission to get your position. This is needed by the Frontend app to center the world map to your location, if you don’t allow it, it will just use a default location.
-
-<Zoom>
-![app-frontend](/workshops/static/images/app-frontend.png)
-*ParksMap application frontend*
-</Zoom>
-
-## 2.4 - Checking application logs
-
-If we deploy an application and something isn't working the way we expect, reviewing the application logs can often be helpful. OpenShift includes built in support for reviewing application logs.
-
-Let's try it now for our ParksMap frontend.
-
-In the web console **Workload** perspective, open the **Topology** view.
-
-Click your "Parksmap" application icon then click on the **Resources** tab.
-
-From the **Resources** tab click **View logs**
-
-<Zoom>
-![app-logs](/workshops/static/images/app-logs.gif)
-*Accessing the ParksMap application logs*
-</Zoom>
-
-## 2.5 - Checking application resource usage
-
-Another essential element of supporting applications on OpenShift is understanding what resources the application is consuming, for example cpu, memory, network bandwidth and storage io.
-
-OpenShift includes built in support for reviewing application resource usage. Let's take a look at that now.
-
-In the web console **Observe** perspective, open the **Dashboards** view.
-
-How much cpu and memory is your ParksMap application currently using?
-
-<Zoom>
-![app-logs](/workshops/static/images/app-resources.gif)
-*Checking the ParksMap application resource usage*
-</Zoom>
-
-You've finished exercise 2, awesome! 🎉
-
-Feel free to explore these concepts further and when you're ready you can move on to [Exercise 3](/workshop/exercise3).
+If your mirroring has completed successfully you are ready to move on to exercise 3 and install the three new operators 🎉

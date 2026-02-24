@@ -1,93 +1,174 @@
 ---
-title: Deploying an application from source
+title: Retrieving raw compliance results
 exercise: 6
-date: '2026-02-03'
-tags: ['openshift','containers','kubernetes','s2i','shipwright']
+date: '2024-09-02'
+tags: ['openshift','compliance','nist-800-53','scanning']
 draft: false
 authors: ['default']
-summary: "Exploring alternative deployment approaches."
+summary: "Need to integrate results with another platform? No problem!"
 ---
 
-Often as a team supporting applications on OpenShift the decision of which deployment method to use will be out of your hands instead be determined by the vendor, organisation or team producing the application in question.
+Often organisations will have dedicated software for managing governance, risk and compliance or need to provide results to external auditors. In these situations while the dashboards within Red Hat Advanced Cluster Security, or `ComplianceCheckResult` objects in the OpenShift APIServer are helpful, what we really need to do is integrate these results into our third party compliance management platform or pass results in a standardised format to third parties.
 
-However, for an interesting scenario let's explore the possibility of what we could do if there is no existing deployment tooling in place and all we are given is a codebase in a git repository.
+In this exercise, we'll briefly step through retrieving raw compliance results, in the well known **Asset Reporting Framework** (ARF) format.
 
-This is where the concept of **Source to Image** or "s2i" comes in. OpenShift has built in support for building container images using source code from an existing repository. This is accomplished using the [source-to-image](https://github.com/openshift/source-to-image) project.
+The Asset Reporting Format is a data model to express the transport format of information about assets, and the relationships between assets and reports. The standardized data model facilitates the reporting, correlating, and fusing of asset information throughout and between organizations. ARF is vendor and technology neutral, flexible, and suited for a wide variety of reporting applications.
 
-OpenShift runs the S2I process inside a special **Pod**, called a **Build Pod**, and thus builds are subject to quotas, limits, resource scheduling, and other aspects of OpenShift. A full discussion of S2I is beyond the scope of this class, but you can find more information about it in the [OpenShift S2I documentation](https://docs.openshift.com/container-platform/4.20/openshift_images/create-images.html).
+For more details on the format specification refer to https://www.nist.gov/publications/specification-asset-reporting-format-11
 
-## 6.1 - Starting a source to image build
 
-Deploying an application via an **Source to Image** is straightforward. Let's try it out.
+## 6.1 - Understanding raw result storage
 
-Start by clicking **Quick create** in the top right corner.
+When the Compliance Operator runs a scan, raw results are stored in a `PersistentVolume`. The following `oc` command shows the mapping `PersistentVolume` name for a given scan name.
 
-Click **Import from Git**.
-
-**Source to Image** supports a number of popular programming languages as the source. For this example we will use **Python**.
-
-Enter `https://github.com/openshift-roadshow/nationalparks-py.git` for the **Git Repo URL**.
-
-OpenShift will automatically guess the git server type and the programming language used by the source code. You will be now asked to select an **Import Strategy**.  You have three options:
-
-- Devfile: this will use Devfile v2 spec to create an application stack. The repo has to contain a file named `devfile.yaml` in the Devfile v2 format.
-
-- Dockerfile: this will create a Container image from an existing Dockerfile.
-
-- Builder Image: this will use a mechanism called Source-to-Image to create automatically a container image directly from the source code.
-
-Select **Builder Image** strategy as we are going to create the container image directly from the source code.
-
-Select **Python** as the **Builder Image** type and **Python 3.9-ubi8** as the **Builder Image Version**.
-
-Scroll down and under the **General** header click the **Application** drop down and select **Create application** entering **workshop** as the name.
-
-Scroll down reviewing the other options then click **Create**.
-
-<Zoom>
-![s2i-build](/workshops/static/images/s2i-build.gif)
-*Creating a source to image build in OpenShift*
-</Zoom>
-
-## 6.2 - Monitoring the build
-
-To see the build logs, in **Topology** view of the **Workloads** perspective, click the nationalparks python icon, then click on **View Logs** in the **Builds** section of the **Resources** tab.
-
-Based on the application’s language, the build process will be different. However, the initial build will take a few minutes as the dependencies are downloaded. You can see all of this happening in real time!
-
-From the `oc` command line utility, you can also see **Builds**, let's open our **Web Terminal** back up and take a look:
+Let's use our scan name that we set up previously, `daily-nist-800-53-moderate`:
 
 ```bash
-oc get builds
+ oc get --namespace openshift-compliance compliancesuites daily-nist-800-53-moderate --output json | jq '.status.scanStatuses[].resultsStorage'
 ```
 
-You will see output similar to the example below:
+We should see results showing the name of each `PersistentVolume` for each profile that was scanned, below is an example:
+
+```json
+{
+  "name": "ocp4-moderate",
+  "namespace": "openshift-compliance"
+}
+{
+  "name": "ocp4-moderate-node-master",
+  "namespace": "openshift-compliance"
+}
+{
+  "name": "ocp4-moderate-node-worker",
+  "namespace": "openshift-compliance"
+}
+```
+
+We can view the details of these `PersistentVolumes` as follows:
+
 
 ```bash
-NAME                     TYPE     FROM          STATUS     STARTED         DURATION
-nationalparks-py-git-1   Source   Git@f87895b   Complete   7 minutes ago   48s
+oc get pvc --namespace openshift-compliance ocp4-moderate
 ```
 
-Let's also take a look at the logs from the `oc` command line with:
+
+## 6.2 - Retrieving results from a volume
+
+Let's retrieve some specific results files from a volume by mounting the volume into a pod, and then using `oc` to copy the volume contents to our highside ssh host.
+
+We can create a pod using the `rhel8/support-tools` additional image that was mirrored into our disconnected environment.
+
+> Note: Note the use of the pinned sha256 image digest below rather than standard image tags, this is a requirement of the mirroring process.
 
 ```bash
-oc logs -f builds/nationalparks-py-git-1
+cat << EOF | oc --namespace openshift-compliance apply --filename -
+apiVersion: "v1"
+kind: Pod
+metadata:
+  name: pv-extract
+spec:
+  containers:
+    - name: pv-extract-pod
+      image: registry.redhat.io/rhel8/support-tools@sha256:ab42416e9e3460f6c6adac4cf09013be6f402810fba452ea95bd717c3ab4076b
+      command: ["sleep", "3000"]
+      volumeMounts:
+      - mountPath: "/ocp4-moderate-scan-results"
+        name: ocp4-moderate-scan-vol
+  volumes:
+    - name: ocp4-moderate-scan-vol
+      persistentVolumeClaim:
+        claimName: ocp4-moderate
+EOF
 ```
 
-After the build has completed and successfully:
+> Note: Spawning a pod that mounts the `PersistentVolume` will keep the claim as `Bound`. If the volume’s storage class in use has permissions set to `ReadWriteOnce`, the volume is only mountable by one pod at a time. You must delete the pod upon completion, or it will not be possible for the Operator to schedule a pod and continue storing results in this location.
 
-- The S2I process will push the resulting image to the internal OpenShift image registry.
+With the volume mounted we can copy the results out to our machine:
 
-- The Deployment (D) will detect that the image has changed, and this will cause a new deployment to happen.
+```bash
+mkdir /mnt/high-side-data/compliance-results
+oc cp pv-extract:/ocp4-moderate-scan-results --namespace openshift-compliance .
+```
 
-- A ReplicaSet (RS) will be spawned for this new deployment.
+After the copy has completed we should delete our helper pod to unbind the volume:
 
-- The ReplicaSet will detect no Pods are running and will cause one to be deployed, as our default replica count is just 1.
+```bash
+oc delete pod pv-extract --namespace openshift-compliance
+```
 
-To conclude, when issuing the `oc get pods` command, you will see that the build **Pod** has finished (exited) and that an application **Pod** is in a ready and running state.
 
-## 6.3 - Bonus objective: Podman
+## 6.3 - Reviewing raw result files
 
-If you have time, take a while to understand how [Podman](https://developers.redhat.com/articles/2022/05/02/podman-basics-resources-beginners-and-experts) can be used to build container images on your device outside of an OpenShift cluster.
+Now that we have a copy of the raw result files, let's see what they look like.
 
-Awesome you've finished exercise 6! 🎉
+Starting with an `ls -lah` in our highside terminal we can see each scan result is stored in a numbered directory, yours should look similar to the example below:
+
+```bash
+drwxr-xr-x. 5 lab-user lab-user   42 Sep  1 20:35 .
+drwxr-xr-x. 7 lab-user lab-user 4.0K Sep  1 20:28 ..
+drwxr-xr-x. 2 lab-user lab-user   52 Sep  1 20:35 0
+drwxr-xr-x. 2 lab-user lab-user   52 Sep  1 20:35 1
+drwxr-xr-x. 2 lab-user lab-user    6 Sep  1 20:35 lost+found
+```
+
+If we take a look at one of the specific directories with `ls -lah compliance-results/1/` we'll see an archive file:
+
+```bash
+-rw-r--r--. 1 lab-user lab-user 251K Sep  1 20:35 ocp4-moderate-api-checks-pod.xml.bzip2
+```
+
+Let's drop into that directory and extract it now to take a look at the contents, run the commands below in your highside ssh terminal:
+
+> Note: If you get an error from the `bunzip2` command below you may need to first install it with `sudo yum install --yes bzip2`.
+
+```bash
+cd /mnt/high-side-data/compliance-results/1
+bunzip2 ocp4-moderate-api-checks-pod.xml.bzip2
+mv ocp4-moderate-api-checks-pod.xml.bzip2.out ocp4-moderate-api-checks-pod.xml
+ls -lah
+```
+
+Now we're getting somewhere, we can see we have `.xml` file. Let's take a quick peek at the contents:
+
+```bash
+head ocp4-moderate-api-checks-pod.xml
+```
+
+You should see an xml document snippet similar to the example below:
+
+```xml
+  <core:relationships xmlns:arfvocab="http://scap.nist.gov/specifications/arf/vocabulary/relationships/1.0#">
+    <core:relationship type="arfvocab:createdFor" subject="xccdf1">
+      <core:ref>collection1</core:ref>
+    </core:relationship>
+    <core:relationship type="arfvocab:isAbout" subject="xccdf1">
+      <core:ref>asset0</core:ref>
+    </core:relationship>
+  </core:relationships>
+```
+
+
+## 6.4 - Generating reports with openscap tooling
+
+To finish off this exercise let's go one step further and use OpenSCAP tooling to generate an html based report we can open in our vnc Firefox browser.
+
+Run the commands below in your high side terminal, we'll start by installing the `openscap-scanner` package.
+
+```bash
+sudo yum install -y openscap-scanner
+```
+
+One the tooling is installed let's generate the report:
+
+```bash
+oscap xccdf generate report ocp4-moderate-api-checks-pod.xml > report.html
+```
+
+So far we've done all this on our high side terminal. We need to get this report artifact to our low side server where our Firefox vnc session is running, let's copy it out now:
+
+```bash
+exit # Return to low side server
+rsync highside:/mnt/high-side-data/compliance-results/1/report.html /home/lab-user/Downloads/report.html
+```
+
+Finally - we can open up our report in our web based Firefox vnc session! Once you've reviewed the report you can move on to exercise 7 🚀

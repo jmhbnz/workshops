@@ -1,130 +1,216 @@
 ---
-title: Deploying an application via operator
+title: Running a cluster compliance scan
 exercise: 5
-date: '2026-02-02'
-tags: ['openshift','containers','kubernetes','operator-framework']
+date: '2024-09-01'
+tags: ['openshift','compliance','nist-800-53','scanning']
 draft: false
 authors: ['default']
-summary: "Exploring alternative deployment approaches."
+summary: "Let's check our cluster compliance against NIST 800-53 👀"
 ---
 
-Another alternative approach for deploying and managing the lifecycle of more complex applications is via the [Operator Framework](https://operatorframework.io).
+We've done the work to set the OpenShift Compliance Operator and Red Hat Advanced Cluster Security up on our cluster, now let's make the most of it by using them to schedule and run a compliance scan on our cluster.
 
-The goal of an **Operator** is to put operational knowledge into software. Previously this knowledge only resided in the minds of administrators, various combinations of shell scripts or automation software like Ansible. It was outside of your Kubernetes cluster and hard to integrate. **Operators** change that.
+For the scan we'll be using the included `NIST 800-53 Moderate-Impact Baseline for Red Hat OpenShift` and `NIST 800-53 Moderate-Impact Baseline for Red Hat OpenShift - Node level` scan profiles that are included with the OpenShift Compliance Operator.
 
-**Operators** are the missing piece of the puzzle in Kubernetes to implement and automate common Day-1 (installation, configuration, etc.) and Day-2 (re-configuration, update, backup, failover, restore, etc.) activities in a piece of software running inside your Kubernetes cluster, by integrating natively with Kubernetes concepts and APIs.
+Two scan profiles are required as we need to scan both the OpenShift cluster, as well as each individual node running [RHEL CoreOS](https://docs.openshift.com/container-platform/4.14/architecture/architecture-rhcos.html).
 
-With Operators you can stop treating an application as a collection␃of primitives like **Pods**, **Deployments**, **Services** or **ConfigMaps**, but instead as a singular, simplified custom object that only exposes the specific configuration values that make sense for the specific application.
+For more details on these compliance profiles please take some time to review:
 
-## 5.1 - Deploying an operator
+- https://static.open-scap.org/ssg-guides/ssg-ocp4-guide-moderate.html
+- https://static.open-scap.org/ssg-guides/ssg-ocp4-guide-moderate-node.html
+- https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-operator-supported-profiles.html
 
-Deploying an application via an **Operator** is generally a two step process. The first step is to deploy the **Operator** itself.
 
-Once the **Operator** is installed we can deploy the application.
+## 5.1 - Scheduling a scan
 
-For this exercise we will install the **Operator** for the [Grafana](https://grafana.com) observability platform.
+There are two methods you can use to schedule Compliance Operator scans:
 
-Let's start by copying the following YAML snippet to your clipboard:
+1. Creating a `ScanSetting` and `ScanSettingBinding` custom resource. This does not require Red Hat Advanced Cluster Security, and can be easily managed by GitOps, however is not beginner friendly and lacks any graphical frontend to easily explore cluster compliance status. For an overview of this approach please take a few minutes to review https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-scans.html#compliance-operator-scans
+2. Creating a **Scan Schedule** in Red Hat Advanced Cluster Security. This is the approach we will be using in this workshop as it is the most intuitive option.
 
-```yaml
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  name: grafana-operator
-  namespace: userX
-spec:
-  channel: v5
-  installPlanApproval: Automatic
-  name: grafana-operator
-  source: community-operators
-  sourceNamespace: openshift-marketplace
-```
+Complete the steps below to create your scan schedule:
 
-Click the **Quick create** button in the top right menu and select **Import YAML**. This is a fast way to quickly import snippets of YAML for testing or exploration purposes. 
-
-Paste the above snippet of YAML into the editor and replace the instance of `userX` with your assigned user.
-
-Click **Create**. In a minute or so you should see the Grafana operator installed and running in your project.
+1. Return to your browser tab in the vnc session with the Red Hat Advanced Cluster Security dashboard open.
+2. Navigate to **Compliance** > **Schedules** in the left hand menu.
+3. Click the blue **Create Scan Schedule** button in the middle of the screen.
+4. Enter the name `daily-nist-800-53-moderate` and set the **Time** field to `00:00` then click **Next**.
+5. On the next screen select your `hub` cluster, then click **Next**.
+6. On the profile screen tick `ocp4-moderate` and `ocp4-moderate-node`, then click **Next**.
+7. Click **Next** once more on the **Reports** screen and the click **Save**.
 
 <Zoom>
-![operator-deployment](/workshops/static/images/operator-deployment.gif)
-*Deploying grafana operator via static yaml*
+|![workshop](/workshops/static/images/compliance/compliance-scan-results.gif)             |
+|:-----------------------------------------------------------------------------:|
+| *Creating a compliance scan schedule in Red Hat Advanced Cluster Security*    |
 </Zoom>
 
-## 5.2 - Deploying an operator driven application
+After creating the scan schedule results will be shortly available in the RHACS console. While we wait for the automatically triggered initial scan to complete, let's use the `oc` cli to review the `ScanSetting` that was created behind the scenes when we created the **Scan Schedule** in the RHACS dashboard.
 
-With our Grafana operator now running it will be listening for the creation of a `grafana` custom resource. When one is detected the operator will deploy the Grafana application according to the specifcation we supplied.
+Run the commands below to review your `ScanSetting` resource:
 
-Let's switch over to the **Ecosystem** perspective for this next task to deploy our Grafana instance.
+```bash
+oc get scansetting --namespace openshift-compliance daily-nist-800-53-moderate
 
-Under the **Ecosystem** perspective in the left hand menu click on **Installed Operators**.
+oc get scansetting --namespace openshift-compliance daily-nist-800-53-moderate --output yaml
+```
 
-In the **Installed Operators** list you should see a **Grafana Operator** entry, click into that.
-
-On the **Operator details** screen you will see a list of "Provided APIs". These are custom resource types that we can now deploy with the help of the operator.
-
-Click on **Create instance** under the provided API titled `Grafana`.
-
-On the next **Create Grafana** screen click on **YAML View** radio button and enter the following, replacing the two instances of `userX` with your assigned user then click **Create**.
+You should see details output similar to the example below. Notice the more advanced settings available in the custom resource including `rawResultsStorage.rotation` and `roles[]` which you may want to customize in your environment.
 
 ```yaml
-apiVersion: grafana.integreatly.org/v1beta1
-kind: Grafana
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ScanSetting
+maxRetryOnTimeout: 3
 metadata:
+  annotations:
+    owner: stackrox
   labels:
-    dashboards: grafana
-    folders: grafana
-  name: grafana
-  namespace: userX
-spec:
-  config:
-    auth:
-      disable_login_form: 'false'
-    log:
-      mode: console
-    security:
-      admin_password: example
-      admin_user: example
-  route:
-    spec:
-      tls:
-        termination: edge
-      host: grafana-userX.apps.cluster-nxzsx.dynamic.redhatworkshops.io
+    app.kubernetes.io/created-by: sensor
+    app.kubernetes.io/managed-by: sensor
+    app.kubernetes.io/name: stackrox
+  name: daily-nist-800-53-moderate
+  namespace: openshift-compliance
+rawResultStorage:
+  pvAccessModes:
+  - ReadWriteOnce
+  rotation: 3
+  size: 1Gi
+roles:
+- master
+- worker
+scanTolerations:
+- operator: Exists
+schedule: 0 0 * * *
+showNotApplicable: false
+strictNodeScan: false
+suspend: false
+timeout: 30m0s
 ```
 
-<Zoom>
-![grafana-deployment](/workshops/static/images/grafana-deployment.gif)
-*Deploying grafana application via the grafana operator*
-</Zoom>
 
-## 5.3 Logging into the application
+## 5.2 - Review cluster compliance
 
-Let's now take a look at a couple of views to confirm our newly deployed Grafana application is running as expected.
+Once your cluster scan completes return to your vnc browser tab with the Red Hat Advanced Cluster Security Dashboard open. We'll take a look at our overall cluster compliance now against the compliance profile.
 
-For our first step click on the **Workloads** perspective on the left hand side menu and then click the **Pods** view.
+> Note: Please be aware of the usage disclaimer shown at the top of the screen *"Red Hat Advanced Cluster Security, and its compliance scanning implementations, assists users by automating the inspection of numerous technical implementations that align with certain aspects of industry standards, benchmarks, and baselines. It does not replace the need for auditors, Qualified Security Assessors, Joint Authorization Boards, or other industry regulatory bodies."*.
 
-We should see that a `grafana-deployment-<id>` pod with a **Status** of `Running`.
+Navigate to **Compliance** > **Coverage** and review the overall result for the `ocp4-moderate` and `ocp4-moderate-node` profiles. The results should look something similar to the examples below:
 
 <Zoom>
-![grafana-pod](/workshops/static/images/grafana-pod.png)
-*Confirming the grafana pod is running*
+|![workshop](/workshops/static/images/compliance/compliance-scan-results-1.png)           |
+|:-----------------------------------------------------------------------------:|
+| *Compliance scan results in Red Hat Advanced Cluster Security*                |
 </Zoom>
-
-Now that we know the Grafana application **Pod** is running let's open the application and confirm we can log in.
-
-Click the **Networking** perspective on the left hand side menu and then click on the **Routes** view.
-
-Click the **Route** named `grafana-route` and open the url on the right hand side under the **Location** header.
-
-Once the new tab opens we should be able to login to Grafana using the credentials we supplied in the previous step in the YAML configuration.
 
 <Zoom>
-![grafana-route](/workshops/static/images/grafana-route.gif)
-*Confirming the grafana route is working*
+|![workshop](/workshops/static/images/compliance/compliance-scan-results-2.png)           |
+|:-----------------------------------------------------------------------------:|
+| *Compliance scan results in Red Hat Advanced Cluster Security*                |
 </Zoom>
 
-## 5.4 - Bonus objective: Grafana dashboards
+Your cluster should come out compliant with ~65% of the `ocp4-moderate` profile and ~93% of the `ocp4-moderate-node` profile. Not a bad start, let's review an example of an individual result now.
 
-If you have time, take a while to learn about the [grafana dashboards](https://grafana.com/grafana/dashboards) and how Grafana can be used to visualise just about anything.
 
-Well done, you've finished exercise 5!, onwards to the [final exercise](/workshop/exercise6) 🎉
+## 5.3 - Review indvidual `Manual` compliance results
+
+Reviewing the detailed results any checks that are not passing will either be categorised as `Failing` or `Manual`. While we do everthing we can to automate the compliance process there are still a small number of controls you need to manage outside the direct automation of the Compliance Operator.
+
+Looking at the `ocp4-moderate` results for our `hub` cluster. A good example of a `Manual` check is `ocp4-moderate-accounts-restrict-service-account-tokens`. Let's get an overview of the check, the rationale and our instructions to address it manually by clicking into that check in the list, and opening the **Details** tab. You can jump directly to it with this url: https://central-acs-central.apps.disco.lab/main/compliance/coverage/profiles/ocp4-moderate/checks/ocp4-moderate-accounts-restrict-service-account-tokens?detailsTab=Details
+
+<Zoom>
+|![workshop](/workshops/static/images/compliance/compliance-scan-results-3.png)           |
+|:-----------------------------------------------------------------------------:|
+| *Compliance scan result details in Red Hat Advanced Cluster Security*         |
+</Zoom>
+
+We can see in this example it's essentially a judgement call. Our instructions are:
+
+> For each pod in the cluster, review the pod specification and ensure that pods that do not need to explicitly communicate with the API server have `automountServiceAccountToken` configured to `false`.
+
+Now just because this check is classified as `Manual`, does not mean that we are now all on our own. There are extremely powerful policy engine & policy violation tracking features in RHACS that we can use investigate the status of this check further.
+
+A default policy is available out of the box called **Pod Service Account Token Automatically Mounted**. By default this policy is in **Inform only** mode, which means deployments that violate this policy will not be prevented by the RHACS admission controller, or scaled down if already running by the RHACS runtime protection. However we can still use this policy as is to inform on the current state of any cluster in our fleet that is secured by RHACS.
+
+1. First let's navigate to **Platform Configuration** > **Policy Management** in the left hand menu.
+2. In the Policy list scroll down to find **Pod Service Account Token Automatically Mounted** and click the policy title.
+3. Have a read of the policy details, then scroll down to review the **Scope exclusions**. You will see Red Hat has already done some work for you to define some standard OpenShift cluster control plane deployments which do need the token mounted and are safely & intentionally excluded from the policy to save you time.
+4. The policy should already be enabled so let's click on **Violations** in the left hand menu to review any current instances where this policy is currently being violated. You should have one entry in the list for the `kube-rbac-proxy`. This is actually a standard openshift pod in the `openshift-machine-config-operator` namespace, and does actually require the api token mounted, so we could safely add this deployment to our policy exclusions.
+
+<Zoom>
+|![workshop](/workshops/static/images/compliance/rhacs-violation-exclude.gif)             |
+|:-----------------------------------------------------------------------------:|
+| *Reviewing a policy & policy violations in Red Hat Advanced Cluster Security* |
+</Zoom>
+
+At this point as a platform engineer we have some flexibility about how we handle this particular compliance check, one option would be to switch the **Pod Service Account Token Automatically Mounted** policy to `Inform & enforce` mode, to prevent any future deployments to any cluster in your fleet secured by RHACS from having this common misconfiguration. As a result of implementing this mitigation you could consider adjusting the compliance profile to remove or change the priority of this `Manual` check as desired. Refer to https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-operator-tailor.html
+
+## 5.4 - Review individual `Failed` compliance results 
+
+For our last task on this exercise let's review a `Failed` check, and apply the corresponding remediation automatically to improve our compliance posture.
+
+This time, rather than using the RHACS Dashboard we'll review the check result and apply the remediation using our terminal and `oc` cli.
+
+Let's start by retrieving one of our failed checks:
+
+```bash
+oc get ComplianceCheckResult --namespace openshift-compliance ocp4-moderate-api-server-encryption-provider-cipher --output yaml
+```
+
+Each `ComplianceCheckResult` represents a result of one compliance rule check. If the rule can be remediated automatically, a `ComplianceRemediation` object with the same name, owned by the `ComplianceCheckResult` is created. Unless requested, the remediations are not applied automatically, which gives an OpenShift Container Platform administrator the opportunity to review what the remediation does and only apply a remediation once it has been verified.
+
+> Note: Not all `ComplianceCheckResult` objects create `ComplianceRemediation` objects. Only `ComplianceCheckResult` objects that can be remediated automatically do. A `ComplianceCheckResult` object has a related remediation if it is labeled with the `compliance.openshift.io/automated-remediation` label.
+
+Let's inspect the corresponding `ComplianceRemediation` for this check:
+
+```bash
+oc get ComplianceRemediation --namespace openshift-compliance ocp4-moderate-api-server-encryption-provider-cipher --output yaml
+```
+
+You should see output similar to the example below. We can see in the `spec:` that it essentially contains a yaml resource patch for our `APIServer` resource named `cluster` to specify `spec.encryption.type` be set to `aescbc`.
+
+```yaml
+apiVersion: compliance.openshift.io/v1alpha1
+kind: ComplianceRemediation
+metadata:
+  annotations:
+    compliance.openshift.io/xccdf-value-used: var-apiserver-encryption-type
+  labels:
+    compliance.openshift.io/scan-name: ocp4-moderate
+    compliance.openshift.io/suite: daily-nist-800-53-moderate
+  name: ocp4-moderate-api-server-encryption-provider-cipher
+  namespace: openshift-compliance
+spec:
+  apply: false
+  current:
+    object:
+      apiVersion: config.openshift.io/v1
+      kind: APIServer
+      metadata:
+        name: cluster
+      spec:
+        encryption:
+          type: aescbc
+  outdated: {}
+  type: Configuration
+status:
+  applicationState: NotApplied
+```
+
+Let's apply this automatic remediation now: 
+
+```bash
+oc --namespace openshift-compliance patch complianceremediation/ocp4-moderate-api-server-encryption-provider-cipher --patch '{"spec":{"apply":true}}' --type=merge
+```
+
+> Note: This remediation has impacts for pods in the `openshift-apiserver` namespace. If you check those pods quickly with an `oc get pods --namespace openshift-apiserver` you will notice a rolling restart underway.
+
+Now it's time for some instant gratification. Let's bring up this compliance check in our vnc browser tab with the RHACS dashboard open by going to: https://central-acs-central.apps.disco.lab/main/compliance/coverage/profiles/ocp4-moderate/checks/ocp4-moderate-api-server-encryption-provider-cipher?detailsTab=Results
+
+You will see it currently shows as `Failed`. We can trigger a re-scan with the `oc` command below in our terminal:
+
+> Note: Due to the api server rolling restart when this remediation was applied you may need to perform a fresh terminal login with `oc login https://api.disco.lab:6443 --username kubeadmin -p "$(more /mnt/high-side-data/auth/kubeadmin-password)" --insecure-skip-tls-verify=true`
+
+```bash
+oc --namespace openshift-compliance annotate compliancescans/ocp4-moderate compliance.openshift.io/rescan=
+```
+
+Hitting refresh, the check should now report `Pass`, and our overall percentage compliance against the baseline should have also now increased. Congratulations, time to move on to exercise 6 🚀
