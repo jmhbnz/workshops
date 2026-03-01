@@ -47,7 +47,7 @@
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
     "cross-env": "^10.1.0",
-    "dedent": "^1.7.1",
+    "dedent": "^1.7.2",
     "eslint": "^9.39.2",
     "eslint-config-next": "16.1.6",
     "eslint-config-prettier": "^10.1.8",
