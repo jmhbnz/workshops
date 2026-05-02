@@ -55,7 +55,7 @@
     "file-loader": "^6.2.0",
     "globby": "16.1.1",
     "husky": "^9.1.7",
-    "inquirer": "^13.3.2",
+    "inquirer": "^13.4.2",
     "lint-staged": "^16.4.0",
     "next-remote-watch": "^2.0.0",
     "prettier": "^3.8.1",
