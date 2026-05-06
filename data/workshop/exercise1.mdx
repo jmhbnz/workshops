@@ -1,40 +1,45 @@
 ---
-title: Understanding our lab environment
+title: Understanding our workshop environment
 exercise: 1
-date: '2024-08-22'
-tags: ['ssh','novnc','workshop','setup']
+date: '2026-05-07'
+tags: ['openshift','security']
 draft: false
 authors: ['default']
-summary: "Let's get familiar with our lab setup."
+summary: "Let's get familiar with our workshop setup."
 ---
 
-Welcome to the OpenShift 4 Disconnected security & compliance workshop! Here you'll learn about operating a secure and compliant OpenShift 4 cluster in a disconnected network using the following key OpenShift features:
+Welcome to the OpenShift security workshop! Here you'll be able to practice your prowess responding to a security breach and making security posture improvements in a safe environment.
 
-- [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes)
-- [Red Hat OpenShift Compliance Operator](https://www.redhat.com/en/blog/a-guide-to-openshift-compliance-operator-best-practices)
-
-To level set, [Red Hat OpenShift](https://www.redhat.com/en/technologies/cloud-computing/openshift) is a unified platform to build, modernize, and deploy applications at scale. OpenShift supports running in disconnected networks, though this does change the way the cluster operates because key ingredients like container images, operator bundles, and helm charts must be brought into the environment from the outside world via mirroring.
-
-There are of course many different options for installing OpenShift in a restricted network; this workshop will not cover the deployment of a cluster, instead you will have an existing installed cluster allocated to you which has been created in advance. Your tasks during this workshop will be to improve the security and compliance of the cluster and workloads running on it.
-
+ 
 **Let's get started!**
 
 
-## 1.1 - Reserve a lab environment
+## 1.1 - The workshop scenario
 
-An OpenShift `4.14` cluster has already been provisioned for you to complete these excercises. To reserve an environment go to [this Google Sheets spreadsheet](https://docs.google.com/spreadsheets/d/1tddgRA6suefTaITyRx87IoRCfCJ7El9Hdr6HB8K7Mvo/edit?usp=sharing). Update your name next to an `Available` environment and change the status to `Allocated`.
+For this hands on workshop, we're going to be in the shoes of ACME Financial Services, a large bank operating in New Zealand. They run a significant number of customer facing workloads on OpenShift and have a small core team of platform engineers supporting the platform.
+
+![acme](/workshops/static/images/fsi-security/acme.png)
+
+
+## 1.2 - Understanding the environment
+
+For this workshop you'll be given access to the ACME Financial Services Production OpenShift `4.21` cluster.
+
+You can and are encouraged to use any supporting documentation or other resources in order to tackle each of the workshop tasks.
 
 <Zoom>
-|![workshop](/workshops/static/images/compliance/environments.png)                        |
-|:-----------------------------------------------------------------------------:|
-| *Workshop environment worksheet*                                              |
+![cluster](/workshops/static/images/security/cluster.png)
+ *OpenShift cluster console*
 </Zoom>
 
 
-## 1.2 - Login via ssh and vnc
+## 1.3 - Obtain your environment
 
-To complete the lab exercises you'll use a mix of an `ssh` terminal session for running OpenShift client `oc` commands, and then a browser based vnc session in order to access the OpenShift cluster web console.
+To get underway open your web browser and navigate to this link to allocate an environment for your team https://catalog.demo.redhat.com/workshop/w949g
 
-Links to a browser based terminal and vnc session are available in the spreadsheet, along with any credentials required. You are welcome to use your own terminal or vnc software if you prefer.
+Register for an environment using any email address and password provided by your workshop organisers. 
 
-Once you have both a terminal and vnc session working you're ready to get underway with the workshop, please move on to exercise 2 🚀
+<Zoom>
+![workshop](/workshops/static/images/security/workshop.png)
+*Workshop registration page*
+</Zoom>
