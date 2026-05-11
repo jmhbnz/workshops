@@ -10,9 +10,24 @@ summary: "The call no-one wants to get"
 
 The phone buzzed angrily on the nightstand. It was 02:14 AM. Sarah, squinted at the caller ID: *ACME SOC Incident Team*.
 
-> "Sarah, we have a problem," the voice on the other end said frantically. "Our automated anomaly detection just flagged highly irregular egress traffic coming from the `payment-gateway` namespace on the `acme-prod` cluster! We think a threat actor has breached the container, you need to get online right now!!
+> Sarah, It's Morgan from Infosec, we have a problem, the voice on the other end said frantically. Our automated anomaly detection just flagged highly irregular egress traffic coming from the `payment-gateway` namespace on the `acme-prod` cluster! We think a threat actor has breached the container, you need to get online right now!!
 
 Sarah threw open her laptop and immediately connected to the bank's VPN, trying to keep calm and shake off sleep brain fog as a sense of panic set in...
 
 ![incident-call](/workshops/static/images/fsi-security/sarah-call.png)
 
+
+## 2.1 - Identify the compromised credentials
+
+Now online and frantically loading the OpenShift Web Console for the `acme-prd` cluster along with additional tabs for observability tools Sarah keeps Morgan updated with her progress.
+
+> Ok I'm logged in, do you want me to kill the pod? What do we do??
+
+> Whatever you do, don't kill the pod yet!  Warns Morgan - we'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? What credential are they using Sarah??  We need to know if this is bigger than just one pod or not.
+
+> We'll need to track that down in the OpenShift Audit Logs Sarah stammers back, give me a few minutes to hunt through the logs.
+
+
+Documentation you may find helpful is:
+
+- https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view
