@@ -8,9 +8,9 @@ authors: ['default']
 summary: "The call no-one wants to get"
 ---
 
-The phone buzzed angrily on the nightstand. It was 02:14 AM. Sarah, squinted at the caller ID: *ACME SOC Incident Team*.
+The phone vibrated angrily on the wooden nightstand. It was 02:14 AM. Sarah, squinted at the caller ID: *ACME SOC Incident Team*.
 
-> Sarah, It's Morgan from Infosec, we have a problem, the voice on the other end said frantically. Our automated anomaly detection just flagged highly irregular egress traffic coming from the `payment-gateway` namespace on the `acme-prod` cluster! We think a threat actor has breached the container, you need to get online right now!!
+> Sarah, It's Morgan from Infosec, sorry to call you out but we have a big f*%$@*^* problem, the voice on the other end said frantically. Our automated anomaly detection just flagged highly irregular egress traffic coming from the `payment-gateway` namespace on the `acme-prod` cluster! We think a threat actor has breached the container, you need to get online right now!!
 
 Sarah threw open her laptop and immediately connected to the bank's VPN, trying to keep calm and shake off sleep brain fog as a sense of panic set in...
 
@@ -28,6 +28,20 @@ Now online and frantically loading the OpenShift Web Console for the `acme-prd` 
 > We'll need to track that down in the OpenShift Audit Logs Sarah stammers back, give me a few minutes to hunt through the logs.
 
 
+
+## 2.2 Another pair of eyes
+
+With everything happening so quickly Sarah opens a case with Red Hat support to confirm their initial findings around the use of a compromised credential and ensure she did not miss anything.
+
+Let's run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [](https://access.redhat.com/support/cases/#/case/new). For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
+
+```bash
+oc adm must-gather -- /usr/bin/gather_audit_logs
+```
+
 Documentation you may find helpful is:
 
-- https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view
+- [](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view)
+
+![support-case](/workshops/static/images/fsi-security/sarah-support.png)
+

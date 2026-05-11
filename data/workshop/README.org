@@ -13,6 +13,17 @@ source .env
 oc login "${OCP_API_URL}" --username "${OCP_USERNAME}" --password "${OCP_PASSWORD}" --insecure-skip-tls-verify
 #+end_src
 
+#+RESULTS: Login to openshift cluster
+#+begin_example
+WARNING: Using insecure TLS client config. Setting this option is not supported!
+
+Login successful.
+
+You have access to 126 projects, the list has been suppressed. You can list all projects with 'oc projects'
+
+Using project "default".
+#+end_example
+
 
 * Cluster themeing
 
@@ -21,8 +32,9 @@ To set up for this workshop and help build the style we're going to make some vi
 
 ** Update cluster logo
 
-#+begin_src tmux
-oc create configmap console-custom-logo --from-file=../../public/static/images/fsi-security/logo.png --namespace openshift-config
+#+NAME: Update cluster logo
+#+begin_src bash
+oc create configmap console-custom-logo --from-file=/home/${USER}/Documents/workshops/public/static/images/fsi-security/logo.png --namespace openshift-config
 
 cat << EOF | oc apply --filename -
 apiVersion: operator.openshift.io/v1
@@ -45,10 +57,17 @@ spec:
 EOF
 #+end_src
 
+#+RESULTS: Update cluster logo
+#+begin_example
+configmap/console-custom-logo created
+console.operator.openshift.io/cluster configured
+#+end_example
+
 
 ** Add an interesting notification banner
 
-#+begin_src tmux
+#+NAME: Create console banner
+#+begin_src bash
 cat << EOF | oc apply --filename -
 apiVersion: console.openshift.io/v1
 kind: ConsoleNotification
@@ -57,11 +76,12 @@ metadata:
 spec:
   text: ACME Financial Services Production OpenShift
   location: BannerTop
-  link:
-    href: ''
-    text: Cluster Security Dashboard
-  color: '#fff'
-  backgroundColor: '#0000FF'
+  color: 'darkblue'
+  backgroundColor: '#fff'
 EOF
 #+end_src
 
+#+RESULTS: Create console banner
+#+begin_example
+consolenotification.console.openshift.io/acme-banner created
+#+end_example
