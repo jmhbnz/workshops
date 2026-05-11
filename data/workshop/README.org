@@ -25,7 +25,7 @@ Using project "default".
 #+end_example
 
 
-* Cluster themeing
+* Cluster theming
 
 To set up for this workshop and help build the style we're going to make some visual customisations to the OpenShift cluster to make it feel more like a customer production cluster.
 
@@ -84,4 +84,41 @@ EOF
 #+RESULTS: Create console banner
 #+begin_example
 consolenotification.console.openshift.io/acme-banner created
+#+end_example
+
+
+* Deploy compromised workload
+
+For the purposes of exercise 2 we need an existing project and demo workload.
+
+#+NAME: Create demo workload
+#+begin_src bash
+oc new-project payment-gateway
+
+cat << EOF | oc apply --filename -
+apiVersion: v1
+kind: Pod
+metadata:
+  name: payment-gateway
+  namespace: payment-gateway
+spec:
+  containers:
+    - name: httpd
+      image: 'image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest'
+EOF
+#+end_src
+
+#+RESULTS: Create demo workload
+#+begin_example
+Now using project "payment-gateway" on server "https://api.cluster-wg67f.dynamic2.redhatworkshops.io:6443".
+
+You can add applications to this project with the 'new-app' command. For example, try:
+
+    oc new-app rails-postgresql-example
+
+to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
+
+    kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.43 -- /agnhost serve-hostname
+
+pod/payment-gateway created
 #+end_example

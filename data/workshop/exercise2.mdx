@@ -27,13 +27,38 @@ Now online and frantically loading the OpenShift Web Console for the `acme-prd` 
 
 > We'll need to track that down in the OpenShift Audit Logs Sarah stammers back, give me a few minutes to hunt through the logs.
 
+Let's review the audit logs, specifically for pods within the `payment-gateway` namespace.  We can quickly query these via `oc`. In an incident situation, fast response is critical, having the skills and tooling to be able to quickly query audit logs is immensely valuable.
+
+In the example below we'll query the audit logs held on one of our control nodes specifically for `exec` events occurring in the namespace of interest.
+
+```bash
+oc adm node-logs $(oc get nodes -l node-role.kubernetes.io/master --output name | head -n 1) \
+  --path=kube-apiserver/audit.log \
+  | jq 'select(.objectRef.namespace == "payment-gateway" 
+        and .verb == "create" 
+        and .objectRef.subresource == "exec")'
+```
+
+Take some time to review the audit log event and get familiar with the fields. **Note down the user that carried out the exec, we'll need this later.**
+
+> Note: Querying node logs directly is only effective within the retention period for cluster logs, these files are rotated on disk. Forwarding logs to an external log store for long term retention is a vital security control.
 
 
-## 2.2 Another pair of eyes
+## 2.3 - Reviewing outbound traffic
+
+<Use COO and/or RHACS to view outbound traffic from the pod of interest to see what domain it was reaching out to?>
+
+
+## 2.4 - Isolate the workload
+
+<Use network policy to prevent all egress traffic from pod, visualize with RHACS?>
+
+
+## 2.5 Another pair of eyes
 
 With everything happening so quickly Sarah opens a case with Red Hat support to confirm their initial findings around the use of a compromised credential and ensure she did not miss anything.
 
-Let's run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [](https://access.redhat.com/support/cases/#/case/new). For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
+Let's run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new). For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
 
 ```bash
 oc adm must-gather -- /usr/bin/gather_audit_logs
@@ -41,7 +66,7 @@ oc adm must-gather -- /usr/bin/gather_audit_logs
 
 Documentation you may find helpful is:
 
-- [](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view)
+- [https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view)](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view)
 
 ![support-case](/workshops/static/images/fsi-security/sarah-support.png)
 
