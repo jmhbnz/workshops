@@ -122,3 +122,29 @@ to build a new example application in Ruby. Or use kubectl to deploy a simple Ku
 
 pod/payment-gateway created
 #+end_example
+
+
+* Enable collecting externalip in rhacs
+
+We want to show how RHACS can make external traffic visible.
+
+#+NAME: Enable rhacs externalip
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: collector-config
+  namespace: tssc-acs
+data:
+  runtime_config.yaml: |
+    networking:
+      externalIps:
+        enabled: ENABLED
+EOF
+#+end_src
+
+#+RESULTS: Enable rhacs externalip
+#+begin_example
+configmap/collector-config created
+#+end_example

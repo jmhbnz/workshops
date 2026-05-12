@@ -46,8 +46,16 @@ Take some time to review the audit log event and get familiar with the fields. *
 
 ## 2.3 - Reviewing outbound traffic
 
-TODO: Use COO and/or RHACS to view outbound traffic from the pod of interest to see what domain it was reaching out to?
+After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io/main/network-graph) to review network traffic and draft the new network policy.
 
+Log in to the Red Hat Advanced Cluster Security dashboard using the username `admin` and the password provided by your workshop facillitators.
+
+Before applying any policy Morgan asks Sarah to confirm what she is seeing in the firewall dashboard for the external IP's that the `payment-gateway` container is making connections to. We can view this within the **Network Graph** by clicking on the **External Entities IP** icon:
+
+<Zoom>
+![rhacs-externalip](/workshops/static/images/fsi-security/rhacs-externalip.png)
+*View external connections within Red Hat Advanced Cluster Security*
+</Zoom>
 
 ## 2.4 - Isolate the workload
 
