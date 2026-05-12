@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: socketio-server
-          image: quay.io/acme-workshop/socketio-server:hardened
+          image: quay.io/smileyfritz/socketio-server:0.1.0-hardened
           ports:
             - containerPort: 5000
           env:

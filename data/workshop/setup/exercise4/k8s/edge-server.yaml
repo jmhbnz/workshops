@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: edge-server
-          image: quay.io/acme-workshop/edge-server:latest
+          image: quay.io/smileyfritz/edge-server:0.1.0
           ports:
             - containerPort: 6000
           env:

@@ -19,7 +19,7 @@ spec:
     spec:
       containers:
         - name: socketio-server
-          image: quay.io/acme-workshop/socketio-server:vulnerable
+          image: quay.io/smileyfritz/socketio-server:0.1.0-vulnerable
           ports:
             - containerPort: 5000
           env:

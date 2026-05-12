@@ -189,7 +189,7 @@ Verify the new pod is running the hardened image:
 oc -n cve-demo get deploy socketio-server -o jsonpath='{.spec.template.spec.containers[0].image}'
 ```
 
-You should see `quay.io/acme-workshop/socketio-server:hardened`.
+You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 
 
 ## 4.7 Verify the fix
