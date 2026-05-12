@@ -5,24 +5,240 @@ date: '2026-05-10'
 tags: ['openshift','security']
 draft: false
 authors: ['default']
-summary: "Understanding an exploit"
+summary: "Exploiting a real RCE and hardening with Project Hummingbird images"
 ---
 
-## 4.1 Introduce a recent rce
+After yesterday's incident, ACME's Infosec lead Morgan has asked Sarah to prove that the team's container hardening strategy actually works. The best way? Find a real vulnerability, exploit it live, then show how hardened images neutralise the threat.
 
-TODO: We need a recent RCE exploitable within OpenShift, ideally with a simple trigger. Even better if we have a hummingbird image that doesn't have that same vuln.
+Sarah has been reading about [CVE-2025-61765](https://nvd.nist.gov/vuln/detail/CVE-2025-61765) — a remote code execution vulnerability in `python-socketio` versions prior to `5.14.0`. It's a textbook insecure deserialization flaw that lets an attacker run arbitrary code on any Socket.IO server that uses a shared message broker like Redis or Valkey.
 
-
-## 4.2 Trigger the exploit
-
-TODO: Run a payload the triggers the exploit
+![forensic-analysis](/workshops/static/images/fsi-security/sarah-infosec.png)
 
 
-## 4.3 Introduce hardened images
+## 4.1 Understanding CVE-2025-61765
 
-TODO: Hummingbird intro, patch the deployment with the hummingbird image
+When multiple Socket.IO servers share a message broker for inter-server communication, messages are serialised using Python's `pickle` module. When a server receives a message from the broker it calls `pickle.loads()` automatically — trusting that the data is safe.
+
+An attacker who can reach the message broker (or any service that publishes to it) can send a crafted pickle payload that executes arbitrary code during deserialization through Python's `__reduce__` method.
+
+Here's the core of the exploit — a class whose `__reduce__` method tells `pickle.loads()` to call `subprocess.call()` with an attacker-controlled command:
+
+```python
+class RCEPayload:
+    def __init__(self, cmd):
+        self.cmd = cmd
+
+    def __reduce__(self):
+        return (subprocess.call, (["/bin/bash", "-c", self.cmd],))
+```
+
+When this object is unpickled by the vulnerable server, it runs the shell command. The attacker simply serialises this payload and publishes it to the broker channel that Socket.IO subscribes to.
+
+> **Key insight:** The exploit depends on two things: (1) `pickle.loads()` deserializing untrusted data, and (2) a **shell** (`/bin/bash`) being available in the container image to execute the payload.
 
 
-## 4.4 Verify fix
+## 4.2 Deploy the vulnerable environment
 
-TODO: Validate that the hummingbird image is not exploitable
+Let's deploy a vulnerable Socket.IO application to our cluster. We'll start with a typical setup that many teams might have in production — a community Redis image as the message broker, and the application built on a standard UBI image with a full shell environment.
+
+The environment consists of:
+
+- **Redis** — the message broker, using the community `docker.io/redis:7-alpine` image
+- **Socket.IO server** — a Python application using `python-socketio==5.13.0` (the vulnerable version), built on a standard UBI image that includes a shell
+- **Edge server** — a Flask webhook server that accepts HTTP payloads and publishes them to Redis
+
+```bash
+oc apply -f setup/exercise4/k8s/namespace.yaml
+oc apply -f setup/exercise4/k8s/redis.yaml
+oc apply -f setup/exercise4/k8s/edge-server.yaml
+oc apply -f setup/exercise4/k8s/socketio-server.yaml
+```
+
+Wait for all pods to become ready:
+
+```bash
+oc -n cve-demo get pods -w
+```
+
+You should see three running pods: `message-broker`, `socketio-server`, and `edge-server`.
+
+Let's check the image that the message broker is running:
+
+```bash
+oc -n cve-demo get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
+```
+
+You should see `docker.io/redis:7-alpine` — a community image with no Red Hat support, no CVE patching SLA, and no supply chain provenance.
+
+
+## 4.3 Trigger the exploit
+
+Now, let's act as the attacker. We'll run a Job that sends a malicious pickle payload to the edge server, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it — executing our code.
+
+```bash
+oc apply -f setup/exercise4/k8s/exploit-job.yaml
+```
+
+Watch the exploit Job's logs:
+
+```bash
+oc -n cve-demo logs -f job/cve-2025-61765-exploit
+```
+
+You should see output confirming the payload was delivered to the edge server webhook and received by a subscriber.
+
+Now check whether the exploit succeeded by looking for the evidence file inside the Socket.IO server pod:
+
+```bash
+oc -n cve-demo exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
+```
+
+If the exploit worked, you'll see output like:
+
+```
+>>> COMPROMISED via CVE-2025-61765 <<<
+Timestamp: Mon May 12 10:30:00 UTC 2026
+Hostname: socketio-server-7d4f8b6c9-x2k4p
+User: default
+Kernel: 5.14.0-427.el9.x86_64
+```
+
+**The Socket.IO server has been compromised.** An attacker delivered arbitrary code through a pickle payload — the server had no way to distinguish it from a legitimate inter-server message.
+
+> Take a minute to review the exploit source at `setup/exercise4/exploit/poc.py` and the vulnerable server at `setup/exercise4/socketio-server/server.py`. The server code itself looks completely normal — the vulnerability is in the `python-socketio` library's use of `pickle.loads()`.
+
+
+## 4.4 Introduce Project Hummingbird hardened images
+
+[Project Hummingbird](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/hummingbird) is Red Hat's catalog of minimal, hardened container images available at `registry.access.redhat.com/hi/`. These images are built with a *distroless* philosophy:
+
+- **No shell** — no `bash`, `sh`, or any other shell binary
+- **No package manager** — no `dnf`, `rpm`, or `apt`
+- **Minimal attack surface** — only the runtime and its dependencies are included
+- **Non-root by default** — containers run as a non-privileged user
+
+This matters for CVE-2025-61765 because the exploit payload calls `subprocess.call(["/bin/bash", "-c", ...])`. If there's no `/bin/bash` in the container, the deserialization still happens but the **code execution fails** — there's nothing to execute.
+
+Let's compare the two Containerfiles for the Socket.IO server:
+
+**Vulnerable** (`Containerfile`) — built on UBI 9, which includes a full shell environment:
+
+```dockerfile
+FROM registry.redhat.io/ubi9/python-311
+# ... has bash, coreutils, rpm, etc.
+```
+
+**Hardened** (`Containerfile.hardened`) — multi-stage build, runtime stage uses the Hummingbird distroless Python image:
+
+```dockerfile
+FROM registry.access.redhat.com/hi/python:latest-builder AS builder
+# install dependencies in builder (has shell)
+
+FROM registry.access.redhat.com/hi/python:latest
+# runtime only — no shell, no package manager
+COPY --from=builder /opt/venv /opt/venv
+```
+
+Project Hummingbird also provides hardened images for common infrastructure components. Instead of relying on the community `redis:7-alpine` image, we can use the Hummingbird Valkey image — `registry.access.redhat.com/hi/valkey:latest`. [Valkey](https://valkey.io/) is the open-source successor to Redis, and it's wire-protocol compatible — a drop-in replacement that requires no application code changes.
+
+
+## 4.5 Harden the message broker — Redis to Hummingbird Valkey
+
+Let's start by swapping out the community Redis image for the Hummingbird Valkey image. Because Valkey speaks the same protocol as Redis, our application connects without any changes.
+
+Apply the hardened Valkey deployment — it uses the same Service name (`message-broker`), so the existing pods will seamlessly reconnect:
+
+```bash
+oc apply -f setup/exercise4/k8s/valkey.yaml
+```
+
+Wait for the new broker pod to roll out:
+
+```bash
+oc -n cve-demo rollout status deploy/message-broker
+```
+
+Verify the image has changed:
+
+```bash
+oc -n cve-demo get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
+```
+
+You should now see `registry.access.redhat.com/hi/valkey:latest` — a hardened, Red Hat-supported image with supply chain provenance and a minimal attack surface.
+
+> **Note:** Swapping the broker alone does not prevent CVE-2025-61765 — the vulnerability is in the Socket.IO server application, not in Redis or Valkey. But hardening the broker is still important: community images may carry their own unpatched CVEs, and a Hummingbird image gives you a known-good, minimal base for every component in your stack.
+
+
+## 4.6 Harden the application — swap to the distroless Python image
+
+Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Hummingbird distroless Python image:
+
+```bash
+oc apply -f setup/exercise4/k8s/socketio-server-hardened.yaml
+```
+
+Wait for the new pod to roll out:
+
+```bash
+oc -n cve-demo rollout status deploy/socketio-server
+```
+
+Verify the new pod is running the hardened image:
+
+```bash
+oc -n cve-demo get deploy socketio-server -o jsonpath='{.spec.template.spec.containers[0].image}'
+```
+
+You should see `quay.io/acme-workshop/socketio-server:hardened`.
+
+
+## 4.7 Verify the fix
+
+First, delete the previous exploit Job so we can re-run it:
+
+```bash
+oc -n cve-demo delete job cve-2025-61765-exploit
+```
+
+Now re-run the exploit:
+
+```bash
+oc apply -f setup/exercise4/k8s/exploit-job.yaml
+```
+
+Watch the logs — the exploit will appear to send successfully (the edge server and Valkey still relay the payload):
+
+```bash
+oc -n cve-demo logs -f job/cve-2025-61765-exploit
+```
+
+But now, try to read the evidence file:
+
+```bash
+oc -n cve-demo exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
+```
+
+This command will **fail** — there is no shell to exec into (the Hummingbird image has no `bash` or `sh`), and even if we could check, the evidence file was never created because `subprocess.call(["/bin/bash", ...])` failed inside the container.
+
+Check the socketio-server logs for the error:
+
+```bash
+oc -n cve-demo logs deploy/socketio-server | tail -20
+```
+
+You should see an error like `FileNotFoundError: [Errno 2] No such file or directory: '/bin/bash'` — the pickle deserialization triggered but the payload could not execute because the shell binary doesn't exist.
+
+> **Key takeaway:** We hardened two layers of the stack:
+>
+> 1. **Message broker** — replaced the community `redis:7-alpine` with `registry.access.redhat.com/hi/valkey:latest`, gaining a supported, minimal, provenance-tracked base image.
+> 2. **Application runtime** — replaced the UBI Python image with `registry.access.redhat.com/hi/python:latest`, removing the shell that the exploit payload depends on.
+>
+> The hardened application image didn't fix the vulnerable library code — `python-socketio 5.13.0` still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
+
+### Clean up
+
+```bash
+oc delete namespace cve-demo
+```
+
+Excellent work! You've seen how a real-world RCE can be exploited in a containerised environment, and how migrating from community images to Project Hummingbird's hardened images — for both infrastructure and application layers — provides critical defence in depth even when application-level vulnerabilities exist.

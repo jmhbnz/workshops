@@ -1,0 +1,19 @@
+FROM registry.redhat.io/ubi9/python-311
+
+EXPOSE 6000
+
+WORKDIR /opt/app
+
+COPY requirements.txt .
+RUN pip3 install --no-cache-dir -r requirements.txt
+
+COPY app.py .
+
+ENV PYTHONUNBUFFERED=1
+ENV BROKER_HOST=message-broker
+ENV BROKER_PORT=6379
+ENV BROKER_CHANNEL=socketio
+ENV FLASK_HOST=0.0.0.0
+ENV FLASK_PORT=6000
+
+CMD ["python3", "app.py"]

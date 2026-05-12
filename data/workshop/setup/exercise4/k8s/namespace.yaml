@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: cve-demo
+  labels:
+    workshop: fsi-security
+    exercise: "4"

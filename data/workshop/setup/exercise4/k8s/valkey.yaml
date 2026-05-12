@@ -1,0 +1,48 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: message-broker
+  namespace: cve-demo
+  labels:
+    app: message-broker
+    variant: hummingbird-valkey
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: message-broker
+  template:
+    metadata:
+      labels:
+        app: message-broker
+        variant: hummingbird-valkey
+    spec:
+      containers:
+        - name: valkey
+          image: registry.access.redhat.com/hi/valkey:latest
+          ports:
+            - containerPort: 6379
+          readinessProbe:
+            tcpSocket:
+              port: 6379
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: 128Mi
+              cpu: 100m
+            limits:
+              memory: 256Mi
+              cpu: 250m
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: message-broker
+  namespace: cve-demo
+spec:
+  selector:
+    app: message-broker
+  ports:
+    - port: 6379
+      targetPort: 6379
