@@ -59,14 +59,38 @@ Before applying any policy Morgan asks Sarah to confirm what she is seeing in th
 
 ## 2.4 - Isolate the workload
 
-TODO: Use network policy to prevent all egress traffic from pod, visualize with RHACS?
+> Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway`. Let's cut this traffic off right now with a network policy.
+
+Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the Quick Create (+) button in the top right corner. Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
+
+```yaml
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: payment-gateway-deny-egress
+  namespace: payment-gateway
+spec:
+  # This targets only the payment-gateway
+  podSelector:
+    matchLabels:
+      app: payment-gateway
+  policyTypes:
+    - Egress
+  # Leaving egress empty here acts as a total block 
+  # for any traffic originating from matching pods.
+  egress: []
+```
+
+With the breached workload now isolated, and no further egress traffic possible Morgan advises Sarah to take a quick break and then jump back online to assist her with some forensic evidence gathering.
 
 
 ## 2.5 Another pair of eyes
 
-With everything happening so quickly Sarah opens a case with Red Hat support to confirm their initial findings around the use of a compromised credential and ensure she did not miss anything.
+With everything happening so quickly, after the short break Sarah opens a case with Red Hat support to confirm their initial findings around the use of a compromised credential and ensure she and Morgan did not miss anything.
 
-Let's run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new). For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
+Let's run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new). 
+
+> **Important:** For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
 
 ```bash
 oc adm must-gather -- /usr/bin/gather_audit_logs
@@ -78,3 +102,4 @@ Documentation you may find helpful is:
 
 ![support-case](/workshops/static/images/fsi-security/sarah-support.png)
 
+Well done, with the breach investigated and contained you're ready to move on to forensic analysis in exercise 3! 🎉
