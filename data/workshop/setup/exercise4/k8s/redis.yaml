@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: message-broker
-  namespace: cve-demo
+  namespace: ${NAMESPACE}
   labels:
     app: message-broker
     variant: community-redis
@@ -40,7 +40,7 @@ apiVersion: v1
 kind: Service
 metadata:
   name: message-broker
-  namespace: cve-demo
+  namespace: ${NAMESPACE}
 spec:
   selector:
     app: message-broker

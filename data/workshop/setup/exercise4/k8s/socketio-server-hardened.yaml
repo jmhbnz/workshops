@@ -2,7 +2,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: socketio-server
-  namespace: cve-demo
+  namespace: ${NAMESPACE}
   labels:
     app: socketio-server
     variant: hardened

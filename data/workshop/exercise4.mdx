@@ -41,6 +41,12 @@ When this object is unpickled by the vulnerable server, it runs the shell comman
 
 Let's deploy a vulnerable Socket.IO application to our cluster. We'll start with a typical setup that many teams might have in production — a community Redis image as the message broker, and the application built on a standard UBI image with a full shell environment.
 
+First, set up your personal namespace. Each participant gets their own namespace based on their username:
+
+```bash
+export NAMESPACE=ex4-$USER
+```
+
 The environment consists of:
 
 - **Redis** — the message broker, using the community `docker.io/redis:7-alpine` image
@@ -48,16 +54,16 @@ The environment consists of:
 - **Edge server** — a Flask webhook server that accepts HTTP payloads and publishes them to Redis
 
 ```bash
-oc apply -f setup/exercise4/k8s/namespace.yaml
-oc apply -f setup/exercise4/k8s/redis.yaml
-oc apply -f setup/exercise4/k8s/edge-server.yaml
-oc apply -f setup/exercise4/k8s/socketio-server.yaml
+envsubst < setup/exercise4/k8s/namespace.yaml | oc apply -f -
+envsubst < setup/exercise4/k8s/redis.yaml | oc apply -f -
+envsubst < setup/exercise4/k8s/edge-server.yaml | oc apply -f -
+envsubst < setup/exercise4/k8s/socketio-server.yaml | oc apply -f -
 ```
 
 Wait for all pods to become ready:
 
 ```bash
-oc -n cve-demo get pods -w
+oc -n $NAMESPACE get pods -w
 ```
 
 You should see three running pods: `message-broker`, `socketio-server`, and `edge-server`.
@@ -65,7 +71,7 @@ You should see three running pods: `message-broker`, `socketio-server`, and `edg
 Let's check the image that the message broker is running:
 
 ```bash
-oc -n cve-demo get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
+oc -n $NAMESPACE get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
 ```
 
 You should see `docker.io/redis:7-alpine` — a community image with no Red Hat support, no CVE patching SLA, and no supply chain provenance.
@@ -76,13 +82,13 @@ You should see `docker.io/redis:7-alpine` — a community image with no Red Hat 
 Now, let's act as the attacker. We'll run a Job that sends a malicious pickle payload to the edge server, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it — executing our code.
 
 ```bash
-oc apply -f setup/exercise4/k8s/exploit-job.yaml
+envsubst < setup/exercise4/k8s/exploit-job.yaml | oc apply -f -
 ```
 
 Watch the exploit Job's logs:
 
 ```bash
-oc -n cve-demo logs -f job/cve-2025-61765-exploit
+oc -n $NAMESPACE logs -f job/cve-2025-61765-exploit
 ```
 
 You should see output confirming the payload was delivered to the edge server webhook and received by a subscriber.
@@ -90,7 +96,7 @@ You should see output confirming the payload was delivered to the edge server we
 Now check whether the exploit succeeded by looking for the evidence file inside the Socket.IO server pod:
 
 ```bash
-oc -n cve-demo exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
+oc -n $NAMESPACE exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
 ```
 
 If the exploit worked, you'll see output like:
@@ -149,19 +155,19 @@ Let's start by swapping out the community Redis image for the Hummingbird Valkey
 Apply the hardened Valkey deployment — it uses the same Service name (`message-broker`), so the existing pods will seamlessly reconnect:
 
 ```bash
-oc apply -f setup/exercise4/k8s/valkey.yaml
+envsubst < setup/exercise4/k8s/valkey.yaml | oc apply -f -
 ```
 
 Wait for the new broker pod to roll out:
 
 ```bash
-oc -n cve-demo rollout status deploy/message-broker
+oc -n $NAMESPACE rollout status deploy/message-broker
 ```
 
 Verify the image has changed:
 
 ```bash
-oc -n cve-demo get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
+oc -n $NAMESPACE get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
 ```
 
 You should now see `registry.access.redhat.com/hi/valkey:latest` — a hardened, Red Hat-supported image with supply chain provenance and a minimal attack surface.
@@ -174,19 +180,19 @@ You should now see `registry.access.redhat.com/hi/valkey:latest` — a hardened,
 Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Hummingbird distroless Python image:
 
 ```bash
-oc apply -f setup/exercise4/k8s/socketio-server-hardened.yaml
+envsubst < setup/exercise4/k8s/socketio-server-hardened.yaml | oc apply -f -
 ```
 
 Wait for the new pod to roll out:
 
 ```bash
-oc -n cve-demo rollout status deploy/socketio-server
+oc -n $NAMESPACE rollout status deploy/socketio-server
 ```
 
 Verify the new pod is running the hardened image:
 
 ```bash
-oc -n cve-demo get deploy socketio-server -o jsonpath='{.spec.template.spec.containers[0].image}'
+oc -n $NAMESPACE get deploy socketio-server -o jsonpath='{.spec.template.spec.containers[0].image}'
 ```
 
 You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
@@ -197,25 +203,25 @@ You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 First, delete the previous exploit Job so we can re-run it:
 
 ```bash
-oc -n cve-demo delete job cve-2025-61765-exploit
+oc -n $NAMESPACE delete job cve-2025-61765-exploit
 ```
 
 Now re-run the exploit:
 
 ```bash
-oc apply -f setup/exercise4/k8s/exploit-job.yaml
+envsubst < setup/exercise4/k8s/exploit-job.yaml | oc apply -f -
 ```
 
 Watch the logs — the exploit will appear to send successfully (the edge server and Valkey still relay the payload):
 
 ```bash
-oc -n cve-demo logs -f job/cve-2025-61765-exploit
+oc -n $NAMESPACE logs -f job/cve-2025-61765-exploit
 ```
 
 But now, try to read the evidence file:
 
 ```bash
-oc -n cve-demo exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
+oc -n $NAMESPACE exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
 ```
 
 This command will **fail** — there is no shell to exec into (the Hummingbird image has no `bash` or `sh`), and even if we could check, the evidence file was never created because `subprocess.call(["/bin/bash", ...])` failed inside the container.
@@ -223,7 +229,7 @@ This command will **fail** — there is no shell to exec into (the Hummingbird i
 Check the socketio-server logs for the error:
 
 ```bash
-oc -n cve-demo logs deploy/socketio-server | tail -20
+oc -n $NAMESPACE logs deploy/socketio-server | tail -20
 ```
 
 You should see an error like `FileNotFoundError: [Errno 2] No such file or directory: '/bin/bash'` — the pickle deserialization triggered but the payload could not execute because the shell binary doesn't exist.
@@ -238,7 +244,7 @@ You should see an error like `FileNotFoundError: [Errno 2] No such file or direc
 ### Clean up
 
 ```bash
-oc delete namespace cve-demo
+oc delete namespace $NAMESPACE
 ```
 
 Excellent work! You've seen how a real-world RCE can be exploited in a containerised environment, and how migrating from community images to Project Hummingbird's hardened images — for both infrastructure and application layers — provides critical defence in depth even when application-level vulnerabilities exist.
