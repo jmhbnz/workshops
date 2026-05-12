@@ -51,6 +51,12 @@ async def index(request):
 app.router.add_get("/", index)
 app.router.add_get("/health", health)
 
+async def on_startup(application):
+    sio.manager_initialized = True
+    sio.manager.initialize()
+
+app.on_startup.append(on_startup)
+
 if __name__ == "__main__":
     logger.info(f"Starting Socket.IO server on :{SOCKETIO_PORT}")
     logger.info(f"Message broker: {BROKER_HOST}:{BROKER_PORT}")

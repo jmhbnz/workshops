@@ -20,6 +20,7 @@ spec:
       containers:
         - name: socketio-server
           image: quay.io/smileyfritz/socketio-server:0.1.0-vulnerable
+          imagePullPolicy: Always
           ports:
             - containerPort: 5000
           env:
