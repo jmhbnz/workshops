@@ -8,21 +8,55 @@ authors: ['default']
 summary: "Let's explore some forensics tools"
 ---
 
-The sun is up ☀️,! Sarah has hardly slept and is simultaneously wired and exhausted after the overnight breach response. Heading into the office she heads straight for the Infosec team pod to help them begin the forensic investigation of the breached container.
+Location: Sarah's desk, ACME Financial HQ.
+Time: 07:23 AM. The caffeine is finally starting to kick in, but the tension from the 2:00 AM page is still heavy in the air.
+
+---
 
 ![forensic-analysis](/workshops/static/images/fsi-security/sarah-infosec.png)
 
+> **Morgan**: (Leaning over Sarah’s shoulder, eyes fixed on the web console) Sarah, look, the egress logs are quiet now thanks to that Network Policy you slammed down, but we’re flying blind in the SOC on what actually happened inside that container. If we restart that pod, the threat actors toolkit is gone forever. I need a forensic checkpoint.
 
-## 3.1 Checkpointing a pod
+> **Sarah**: (Rubbing her eyes) I hear you, Morgan. We’ve got the PV snapshot done, so the disk is "frozen," but you want the full runtime state, right? The RAM, the open file descriptors, the works?
 
-TODO: Use node kubelet API to take checkpoint
+> **Morgan**: Exactly. In the old days, I’d just dump the physical memory of the server. But here? This "container" is just a slice of a kernel. How do we pull the memory out of a running pod without killing the process?
+
+> **Sarah**: I think it’s called a CRIU checkpoint. It stands for Checkpoint/Restore In Userspace. Theoretically, it freezes the container and serializes its entire state into a set of image files.
+
+> **Morgan**: (Nodding) That’s the ticket. Can you run it? I want to see if they left a reverse shell sitting in the heap.
+
+> **Sarah**: To be honest... I’ve never actually done this before. OpenShift has some specific security gatekeeping for this because, well, dumping memory is a sensitive operation. Let me pull up the docs.
 
 
-## 3.2 Examining the checkpoint
+## 3.1 Checkpointing the breached pod
 
-TODO: Download checkpoint locally and examine memory strings
+Container checkpointing was introduced as an alpha feature in Kubernetes v1.25 and graduated to beta in Kubernetes v1.30 and is a [Generally Available feature in OpenShift 4.17 onwards](https://access.redhat.com/solutions/7008477). This functionality allows running containers to be transparently checkpointed to persistent storage and later restored to resume execution, or migrated across nodes and clusters.
 
+The content of container checkpoints can be further analyzed with the `checkpointctl` tool. This allows to perform forensic analysis in case of security incidents (e.g., suspected compromise, data exfiltration) or application failures by inspecting the saved process memory, open files, sockets, and execution context captured in the checkpoint.
 
-## 3.3 Restoring in a sandbox
+> **Sarah**: OK here we go, I need to use the kubelet API directly. I have to run a `curl` command against the local kubelet API endpoint on the specific worker node where the `payment-gateway` is sitting.
 
-TODO: Optional, cover how a checkpoint can be rebuilt into an image and restored to a cluster for further runtime analysis
+> **Morgan**: A curl command to dump memory? That’s... surprisingly old school for such a modern platform!
+
+> **Sarah**: (Laughing weakly) Welcome to Kubernetes. The command looks like this: `curl -X POST "https://localhost:10250/checkpoint/payment-gateway/payment-pod/payment-container"`. I’ll need to do this from a debug shell on the node itself.
+
+> **Morgan**: Will the container stay alive after the checkpoint?
+
+>**Sarah**: The docs say it depends on the flags, but for a "forensic" checkpoint, the goal is to keep it running in its "frozen" state or let it continue. Since we already have the egress blocked, I’ll let it keep running so we don't tip off any watchdog scripts the attacker might have left.
+
+> **Morgan**: Sounds good, do it.
+
+> **Sarah**: Initiating the node-level debug shell now. Hang on... and... started.
+
+Initiate a checkpoint by running the following command in your OpenShift Web Terminal:
+
+```bash
+TOKEN=$(oc whoami --token)
+OPENSHIFT_API_URL=$(oc whoami --show-server)
+NODE_NAME=$(oc --namespace payment-gateway get pod payment-gateway --output jsonpath='{.spec.nodeName}')
+
+curl --insecure \
+  --header "Authorization: Bearer $(oc whoami --show-token)" \
+  --request POST "${OPENSHIFT_API_URL}/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/payment-gateway/payment-gateway/httpd"
+
+```
