@@ -68,15 +68,6 @@ oc -n $NAMESPACE get pods -w
 
 You should see three running pods: `message-broker`, `socketio-server`, and `edge-server`.
 
-Let's check the image that the message broker is running:
-
-```bash
-oc -n $NAMESPACE get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
-```
-
-You should see `docker.io/redis:7-alpine` — a community image with no Red Hat support, no CVE patching SLA, and no supply chain provenance.
-
-
 ## 4.3 Trigger the exploit
 
 Now, let's act as the attacker. We'll run a Job that sends a malicious pickle payload to the edge server, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it — executing our code.
