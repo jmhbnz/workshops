@@ -10,7 +10,7 @@ summary: "Exploiting a real RCE and hardening with Project Hummingbird images"
 
 After yesterday's incident, ACME's Infosec lead Morgan has asked Sarah to prove that the team's container hardening strategy actually works. The best way? Find a real vulnerability, exploit it live, then show how hardened images neutralise the threat.
 
-Sarah has been reading about [CVE-2025-61765](https://nvd.nist.gov/vuln/detail/CVE-2025-61765) — a remote code execution vulnerability in `python-socketio` versions prior to `5.14.0`. It's a textbook insecure deserialization flaw that lets an attacker run arbitrary code on any Socket.IO server that uses a shared message broker like Redis or Valkey.
+Sarah has been reading about [CVE-2025-61765](https://nvd.nist.gov/vuln/detail/CVE-2025-61765) — a remote code execution vulnerability in `python-socketio` versions prior to `5.14.0`. It's a textbook insecure deserialization flaw that lets an attacker run arbitrary code on any Socket.IO server that uses a shared message broker like Redis.
 
 ![forensic-analysis](/workshops/static/images/fsi-security/sarah-infosec.png)
 
@@ -145,37 +145,8 @@ FROM registry.access.redhat.com/hi/python:latest
 COPY --from=builder /opt/venv /opt/venv
 ```
 
-Project Hummingbird also provides hardened images for common infrastructure components. Instead of relying on the community `redis:7-alpine` image, we can use the Hummingbird Valkey image — `registry.access.redhat.com/hi/valkey:latest`. [Valkey](https://valkey.io/) is the open-source successor to Redis, and it's wire-protocol compatible — a drop-in replacement that requires no application code changes.
 
-
-## 4.5 Harden the message broker — Redis to Hummingbird Valkey
-
-Let's start by swapping out the community Redis image for the Hummingbird Valkey image. Because Valkey speaks the same protocol as Redis, our application connects without any changes.
-
-Apply the hardened Valkey deployment — it uses the same Service name (`message-broker`), so the existing pods will seamlessly reconnect:
-
-```bash
-envsubst < setup/exercise4/k8s/valkey.yaml | oc apply -f -
-```
-
-Wait for the new broker pod to roll out:
-
-```bash
-oc -n $NAMESPACE rollout status deploy/message-broker
-```
-
-Verify the image has changed:
-
-```bash
-oc -n $NAMESPACE get deploy message-broker -o jsonpath='{.spec.template.spec.containers[0].image}'
-```
-
-You should now see `registry.access.redhat.com/hi/valkey:latest` — a hardened, Red Hat-supported image with supply chain provenance and a minimal attack surface.
-
-> **Note:** Swapping the broker alone does not prevent CVE-2025-61765 — the vulnerability is in the Socket.IO server application, not in Redis or Valkey. But hardening the broker is still important: community images may carry their own unpatched CVEs, and a Hummingbird image gives you a known-good, minimal base for every component in your stack.
-
-
-## 4.6 Harden the application — swap to the distroless Python image
+## 4.5 Harden the application — swap to the distroless Python image
 
 Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Hummingbird distroless Python image:
 
@@ -198,7 +169,7 @@ oc -n $NAMESPACE get deploy socketio-server -o jsonpath='{.spec.template.spec.co
 You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 
 
-## 4.7 Verify the fix
+## 4.6 Verify the fix
 
 First, delete the previous exploit Job so we can re-run it:
 
@@ -212,7 +183,7 @@ Now re-run the exploit:
 envsubst < setup/exercise4/k8s/exploit-job.yaml | oc apply -f -
 ```
 
-Watch the logs — the exploit will appear to send successfully (the edge server and Valkey still relay the payload):
+Watch the logs — the exploit will appear to send successfully (the edge server and Redis still relay the payload):
 
 ```bash
 oc -n $NAMESPACE logs -f job/cve-2025-61765-exploit
@@ -234,12 +205,7 @@ oc -n $NAMESPACE logs deploy/socketio-server | tail -20
 
 You should see an error like `FileNotFoundError: [Errno 2] No such file or directory: '/bin/bash'` — the pickle deserialization triggered but the payload could not execute because the shell binary doesn't exist.
 
-> **Key takeaway:** We hardened two layers of the stack:
->
-> 1. **Message broker** — replaced the community `redis:7-alpine` with `registry.access.redhat.com/hi/valkey:latest`, gaining a supported, minimal, provenance-tracked base image.
-> 2. **Application runtime** — replaced the UBI Python image with `registry.access.redhat.com/hi/python:latest`, removing the shell that the exploit payload depends on.
->
-> The hardened application image didn't fix the vulnerable library code — `python-socketio 5.13.0` still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
+> **Key takeaway:** The hardened application image didn't fix the vulnerable library code — `python-socketio 5.13.0` still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
 
 ### Clean up
 
@@ -247,4 +213,11 @@ You should see an error like `FileNotFoundError: [Errno 2] No such file or direc
 oc delete namespace $NAMESPACE
 ```
 
-Excellent work! You've seen how a real-world RCE can be exploited in a containerised environment, and how migrating from community images to Project Hummingbird's hardened images — for both infrastructure and application layers — provides critical defence in depth even when application-level vulnerabilities exist.
+Excellent work! You've seen how a real-world RCE can be exploited in a containerised environment, and how migrating from community images to Project Hummingbird's hardened images provides critical defence in depth even when application-level vulnerabilities exist.
+
+
+## Stretch activity
+
+We hardened the application runtime, but the message broker is still running the community `docker.io/redis:7-alpine` image — with no Red Hat support, no CVE patching SLA, and no supply chain provenance.
+
+Can you find a Project Hummingbird image at [images.redhat.com](https://images.redhat.com) that you could use for the Redis container?
