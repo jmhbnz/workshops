@@ -1,0 +1,39 @@
+---
+title: The security posture transformation 
+exercise: 5
+date: '2026-05-11'
+tags: ['openshift','security']
+draft: false
+authors: ['default']
+summary: "Arbitrary process execution?? I don't think so Tim 🙅🏻‍♂️"
+---
+
+After the demonstration today to Morgan, her platform team colleagues and the wider Infosec team on the effectiveness of hardening application containers to prevent vulnerabilities being exploitable the main concern from Morgan was that this would take time to adopt and flow through development team pipelines.
+
+Given how close they came to ending up in the news the other day Infosec are insisting they also implement a platform level control to prevent this kind of arbitrary process execution exploit being possible.
+
+After a quick virtual call with their local Red Hat team Sarah opts to employ Process Baselining through [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes).
+
+![baselining-meeting](/workshops/static/images/fsi-security/sarah-meeting-demo.png)
+
+
+## 5.1 Execute an arbitrary process
+
+TODO: Exec one liner into an existing pod, show a shell being launched successfully
+
+
+## 5.2 Introduce process baselining
+
+TODO: Context on baselines, time windows, ebpf etc
+
+TODO: Open rhacs console, show that no baseline currently exists for the container in question
+
+
+## 5.3 Lock a baseline
+
+TODO: Use the rhacs web console to lock the container baseline (make sure initial oc exec doesn't get into it!?)
+
+
+## 5.4 Automate locking of baselines for entire namespace
+
+TODO: Optional activity to show an example of using script or curl one liner to lock baselines in bulk. 
