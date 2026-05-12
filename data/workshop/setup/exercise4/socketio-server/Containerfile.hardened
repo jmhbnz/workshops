@@ -5,8 +5,8 @@ RUN ["python3", "-m", "venv", "/opt/venv"]
 ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /opt/app
-COPY requirements.txt .
-RUN ["pip3", "install", "--no-cache-dir", "-r", "requirements.txt"]
+COPY requirements-hardened.txt .
+RUN ["pip3", "install", "--no-cache-dir", "-r", "requirements-hardened.txt"]
 
 FROM registry.access.redhat.com/hi/python:latest
 

@@ -84,20 +84,18 @@ oc -n $NAMESPACE logs -f job/cve-2025-61765-exploit
 
 You should see output confirming the payload was delivered to the edge server webhook and received by a subscriber.
 
-Now check whether the exploit succeeded by looking for the evidence file inside the Socket.IO server pod:
+Now check whether the exploit succeeded. The Socket.IO server exposes an `/evidence` endpoint that reads the evidence file. We can query it by running a verification Job that curls the endpoint:
 
 ```bash
-oc -n $NAMESPACE exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
+envsubst < setup/exercise4/k8s/verify-job.yaml | oc apply -f -
+oc -n $NAMESPACE wait --for=condition=complete job/verify-exploit --timeout=30s
+oc -n $NAMESPACE logs job/verify-exploit
 ```
 
 If the exploit worked, you'll see output like:
 
 ```
 >>> COMPROMISED via CVE-2025-61765 <<<
-Timestamp: Mon May 12 10:30:00 UTC 2026
-Hostname: socketio-server-7d4f8b6c9-x2k4p
-User: default
-Kernel: 5.14.0-427.el9.x86_64
 ```
 
 **The Socket.IO server has been compromised.** An attacker delivered arbitrary code through a pickle payload — the server had no way to distinguish it from a legitimate inter-server message.
@@ -125,17 +123,21 @@ FROM registry.redhat.io/ubi9/python-311
 # ... has bash, coreutils, rpm, etc.
 ```
 
-**Hardened** (`Containerfile.hardened`) — multi-stage build, runtime stage uses the Hummingbird distroless Python image:
+**Hardened** (`Containerfile.hardened`) — multi-stage build, runtime stage uses the Hummingbird distroless Python image. It also uses `requirements-hardened.txt`, which removes the version pin so `pip` pulls the latest (patched) `python-socketio`:
 
 ```dockerfile
 FROM registry.access.redhat.com/hi/python:latest-builder AS builder
 # install dependencies in builder (has shell)
+# uses requirements-hardened.txt — no version pin on python-socketio
 
 FROM registry.access.redhat.com/hi/python:latest
 # runtime only — no shell, no package manager
 COPY --from=builder /opt/venv /opt/venv
 ```
-
+Before we harden the application, let's clean-up first:
+```
+oc -n $NAMESPACE exec deploy/socketio-server -- rm -f /tmp/evidence/pwned.txt 2>/dev/null; true
+```
 
 ## 4.5 Harden the application — swap to the distroless Python image
 
@@ -162,10 +164,10 @@ You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 
 ## 4.6 Verify the fix
 
-First, delete the previous exploit Job so we can re-run it:
+First, delete the previous exploit and verification Jobs:
 
 ```bash
-oc -n $NAMESPACE delete job cve-2025-61765-exploit
+oc -n $NAMESPACE delete job cve-2025-61765-exploit verify-exploit --ignore-not-found
 ```
 
 Now re-run the exploit:
@@ -180,21 +182,15 @@ Watch the logs — the exploit will appear to send successfully (the edge server
 oc -n $NAMESPACE logs -f job/cve-2025-61765-exploit
 ```
 
-But now, try to read the evidence file:
+Now run the verification Job to query the `/evidence` endpoint:
 
 ```bash
-oc -n $NAMESPACE exec deploy/socketio-server -- cat /tmp/evidence/pwned.txt
+envsubst < setup/exercise4/k8s/verify-job.yaml | oc apply -f -
+oc -n $NAMESPACE wait --for=condition=complete --for=condition=failed job/verify-exploit --timeout=30s
+oc -n $NAMESPACE logs job/verify-exploit
 ```
 
-This command will **fail** — there is no shell to exec into (the Hummingbird image has no `bash` or `sh`), and even if we could check, the evidence file was never created because `subprocess.call(["/bin/bash", ...])` failed inside the container.
-
-Check the socketio-server logs for the error:
-
-```bash
-oc -n $NAMESPACE logs deploy/socketio-server | tail -20
-```
-
-You should see an error like `FileNotFoundError: [Errno 2] No such file or directory: '/bin/bash'` — the pickle deserialization triggered but the payload could not execute because the shell binary doesn't exist.
+The verification Job will **fail** — the evidence file was never created because the exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Hummingbird distroless image. The pickle deserialization still triggered, but the code execution failed silently.
 
 > **Key takeaway:** The hardened application image didn't fix the vulnerable library code — `python-socketio 5.13.0` still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
 

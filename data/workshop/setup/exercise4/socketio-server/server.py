@@ -48,8 +48,18 @@ async def index(request):
     )
 
 
+async def evidence(request):
+    path = "/tmp/evidence/pwned.txt"
+    try:
+        with open(path) as f:
+            return web.Response(text=f.read(), content_type="text/plain")
+    except FileNotFoundError:
+        return web.Response(text="No evidence found.\n", status=404)
+
+
 app.router.add_get("/", index)
 app.router.add_get("/health", health)
+app.router.add_get("/evidence", evidence)
 
 async def on_startup(application):
     sio.manager_initialized = True
