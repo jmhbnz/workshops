@@ -1,0 +1,14 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: verify-exploit
+  namespace: ${NAMESPACE}
+spec:
+  backoffLimit: 0
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: verify
+          image: registry.access.redhat.com/hi/curl:latest
+          command: ["curl", "-sf", "http://socketio-server:5000/evidence"]
