@@ -72,8 +72,10 @@ oc --namespace $NAMESPACE get pods --watch
 
 You should see three running pods: `message-broker`, `socketio-server`, and `edge-server`.
 
+<Zoom>
 ![vulnerable-pods-running](/workshops/static/images/fsi-security/vulnerable-pods-running.png)
-
+*Vulnerable application pods running*
+</Zoom>
 
 ## 4.3 Trigger the exploit
 
@@ -202,7 +204,10 @@ oc --namespace $NAMESPACE logs job/verify-exploit
 
 The verification Job will **fail** ⛔. The evidence file was never created because the exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Hummingbird distroless image. The pickle deserialization still triggered, but the code execution failed.
 
+<Zoom>
 ![exploit-job-failed](/workshops/static/images/fsi-security/exploit-job-failed.png)
+*Exploit fails after image hardening*
+</Zoom>
 
 > **Key takeaway:** The hardened application image didn't fix the vulnerable library code. The `python-socketio 5.13.0` package still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
 
@@ -215,5 +220,7 @@ We hardened the application runtime, but the message broker is still running the
 
 Can you find a Project Hummingbird image at [images.redhat.com](https://images.redhat.com) that you could use for the Redis container?
 
+<Zoom>
 ![images](/workshops/static/images/fsi-security/hummingbird-images.png)
-
+*Red Hat Hardened Images*
+</Zoom>
