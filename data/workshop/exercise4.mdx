@@ -10,7 +10,7 @@ summary: "Exploiting a real remote code execution vulnerability"
 
 After yesterday's incident, ACME's Infosec lead Morgan has asked Sarah to prove that the team's container hardening strategy actually works. The best way? Find a real vulnerability, exploit it live, then show Morgan how the container hardening approach employed by ACME neutralise the threat.
 
-Sarah has been reading about [CVE-2025-61765](https://nvd.nist.gov/vuln/detail/CVE-2025-61765). This is a remote code execution vulnerability in [`python-socketio`](https://pypi.org/project/python-socketio) versions prior to `5.14.0`. 
+Sarah has been reading about [CVE-2025-61765](https://nvd.nist.gov/vuln/detail/CVE-2025-61765). This is a remote code execution vulnerability in [`python-socketio`](https://pypi.org/project/python-socketio) versions prior to `5.14.0`.
 
 It's a textbook insecure deserialization flaw that lets an attacker run arbitrary code on any [Socket.IO](https://socket.io) server that uses a shared message broker like Redis. With both Redis & Python being regularly used across the bank this should clearly show Morgan that the container hardening work that Sarah's team have on the backlog works, and should be immediately prioritized.
 
@@ -114,7 +114,7 @@ If the exploit worked, you'll see output like:
 
 ## 4.4 Harden the image
 
-[Project Hummingbird](https://www.redhat.com/en/technologies/linux-platforms/enterprise-linux/hummingbird) is Red Hat's catalog of minimal, hardened container images available at `registry.access.redhat.com/hi/`. These images are built with a *distroless* philosophy:
+[Red Hat Hardened Images](https://images.redhat.com) is Red Hat's catalog of minimal, hardened container images, available at no-cost. These images are built with a *distroless* philosophy:
 
 - **No shell** — no `bash`, `sh`, or any other shell binary
 - **No package manager** — no `dnf`, `rpm`, or `apt`
@@ -132,7 +132,7 @@ FROM registry.redhat.io/ubi9/python-311
 # ... has bash, coreutils, rpm, etc.
 ```
 
-**Hardened** (`Containerfile.hardened`) — multi-stage build, runtime stage uses the Hummingbird distroless Python image. It also uses `requirements-hardened.txt`, which removes the version pin so `pip` pulls the latest (patched) `python-socketio`:
+**Hardened** (`Containerfile.hardened`) — multi-stage build, runtime stage uses the [Red Hat Hardened Images](https://www.redhat.com/en/blog/red-hat-hardened-images) distroless Python image. It also uses `requirements-hardened.txt`, which removes the version pin so `pip` pulls the latest (patched) `python-socketio`:
 
 ```dockerfile
 FROM registry.access.redhat.com/hi/python:latest-builder AS builder
@@ -153,7 +153,7 @@ oc --namespace $NAMESPACE exec deploy/socketio-server -- rm -f /tmp/evidence/pwn
 
 ## 4.5 Harden the application
 
-Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Hummingbird distroless Python image:
+Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Red Hat Hardened Images distroless Python image:
 
 ```bash
 envsubst < setup/exercise4/k8s/socketio-server-hardened.yaml | oc apply --filename -
@@ -202,7 +202,7 @@ oc --namespace $NAMESPACE wait --for=condition=complete --for=condition=failed j
 oc --namespace $NAMESPACE logs job/verify-exploit
 ```
 
-The verification Job will **fail** ⛔. The evidence file was never created because the exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Hummingbird distroless image. The pickle deserialization still triggered, but the code execution failed.
+The verification Job will **fail** ⛔. The evidence file was never created because the exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Red Hat Hardened Images distroless image. The pickle deserialization still triggered, but the code execution failed.
 
 <Zoom>
 ![exploit-job-failed](/workshops/static/images/fsi-security/exploit-job-failed.png)
@@ -211,14 +211,14 @@ The verification Job will **fail** ⛔. The evidence file was never created beca
 
 > **Key takeaway:** The hardened application image didn't fix the vulnerable library code. The `python-socketio 5.13.0` package still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
 
-Excellent work! You've seen how a real-world Remote Code Execution vulnerability can be exploited in a containerised environment, and how adopting Red Hat hardened images provides critical defence in depth even when application-level vulnerabilities exist.
+Excellent work! You've seen how a real-world Remote Code Execution vulnerability can be exploited in a containerised environment, and how adopting Red Hat Hardened Images provides critical defence in depth even when application-level vulnerabilities exist.
 
 
 ## Stretch activity
 
 We hardened the application runtime, but the message broker is still running the community `docker.io/redis:7-alpine` image, with no Red Hat support, no CVE patching SLA, and no supply chain provenance.
 
-Can you find a Project Hummingbird image at [images.redhat.com](https://images.redhat.com) that you could use for the Redis container?
+Can you find an image at [images.redhat.com](https://images.redhat.com) that you could use for the Redis container?
 
 <Zoom>
 ![images](/workshops/static/images/fsi-security/hummingbird-images.png)
