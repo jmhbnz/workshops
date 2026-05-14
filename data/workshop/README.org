@@ -5,7 +5,10 @@
 
 This document captures the steps required to set up an instance of the workshop.
 
+
 * Log in to cluster
+
+Let's start by logging in as the cluster admin.
 
 #+NAME: Login to openshift cluster
 #+begin_src bash
@@ -19,7 +22,7 @@ WARNING: Using insecure TLS client config. Setting this option is not supported!
 
 Login successful.
 
-You have access to 126 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 107 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
 Using project "default".
 #+end_example
@@ -93,34 +96,126 @@ For the purposes of exercise 2 we need an existing project and demo workload.
 
 #+NAME: Create demo workload
 #+begin_src bash
-oc new-project payment-gateway
+for i in $(seq 1 30); do
+  PROJECT_NAME="payment-gateway-$i"
 
-cat << EOF | oc apply --filename -
-apiVersion: v1
-kind: Pod
-metadata:
-  name: payment-gateway
-  namespace: payment-gateway
-spec:
-  containers:
-    - name: httpd
-      image: 'image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest'
+  echo "--- Reconciling $PROJECT_NAME ---"
+
+  # Check if project exists; if not, create it
+  if ! oc get project "$PROJECT_NAME" &>/dev/null; then
+    oc new-project "$PROJECT_NAME"
+  else
+    # If it exists, just switch to it
+    oc project "$PROJECT_NAME"
+  fi
+
+  # Deploy the pod into the current project context
+  cat << EOF | oc apply -f -
+  apiVersion: v1
+  kind: Pod
+  metadata:
+    name: payment-gateway
+  spec:
+    containers:
+      - name: httpd
+        image: 'image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest'
+EOF
+done
 EOF
 #+end_src
 
 #+RESULTS: Create demo workload
 #+begin_example
-Now using project "payment-gateway" on server "https://api.cluster-wg67f.dynamic2.redhatworkshops.io:6443".
-
-You can add applications to this project with the 'new-app' command. For example, try:
-
-    oc new-app rails-postgresql-example
-
-to build a new example application in Ruby. Or use kubectl to deploy a simple Kubernetes application:
-
-    kubectl create deployment hello-node --image=registry.k8s.io/e2e-test-images/agnhost:2.43 -- /agnhost serve-hostname
-
-pod/payment-gateway created
+--- Reconciling payment-gateway-1 ---
+Now using project "payment-gateway-1" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-2 ---
+Now using project "payment-gateway-2" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-3 ---
+Now using project "payment-gateway-3" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-4 ---
+Now using project "payment-gateway-4" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-5 ---
+Now using project "payment-gateway-5" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-6 ---
+Now using project "payment-gateway-6" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-7 ---
+Now using project "payment-gateway-7" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-8 ---
+Now using project "payment-gateway-8" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-9 ---
+Now using project "payment-gateway-9" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-10 ---
+Now using project "payment-gateway-10" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-11 ---
+Now using project "payment-gateway-11" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-12 ---
+Now using project "payment-gateway-12" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-13 ---
+Now using project "payment-gateway-13" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-14 ---
+Now using project "payment-gateway-14" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-15 ---
+Now using project "payment-gateway-15" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-16 ---
+Now using project "payment-gateway-16" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-17 ---
+Now using project "payment-gateway-17" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-18 ---
+Now using project "payment-gateway-18" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-19 ---
+Now using project "payment-gateway-19" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-20 ---
+Now using project "payment-gateway-20" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-21 ---
+Now using project "payment-gateway-21" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-22 ---
+Now using project "payment-gateway-22" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-23 ---
+Now using project "payment-gateway-23" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-24 ---
+Now using project "payment-gateway-24" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-25 ---
+Now using project "payment-gateway-25" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-26 ---
+Now using project "payment-gateway-26" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-27 ---
+Now using project "payment-gateway-27" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-28 ---
+Now using project "payment-gateway-28" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-29 ---
+Now using project "payment-gateway-29" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
+--- Reconciling payment-gateway-30 ---
+Now using project "payment-gateway-30" on server "https://api.cluster-dsqzf.dsqzf.sandbox2470.opentlc.com:6443".
+pod/payment-gateway unchanged
 #+end_example
 
 
