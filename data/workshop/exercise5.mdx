@@ -1,5 +1,5 @@
 ---
-title: The security posture transformation 
+title: The security posture transformation
 exercise: 5
 date: '2026-05-11'
 tags: ['openshift','security']
@@ -12,28 +12,147 @@ After the demonstration today to Morgan, her platform team colleagues and the wi
 
 Given how close they came to ending up in the news the other day Infosec are insisting they also implement a platform level control to prevent this kind of arbitrary process execution exploit being possible.
 
-After a quick virtual call with their local Red Hat team Sarah opts to employ Process Baselining through [Red Hat Advanced Cluster Security](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes).
+After a quick virtual call with their local Red Hat team Sarah opts to employ Process Baselining through [Red Hat Advanced Cluster Security for Kubernetes](https://www.redhat.com/en/technologies/cloud-computing/openshift/advanced-cluster-security-kubernetes).
 
 ![baselining-meeting](/workshops/static/images/fsi-security/sarah-meeting-demo.png)
 
 
 ## 5.1 Execute an arbitrary process
 
-TODO: Exec one liner into an existing pod, show a shell being launched successfully
+Before we introduce any runtime controls, let's first prove an attacker (or anyone with cluster access) can execute arbitrary processes inside a running container.
+
+We'll use the `payment-gateway` pod from our incident scenario. Run the following command to exec into the container and launch a shell:
+
+```bash
+oc --namespace payment-gateway exec -it deploy/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Arbitrary process execution successful'"
+```
+
+You should see output confirming the shell ran successfully, displaying the user and hostname inside the container. This is exactly the kind of capability a threat actor exploits after gaining initial access — once they can execute arbitrary processes, they can download toolkits, exfiltrate data, or establish persistence.
+
+> **Morgan**: See that? Anyone with exec permissions can drop into a shell and run whatever they want. The network policy buys us time, but it doesn't stop code execution inside the container. We need something that catches this at the process level.
+
+> **Sarah**: Agreed. Let's look at what RHACS can do for us here.
 
 
 ## 5.2 Introduce process baselining
 
-TODO: Context on baselines, time windows, ebpf etc
+Red Hat Advanced Cluster Security (RHACS) uses [eBPF](https://ebpf.io/) (extended Berkeley Packet Filter) probes on each cluster node to monitor every process that starts inside a container — in real time, with zero instrumentation required in the application itself. It's actually an embedded instance of the [Falco](https://github.com/falcosecurity/libs) eBPF probes.
 
-TODO: Open rhacs console, show that no baseline currently exists for the container in question
+When a deployment is first observed, RHACS enters an **observation window** where it records every process that runs inside each container. This set of observed processes forms the **process baseline**. Think of it as a representation of "normal" behaviour for that container.
+
+While the baseline is **unlocked**, RHACS continues to add newly observed processes to the baseline — it's learning. Once the baseline is **locked**, any process execution that falls outside the baseline is flagged as an **anomalous process** violation.
+
+This gives platform and security teams a powerful runtime control, based on behavioural analysis: even if a vulnerability allows remote code execution, RHACS will detect and alert on the anomalous process that the exploit attempts to run.
+
+Let's see this in action. Open the [RHACS web console](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io) and navigate to **Risk** from the left-hand menu. Search for the `payment-gateway` pod.
+
+Click on the pod to open its risk details, then select the **Process Discovery** tab. You'll see the list of processes that RHACS has observed running in the container.
+
+Notice that the baseline is currently **unlocked** — RHACS is still in its observation window and will continue adding any new processes it sees to the baseline. This means our earlier `exec` command may have been captured, but it won't trigger a violation because the baseline hasn't been enforced yet.
+
+> **Morgan**: So right now it's just watching and learning?
+
+> **Sarah**: Exactly. Once we lock the baseline, anything not on the list gets flagged. Let's do that now.
 
 
 ## 5.3 Lock a baseline
 
-TODO: Use the rhacs web console to lock the container baseline (make sure initial oc exec doesn't get into it!?)
+Now we'll lock the process baseline for the `payment-gateway` container. Once locked, only the processes already in the baseline will be considered "normal" — everything else triggers a violation.
+
+In the RHACS web console:
+
+1. Navigate to **Risk** and select the `payment-gateway` deployment
+2. Click the **Process Discovery** tab
+3. Review the list of baselined processes — these should be the legitimate application processes (e.g., the `httpd` web server and its worker processes)
+4. If you see `/bin/bash` or other shell processes in the baseline from our earlier exec, **remove them** by clicking the **X** next to the process entry — we don't want shells to be considered normal behaviour
+5. Click the **Lock** icon (🔒) to lock the baseline
+
+Here's a view of a locked process baseline:
+
+![locked1.png](/workshops/static/images/fsi-security/locked1.png)
+
+![locked2.png](/workshops/static/images/fsi-security/locked2.png)
+
+![locked3.png](/workshops/static/images/fsi-security/locked3.png)
+
+With the baseline locked, let's prove it works. Run the same exec command we used earlier:
+
+```bash
+oc --namespace payment-gateway exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
+```
+
+The command itself will still execute (RHACS is **detecting**, not **blocking** by default), but now navigate back to the RHACS web console and check the **Violations** page from the left-hand menu.
+
+You should see a new violation: **Unauthorized Process Execution** for the `payment-gateway` deployment. Click on it to see the details — RHACS has recorded that `/bin/bash` was executed and it was not in the locked baseline.
+
+![locked4.png](/workshops/static/images/fsi-security/locked4.png)
+
+![locked5.png](/workshops/static/images/fsi-security/locked5.png)
+
+
+> **Sarah**: There it is Morgan — the shell exec just lit up as a violation. If we'd had this in place during the incident, the SOC would have been alerted the moment the threat actor tried to run their reverse shell.
+
+> **Morgan**: Now we're talking. Can we make this block the process rather than just alert?
+
+> **Sarah**: Yes — RHACS enforcement policies can be configured to kill pods or block exec at runtime. For now, the detection gives us immediate visibility. We can tighten enforcement once the team is comfortable with the baseline accuracy across all our workloads.
 
 
 ## 5.4 Automate locking of baselines for entire namespace
 
-TODO: Optional activity to show an example of using script or curl one liner to lock baselines in bulk. 
+Locking baselines one deployment at a time through the web console is fine for a targeted change, but ACME has hundreds of deployments. Morgan wants every workload in the `payment-gateway` namespace locked down before end of day.
+
+Fortunately, RHACS exposes a full [REST API](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io/main/apidocs) that we can use to automate this. Let's write a script that queries all process baselines for a given namespace and locks each one.
+
+First, generate an API token in the RHACS web console:
+
+1. Navigate to **Platform Configuration** → **Integrations**
+2. Scroll down to **Authentication Tokens** and click **API Token**
+3. Click **Generate Token**, give it a name like `baseline-automation`, and select the `Admin` role
+4. Copy the generated token
+
+Now set your environment variables:
+
+```bash
+export ROX_API_TOKEN="<your-token-here>"
+export ROX_CENTRAL_ADDRESS="central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io:443"
+```
+
+Run the following script to lock all process baselines in the `payment-gateway` namespace:
+
+```bash
+NAMESPACE="payment-gateway"
+
+DEPLOYMENT_IDS=$(curl --silent --insecure \
+  --header "Authorization: Bearer ${ROX_API_TOKEN}" \
+  "https://${ROX_CENTRAL_ADDRESS}/v1/deployments?query=Namespace:${NAMESPACE}" \
+  | jq -r '.deployments[].id')
+
+for DEPLOY_ID in $DEPLOYMENT_IDS; do
+  DEPLOY_NAME=$(curl --silent --insecure \
+    --header "Authorization: Bearer ${ROX_API_TOKEN}" \
+    "https://${ROX_CENTRAL_ADDRESS}/v1/deployments/${DEPLOY_ID}" \
+    | jq -r '.name')
+
+  BASELINE_IDS=$(curl --silent --insecure \
+    --header "Authorization: Bearer ${ROX_API_TOKEN}" \
+    "https://${ROX_CENTRAL_ADDRESS}/v1/processbaselines/key?deploymentId=${DEPLOY_ID}" \
+    | jq -r '.key.deploymentId')
+
+  curl --silent --insecure \
+    --header "Authorization: Bearer ${ROX_API_TOKEN}" \
+    --header "Content-Type: application/json" \
+    --request PUT \
+    "https://${ROX_CENTRAL_ADDRESS}/v1/processbaselines/${DEPLOY_ID}/lock" \
+    --data '{"locked": true}' | jq .
+
+  echo "Locked baseline for deployment: ${DEPLOY_NAME}"
+done
+```
+
+You should see output confirming each deployment's baseline has been locked. Navigate back to the RHACS **Risk** view and verify that the baselines for all deployments in the `payment-gateway` namespace now show as locked.
+
+> **Morgan**: This is exactly what I needed. We can roll this out across every namespace on the cluster as part of our hardening sprint. Between the image hardening from earlier and the process baselining, we've got real defence in depth.
+
+> **Sarah**: And the best part is we didn't have to change a single line of application code. The platform is doing the heavy lifting.
+
+Well done! You've implemented runtime process baselining with RHACS, giving ACME Financial Services the ability to detect anomalous process execution across their entire container fleet. Combined with the image hardening from Exercise 4 and the network isolation from Exercise 2, ACME now has multiple layers of defence protecting their critical workloads. 🎉
