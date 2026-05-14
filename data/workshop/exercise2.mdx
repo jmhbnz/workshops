@@ -57,11 +57,18 @@ Before applying any policy Morgan asks Sarah to confirm what she is seeing in th
 *View external connections within Red Hat Advanced Cluster Security*
 </Zoom>
 
+
 ## 2.4 - Isolate the workload
 
-> Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway`. Let's cut this traffic off right now with a network policy.
+> Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway-<#>`. Let's cut this traffic off right now with a network policy.
 
-Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the Quick Create (+) button in the top right corner. Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
+OpenShift supports software defined network segmentation through Kubernetes [`NetworkPolicy`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/network_security/network-policy).  As a platform engineer, you can define network policies that restrict traffic to pods in your cluster. In an incident situation a NetworkPolicy is a critical tool to quickly adjust what network flows are possible.
+
+Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the **Quick Create (+)** button in the top right corner. Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
+
+Paste in the network policy example below, then adjust the `namespace:` is updated to your user number.
+
+Once updated, click **Create**.
 
 ```yaml
 apiVersion: networking.k8s.io/v1
@@ -80,6 +87,7 @@ spec:
   # for any traffic originating from matching pods.
   egress: []
 ```
+
 
 With the breached workload now isolated, and no further egress traffic possible Morgan advises Sarah to take a quick break and then jump back online to assist her with some forensic evidence gathering.
 
