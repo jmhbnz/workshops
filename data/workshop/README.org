@@ -22,7 +22,7 @@ WARNING: Using insecure TLS client config. Setting this option is not supported!
 
 Login successful.
 
-You have access to 107 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 81 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
 Using project "default".
 #+end_example
@@ -90,83 +90,95 @@ consolenotification.console.openshift.io/acme-banner created
 #+end_example
 
 
-* Deploy compromised workload
+* Deploy compromised workloads
 
-For the purposes of exercise 2 we need an existing project and demo workload.
+For the purposes of exercise 2 we need an existing project and demo workload for each workshop user.
 
-#+NAME: Create demo workload
+We'll create the required ~Project~, ~Pod~ and ~ServiceAccount~ by hydrating an OpenShift ~Template~, then carry out the exploit with a bash script once the pods are up.
+
+#+NAME: Deploy compromised workloads
 #+begin_src bash
-for i in $(seq 1 30); do
-  PROJECT_NAME="payment-gateway-$i"
+echo "Applying template for each attendee"
+for i in $(seq 1 5); do
+  oc process --filename setup/app-template.yaml --param SUFFIX=$i
+done | oc apply --filename -
 
-  echo "--- Reconciling $PROJECT_NAME ---"
+echo "Waiting for all payment-gateway pods to initialize..."
+oc wait --for=condition=Ready pods --selector app=payment-gateway --all-namespaces --timeout=90s
 
-  # Check if project exists; if not, create it
-  if ! oc get project "$PROJECT_NAME" &>/dev/null; then
-    oc new-project "$PROJECT_NAME"
-  else
-    # If it exists, just switch to it
-    oc project "$PROJECT_NAME"
-  fi
+echo "Simulating live 'oc exec' intrusion across environments..."
+for i in $(seq 1 5); do
+  namespace="payment-gateway-$i"
 
-  # Deploy the pod into the current project context
-  cat << EOF | oc apply -f -
-  apiVersion: v1
-  kind: Pod
-  metadata:
-    name: payment-gateway
-  spec:
-    containers:
-      - name: httpd
-        image: 'image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest'
-EOF
+  # Executing the exploit payload dynamically using explicit parameter names
+  oc exec pod/payment-gateway \
+    --namespace "${namespace}" \
+    --container httpd \
+    -- sh -c '
+      export C2_SERVER="198.51.100.42"
+      export CODENAME="SHADOW_PIVOT"
+      export ENV_MARKER="ACME_SECRET_KEY_EXFIL_TEST_9921"
+      mkdir -p /tmp/.hidden_toolkit
+      echo "while true; do sleep 60; done" > /tmp/.hidden_toolkit/exfil.sh
+      chmod +x /tmp/.hidden_toolkit/exfil.sh
+      /tmp/.hidden_toolkit/exfil.sh > /dev/null 2>&1 &
+    '
+
+  echo "[+] Namespace ${namespace} weaponized via simulated session execution."
 done
-EOF
 #+end_src
 
-
-Once the workload pod is deployed we need the "threat actor" to carry out some action which we can later introspect via a criu checkpoint.
-
-#+NAME: Simulate threat actor activity
-#+begin_src bash
-#!/bin/sh
-# ACME Security Workshop - Threat Actor Simulation
-# This script executes inside the target httpd container to populate volatile memory.
-
-echo "[*] Mimicking threat actor initial access..."
-
-# 1. Set environmental variables to inject indicators into process environment blocks
-export C2_SERVER="198.51.100.42"
-export EXFIL_TARGET="http://198.51.100.42/incoming/acme_dump.tar.gz"
-export CODENAME="SHADOW_PIVOT"
-
-# 2. Create a hidden directory structure in the container filesystem
-mkdir -p /tmp/.hidden_toolkit
-
-# 3. Simulate downloading malicious tool payloads (written to /tmp string arrays)
-echo "Writing decoy malware footprints to disk..."
-cat << 'EOF' > /tmp/.hidden_toolkit/exfil.sh
-#!/bin/sh
-# Simulated data exfiltration loop
-while true; do
-    echo "Staging environment variables and config data..."
-    sleep 60
-done
-EOF
-chmod +x /tmp/.hidden_toolkit/exfil.sh
-
-# 4. Execute a persistent dummy process in the background.
-# This ensures a distinct PID, file descriptors, and memory allocation map exist
-# when participants pull the CRIU memory strings.
-echo "[*] Spawning persistent background process..."
-/tmp/.hidden_toolkit/exfil.sh > /dev/null 2>&1 &
-
-# 5. Populate a text variable inside a standard running utility to simulate a resident string
-# We use a unique marker string ('ACME_SECRET_KEY_EXFIL_TEST') so students can grep it out of the dump
-ENV_MARKER="ACME_SECRET_KEY_EXFIL_TEST_9921"
-sleep 1
-echo "[+] Simulation complete. Attacker background worker active under PID: $!"
-#+end_src
+#+RESULTS: Deploy compromised workloads
+#+begin_example
+Applying template for each attendee
+project.project.openshift.io/payment-gateway-1 unchanged
+pod/payment-gateway unchanged
+serviceaccount/workshop-sa unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
+role.rbac.authorization.k8s.io/container-executor unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+project.project.openshift.io/payment-gateway-2 unchanged
+pod/payment-gateway unchanged
+serviceaccount/workshop-sa unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
+role.rbac.authorization.k8s.io/container-executor unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+project.project.openshift.io/payment-gateway-3 unchanged
+pod/payment-gateway unchanged
+serviceaccount/workshop-sa unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
+role.rbac.authorization.k8s.io/container-executor unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+project.project.openshift.io/payment-gateway-4 unchanged
+pod/payment-gateway unchanged
+serviceaccount/workshop-sa unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
+role.rbac.authorization.k8s.io/container-executor unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+project.project.openshift.io/payment-gateway-5 unchanged
+pod/payment-gateway unchanged
+serviceaccount/workshop-sa unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
+role.rbac.authorization.k8s.io/container-executor unchanged
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+Waiting for all payment-gateway pods to initialize...
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+Simulating live 'oc exec' intrusion across environments...
+[+] Namespace payment-gateway-1 weaponized via simulated session execution.
+[+] Namespace payment-gateway-2 weaponized via simulated session execution.
+[+] Namespace payment-gateway-3 weaponized via simulated session execution.
+[+] Namespace payment-gateway-4 weaponized via simulated session execution.
+[+] Namespace payment-gateway-5 weaponized via simulated session execution.
+#+end_example
 
 
 * Enable collecting externalip in rhacs
