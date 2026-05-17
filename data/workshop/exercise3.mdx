@@ -38,7 +38,7 @@ The content of container checkpoints can be further analyzed with the `checkpoin
 
 > **Morgan**: A curl command to dump memory? That’s... surprisingly old school for such a modern platform!
 
-> **Sarah**: (Laughing weakly) Welcome to Kubernetes. The command looks like this: `curl -X POST "https://localhost:10250/checkpoint/payment-gateway/payment-pod/payment-container"`. I’ll need to do this from a debug shell on the node itself.
+> **Sarah**: (Laughing weakly) Welcome to Kubernetes. The command looks like this: `curl -X POST "https://localhost:10250/checkpoint/payment-gateway-x/payment-gateway/httpd"`. I’ll need to do this from a debug shell on the node itself. I think there is a helper script on a Red Hat support article I can use to make it easy.
 
 > **Morgan**: Will the container stay alive after the checkpoint?
 
@@ -48,18 +48,42 @@ The content of container checkpoints can be further analyzed with the `checkpoin
 
 > **Sarah**: Initiating the node-level debug shell now. Hang on... and... started.
 
-Initiate a checkpoint by running the following command in your OpenShift Web Terminal:
+Initiate a checkpoint by copying and running the following script in your OpenShift Web Terminal:
 
 ```bash
-TOKEN=$(oc whoami --token)
-OPENSHIFT_API_URL=$(oc whoami --show-server)
-NODE_NAME=$(oc --namespace payment-gateway get pod payment-gateway --output jsonpath='{.spec.nodeName}')
+NODE_NAME=$(oc get pods -l app=payment-gateway -o jsonpath='{.items[0].spec.nodeName}')
+CURRENT_NS=$(oc project --short)
 
-curl --insecure \
+echo "==> Triggering fresh CRIU checkpoint on node: $NODE_NAME..."
+
+API_RESPONSE=$(curl --silent --insecure \
   --header "Authorization: Bearer $(oc whoami --show-token)" \
-  --request POST "${OPENSHIFT_API_URL}/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/payment-gateway/payment-gateway/httpd"
+  --request POST "${OPENSHIFT_API_URL}/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/${CURRENT_NS}/payment-gateway/httpd")
 
+TARBALL_PATH=$(echo "$API_RESPONSE" | jq -r '.items[0] // empty')
+
+if [ -z "$TARBALL_PATH" ] || [ "$TARBALL_PATH" = "null" ]; then
+  echo "[!] ERROR: Checkpoint failed. API response was:"
+  echo "$API_RESPONSE"
+  return 1 2>/dev/null || exit 1
+fi
+
+CHECKPOINT_FILE=${TARBALL_PATH##*/}
+
+echo "==> Checkpoint created successfully: $CHECKPOINT_FILE"
+echo "==> Streaming memory dump into Web Terminal..."
+
+oc debug node/"$NODE_NAME" --to-namespace="$CURRENT_NS" -- \
+  chroot /host /bin/sh -c "cat $TARBALL_PATH" > "/tmp/$CHECKPOINT_FILE"
+
+echo "==> Success! Verifying saved forensic artifact in /tmp/:"
+ls -lah "/tmp/$CHECKPOINT_FILE"
 ```
+
+After a short wait you should see that a checkpoint has been created.
+
+
+
 
 ## 3.2 Exploring the checkpoint
 
