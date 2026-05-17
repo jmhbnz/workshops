@@ -38,7 +38,7 @@ Open a **Web Terminal** session using the **>_** button in the top right of the 
 *Launch an OpenShift Web Terminal*
 </Zoom>
 
-Ensure your `payment-gateway-x` project is selected.
+Ensure your `payment-gateway-x` project is selected, then click **Start**.
 
 <Zoom>
 ![web-terminal-project](/workshops/static/images/fsi-security/web-terminal-project.png)
@@ -60,29 +60,28 @@ for master in $(oc get nodes --selector node-role.kubernetes.io/master --output 
 done
 ```
 
-Take some time to review the audit log event and get familiar with the fields. **Note down the user that carried out the exec, we'll need this later.**
-
-Below is an example audit log event. What interesting information can we obtain?
+After running the command you should see a log entry similar to the one below.  Take some time to review the audit log event and get familiar with the fields. What interesting information can web obtain?
 
 ```json
 {
   "kind": "Event",
   "apiVersion": "audit.k8s.io/v1",
   "level": "Metadata",
-  "auditID": "93c35bfe-5fb4-4323-a5fa-076be76478f3",
-  "stage": "ResponseComplete",
+  "auditID": "706e66a9-8f01-4d5b-a342-7242fb0ef00b",
+  "stage": "ResponseStarted",
   "requestURI": "/api/v1/namespaces/payment-gateway-1/pods/payment-gateway/exec?command=sh&command=-c&command=%0A++++++export+C2_SERVER%3D%22198.51.100.42%22%0A++++++export+CODENAME%3D%22SHADOW_PIVOT%22%0A++++++export+ENV_MARKER%3D%22ACME_SECRET_KEY_EXFIL_TEST_9921%22%0A++++++mkdir+-p+%2Ftmp%2F.hidden_toolkit%0A++++++echo+%22while+true%3B+do+sleep+60%3B+done%22+%3E+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++chmod+%2Bx+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++%2Ftmp%2F.hidden_toolkit%2Fexfil.sh+%3E+%2Fdev%2Fnull+2%3E%261+%26%0A++++&container=httpd&stderr=true&stdout=true",
   "verb": "create",
   "user": {
-    "username": "admin",
-    "uid": "74bd0e33-5c0a-4fec-b149-0d7f72368dc2",
+    "username": "system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa",
+    "uid": "305c20f0-e448-43b8-8260-44feedb88601",
     "groups": [
-      "system:authenticated:oauth",
+      "system:serviceaccounts",
+      "system:serviceaccounts:payment-gateway-1",
       "system:authenticated"
     ],
     "extra": {
-      "scopes.authorization.openshift.io": [
-        "user:full"
+      "authentication.kubernetes.io/credential-id": [
+        "JTI=e4fc9219-a80c-44ff-bee8-fe8eb1d04786"
       ]
     }
   },
@@ -101,16 +100,78 @@ Below is an example audit log event. What interesting information can we obtain?
     "metadata": {},
     "code": 101
   },
-  "requestReceivedTimestamp": "2026-05-17T13:24:11.612048Z",
-  "stageTimestamp": "2026-05-17T13:24:12.307936Z",
+  "requestReceivedTimestamp": "2026-05-17T14:01:47.504612Z",
+  "stageTimestamp": "2026-05-17T14:01:47.535669Z",
   "annotations": {
     "authorization.k8s.io/decision": "allow",
-    "authorization.k8s.io/reason": "RBAC: allowed by ClusterRoleBinding \"keycloak-sso-user:admin:cluster-admin\" of ClusterRole \"cluster-admin\" to User \"admin\""
+    "authorization.k8s.io/reason": "RBAC: allowed by RoleBinding \"workshop-sa-exec-binding/payment-gateway-1\" of Role \"container-executor\" to ServiceAccount \"cicd-pipeline-runner-sa/payment-gateway-1\""
+  }
+}
+{
+  "kind": "Event",
+  "apiVersion": "audit.k8s.io/v1",
+  "level": "Metadata",
+  "auditID": "706e66a9-8f01-4d5b-a342-7242fb0ef00b",
+  "stage": "ResponseComplete",
+  "requestURI": "/api/v1/namespaces/payment-gateway-1/pods/payment-gateway/exec?command=sh&command=-c&command=%0A++++++export+C2_SERVER%3D%22198.51.100.42%22%0A++++++export+CODENAME%3D%22SHADOW_PIVOT%22%0A++++++export+ENV_MARKER%3D%22ACME_SECRET_KEY_EXFIL_TEST_9921%22%0A++++++mkdir+-p+%2Ftmp%2F.hidden_toolkit%0A++++++echo+%22while+true%3B+do+sleep+60%3B+done%22+%3E+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++chmod+%2Bx+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++%2Ftmp%2F.hidden_toolkit%2Fexfil.sh+%3E+%2Fdev%2Fnull+2%3E%261+%26%0A++++&container=httpd&stderr=true&stdout=true",
+  "verb": "create",
+  "user": {
+    "username": "system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa",
+    "uid": "305c20f0-e448-43b8-8260-44feedb88601",
+    "groups": [
+      "system:serviceaccounts",
+      "system:serviceaccounts:payment-gateway-1",
+      "system:authenticated"
+    ],
+    "extra": {
+      "authentication.kubernetes.io/credential-id": [
+        "JTI=e4fc9219-a80c-44ff-bee8-fe8eb1d04786"
+      ]
+    }
+  },
+  "sourceIPs": [
+    "100.64.0.5"
+  ],
+  "userAgent": "oc/4.21.15 (linux/amd64) kubernetes/9d9df34",
+  "objectRef": {
+    "resource": "pods",
+    "namespace": "payment-gateway-1",
+    "name": "payment-gateway",
+    "apiVersion": "v1",
+    "subresource": "exec"
+  },
+  "responseStatus": {
+    "metadata": {},
+    "code": 101
+  },
+  "requestReceivedTimestamp": "2026-05-17T14:01:47.504612Z",
+  "stageTimestamp": "2026-05-17T14:01:48.409279Z",
+  "annotations": {
+    "authorization.k8s.io/decision": "allow",
+    "authorization.k8s.io/reason": "RBAC: allowed by RoleBinding \"workshop-sa-exec-binding/payment-gateway-1\" of Role \"container-executor\" to ServiceAccount \"cicd-pipeline-runner-sa/payment-gateway-1\""
   }
 }
 ```
 
-> **Note:** Querying node logs directly on a control node is only effective within the node log retention period, these files are rotated on disk. Forwarding logs to an external log store for long term retention is a vital security control.
+> **Sarah:** (Rubbing her eyes, voice raspy) Morgan, I’m looking at the master node audit logs right now. Tell me you’re seeing this on my shared screen in Teams?
+
+> **Morgan:** (Over the phone, typing audio in the background) I see it. I'm looking at the requestURI block right now... f&%$. Someone just spawned an interactive shell.
+
+> **Sarah:** It’s worse than that. Look at the URL encoding in the query string. They didn't just open a terminal; they fed a full payload straight into the exec subresource. If you decode those hex characters, they're exporting a C2 server IP.
+
+> **Morgan:** Wait, scroll back up... %2Ftmp%2F.hidden_toolkit%2Fexfil.sh. They're building a hidden persistence directory right inside the /tmp directory of our production gateway.
+
+> **Sarah:** Exactly. And it worked. Look at the responseStatus.code. It’s a 101.
+
+> **Morgan:** HTTP 101 Switching Protocols... the API server upgraded the connection to a live WebSocket. That means the attacker successfully established a persistent bidirectional stream directly into the httpd container. Who authorized this? Is it a compromised admin account?
+
+> **Sarah:** No, look at the user object. The username is `system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa`.
+
+> **Morgan:** (Stunned silence for a second) The automated CI/CD pipeline runner? That account shouldn't even be interacting with live pods. It’s only supposed to push manifests to the cluster!
+
+> **Sarah:** Someone over-permissioned that pipeline service account, and its token just got leaked. Morgan, I don't care what time it is, wake up the payment gateway application team. We need to investigate how that CI/CD credential got compromised.
+
+> **Morgan:** On it.
 
 
 ## 2.3 - Reviewing outbound traffic
