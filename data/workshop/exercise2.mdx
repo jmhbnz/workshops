@@ -21,11 +21,11 @@ Sarah threw open her laptop and immediately connected to the bank's VPN, trying 
 
 Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster-6lrcm.dynamic2.redhatworkshops.io) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
 
-> Ok I'm logged in, do you want me to kill the pod? What do we do??
+> **Sarah** Ok I'm logged in, do you want me to kill the pod? What do we do??
 
-> Whatever you do, don't kill the pod yet!  Warns Morgan - we'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? Is there anything you can see from your side on how this started Sarah??  We need to know if this is bigger than just one pod or not.
+> **Morgan** Whatever you do, don't kill the pod yet!  We'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? Is there anything you can see from your side on how this started Sarah??  We need to know if this is bigger than just one pod or not.
 
-> We'll need to track that down in the OpenShift Audit Logs Sarah stammers back, give me a few minutes to hunt through the logs.
+> **Sarah** Let me take a look in the OpenShift Audit Logs, give me a few minutes to hunt through the logs.
 
 Throughout this workshop you'll be using a namespace assigned to your user number, for example `payment-gateway-1` for `user1`.
 
@@ -107,50 +107,6 @@ After running the command you should see a log entry similar to the one below.  
     "authorization.k8s.io/reason": "RBAC: allowed by RoleBinding \"workshop-sa-exec-binding/payment-gateway-1\" of Role \"container-executor\" to ServiceAccount \"cicd-pipeline-runner-sa/payment-gateway-1\""
   }
 }
-{
-  "kind": "Event",
-  "apiVersion": "audit.k8s.io/v1",
-  "level": "Metadata",
-  "auditID": "706e66a9-8f01-4d5b-a342-7242fb0ef00b",
-  "stage": "ResponseComplete",
-  "requestURI": "/api/v1/namespaces/payment-gateway-1/pods/payment-gateway/exec?command=sh&command=-c&command=%0A++++++export+C2_SERVER%3D%22198.51.100.42%22%0A++++++export+CODENAME%3D%22SHADOW_PIVOT%22%0A++++++export+ENV_MARKER%3D%22ACME_SECRET_KEY_EXFIL_TEST_9921%22%0A++++++mkdir+-p+%2Ftmp%2F.hidden_toolkit%0A++++++echo+%22while+true%3B+do+sleep+60%3B+done%22+%3E+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++chmod+%2Bx+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++%2Ftmp%2F.hidden_toolkit%2Fexfil.sh+%3E+%2Fdev%2Fnull+2%3E%261+%26%0A++++&container=httpd&stderr=true&stdout=true",
-  "verb": "create",
-  "user": {
-    "username": "system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa",
-    "uid": "305c20f0-e448-43b8-8260-44feedb88601",
-    "groups": [
-      "system:serviceaccounts",
-      "system:serviceaccounts:payment-gateway-1",
-      "system:authenticated"
-    ],
-    "extra": {
-      "authentication.kubernetes.io/credential-id": [
-        "JTI=e4fc9219-a80c-44ff-bee8-fe8eb1d04786"
-      ]
-    }
-  },
-  "sourceIPs": [
-    "100.64.0.5"
-  ],
-  "userAgent": "oc/4.21.15 (linux/amd64) kubernetes/9d9df34",
-  "objectRef": {
-    "resource": "pods",
-    "namespace": "payment-gateway-1",
-    "name": "payment-gateway",
-    "apiVersion": "v1",
-    "subresource": "exec"
-  },
-  "responseStatus": {
-    "metadata": {},
-    "code": 101
-  },
-  "requestReceivedTimestamp": "2026-05-17T14:01:47.504612Z",
-  "stageTimestamp": "2026-05-17T14:01:48.409279Z",
-  "annotations": {
-    "authorization.k8s.io/decision": "allow",
-    "authorization.k8s.io/reason": "RBAC: allowed by RoleBinding \"workshop-sa-exec-binding/payment-gateway-1\" of Role \"container-executor\" to ServiceAccount \"cicd-pipeline-runner-sa/payment-gateway-1\""
-  }
-}
 ```
 
 > **Sarah:** (Rubbing her eyes, voice raspy) Morgan, I’m looking at the master node audit logs right now. Tell me you’re seeing this on my shared screen in Teams?
@@ -176,9 +132,21 @@ After running the command you should see a log entry similar to the one below.  
 
 ## 2.3 - Reviewing outbound traffic
 
-After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io/main/network-graph) to review network traffic and draft the new network policy.
+After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster-6lrcm.dynamic2.redhatworkshops.io/main/network-graph) to review network traffic and draft the new network policy.
 
-Log in to the Red Hat Advanced Cluster Security dashboard using the username `admin` and the password provided by your workshop facillitators.
+Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider.
+
+<Zoom>
+![rhacs-auth](/workshops/static/images/fsi-security/rhacs-auth.png)
+*Red Hat Advanced Cluster Security authentication provider*
+</Zoom>
+
+Navigate to **Network Graph** on the left menu, then filter to your `payment-gateway-` namespace and the `payment-gateway` deployment using the dropdown filters at the top of the page.
+
+<Zoom>
+![rhacs-filters](/workshops/static/images/fsi-security/rhacs-filters.png)
+*Red Hat Advanced Cluster Security network graph filters*
+</Zoom>
 
 Before applying any policy Morgan asks Sarah to confirm what she is seeing in the firewall dashboard for the external IP's that the `payment-gateway` container is making connections to. We can view this within the **Network Graph** by clicking on the **External Entities IP** icon:
 
@@ -190,7 +158,7 @@ Before applying any policy Morgan asks Sarah to confirm what she is seeing in th
 
 ## 2.4 - Isolate the workload
 
-> Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway-<#>`. Let's cut this traffic off right now with a network policy.
+> **Sarah** Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway`. Let's cut this traffic off right now with a network policy.
 
 OpenShift supports software defined network segmentation through Kubernetes [`NetworkPolicy`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/network_security/network-policy).  As a platform engineer, you can define network policies that restrict traffic to pods in your cluster. In an incident situation a NetworkPolicy is a critical tool to quickly adjust what network flows are possible.
 
