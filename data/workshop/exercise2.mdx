@@ -10,7 +10,7 @@ summary: "The call no-one wants to get"
 
 The phone vibrated angrily on the wooden nightstand. It was 02:14 AM. Sarah, squinted at the caller ID: *ACME SOC Incident Team*.
 
-> Sarah, It's Morgan from Infosec, sorry to call you out but we have a big f*%$@*^* problem, the voice on the other end said frantically. Our automated anomaly detection just flagged highly irregular egress traffic coming from the `payment-gateway` namespace on the `acme-prod` cluster! We think a threat actor has breached the container, you need to get online right now!!
+> Sarah, It's Morgan from Infosec, sorry to call you out but we have a big f*%$@*^* problem, the voice on the other end said frantically. Our automated anomaly detection just flagged highly irregular egress traffic coming from a `payment-gateway` namespace on the `acme-prod` cluster! We think a threat actor has breached the container, you need to get online right now!!
 
 Sarah threw open her laptop and immediately connected to the bank's VPN, trying to keep calm and shake off sleep brain fog as a sense of panic set in...
 
@@ -19,29 +19,93 @@ Sarah threw open her laptop and immediately connected to the bank's VPN, trying 
 
 ## 2.1 - Identify the compromised credentials
 
-Now online and frantically loading the OpenShift Web Console for the `acme-prd` cluster along with additional tabs for observability tools Sarah keeps Morgan updated with her progress.
+Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster-6lrcm.dynamic2.redhatworkshops.io) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
 
 > Ok I'm logged in, do you want me to kill the pod? What do we do??
 
-> Whatever you do, don't kill the pod yet!  Warns Morgan - we'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? What credential are they using Sarah??  We need to know if this is bigger than just one pod or not.
+> Whatever you do, don't kill the pod yet!  Warns Morgan - we'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? Is there anything you can see from your side on how this started Sarah??  We need to know if this is bigger than just one pod or not.
 
 > We'll need to track that down in the OpenShift Audit Logs Sarah stammers back, give me a few minutes to hunt through the logs.
 
-Let's review the audit logs, specifically for pods within the `payment-gateway` namespace.  We can quickly query these via `oc`. In an incident situation, fast response is critical, having the skills and tooling to be able to quickly query audit logs is immensely valuable.
+Throughout this workshop you'll be using a namespace assigned to your user number, for example `payment-gateway-1` for `user1`.
 
-In the example below we'll query the audit logs held on one of our control nodes specifically for `exec` events occurring in the namespace of interest.
+Let's review the audit logs, specifically for pods within your allocated `payment-gateway` namespace.  We can quickly query these via `oc` using our OpenShift Web Terminal. In an incident situation, fast response is critical, having the skills and tooling to be able to quickly query audit logs is immensely valuable.
+
+Open a **Web Terminal** session using the **>_** button in the top right of the OpenShift Web Console.
+
+<Zoom>
+![web-terminal-button](/workshops/static/images/fsi-security/web-terminal-button.png)
+*Launch an OpenShift Web Terminal*
+</Zoom>
+
+Ensure your `payment-gateway-x` project is selected.
+
+<Zoom>
+![web-terminal-project](/workshops/static/images/fsi-security/web-terminal-project.png)
+*Select OpenShift Web Terminal project*
+</Zoom>
+
+Run the `oc` command below to query the audit logs held on one of our control nodes specifically for `exec` events occurring in the namespace of interest.
 
 ```bash
 oc adm node-logs $(oc get nodes -l node-role.kubernetes.io/master --output name | head -n 1) \
   --path=kube-apiserver/audit.log \
-  | jq 'select(.objectRef.namespace == "payment-gateway" 
+  | jq 'select(.objectRef.namespace == "$(oc project --short)" 
         and .verb == "create" 
         and .objectRef.subresource == "exec")'
 ```
 
 Take some time to review the audit log event and get familiar with the fields. **Note down the user that carried out the exec, we'll need this later.**
 
-> Note: Querying node logs directly is only effective within the retention period for cluster logs, these files are rotated on disk. Forwarding logs to an external log store for long term retention is a vital security control.
+Below is an example audit log event. What interesting information can we obtain?
+
+```json
+{
+  "kind": "Event",
+  "apiVersion": "audit.k8s.io/v1",
+  "level": "Metadata",
+  "auditID": "93c35bfe-5fb4-4323-a5fa-076be76478f3",
+  "stage": "ResponseComplete",
+  "requestURI": "/api/v1/namespaces/payment-gateway-1/pods/payment-gateway/exec?command=sh&command=-c&command=%0A++++++export+C2_SERVER%3D%22198.51.100.42%22%0A++++++export+CODENAME%3D%22SHADOW_PIVOT%22%0A++++++export+ENV_MARKER%3D%22ACME_SECRET_KEY_EXFIL_TEST_9921%22%0A++++++mkdir+-p+%2Ftmp%2F.hidden_toolkit%0A++++++echo+%22while+true%3B+do+sleep+60%3B+done%22+%3E+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++chmod+%2Bx+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++%2Ftmp%2F.hidden_toolkit%2Fexfil.sh+%3E+%2Fdev%2Fnull+2%3E%261+%26%0A++++&container=httpd&stderr=true&stdout=true",
+  "verb": "create",
+  "user": {
+    "username": "admin",
+    "uid": "74bd0e33-5c0a-4fec-b149-0d7f72368dc2",
+    "groups": [
+      "system:authenticated:oauth",
+      "system:authenticated"
+    ],
+    "extra": {
+      "scopes.authorization.openshift.io": [
+        "user:full"
+      ]
+    }
+  },
+  "sourceIPs": [
+    "100.64.0.5"
+  ],
+  "userAgent": "oc/4.21.15 (linux/amd64) kubernetes/9d9df34",
+  "objectRef": {
+    "resource": "pods",
+    "namespace": "payment-gateway-1",
+    "name": "payment-gateway",
+    "apiVersion": "v1",
+    "subresource": "exec"
+  },
+  "responseStatus": {
+    "metadata": {},
+    "code": 101
+  },
+  "requestReceivedTimestamp": "2026-05-17T13:24:11.612048Z",
+  "stageTimestamp": "2026-05-17T13:24:12.307936Z",
+  "annotations": {
+    "authorization.k8s.io/decision": "allow",
+    "authorization.k8s.io/reason": "RBAC: allowed by ClusterRoleBinding \"keycloak-sso-user:admin:cluster-admin\" of ClusterRole \"cluster-admin\" to User \"admin\""
+  }
+}
+```
+
+> **Note:** Querying node logs directly on a control node is only effective within the node log retention period, these files are rotated on disk. Forwarding logs to an external log store for long term retention is a vital security control.
 
 
 ## 2.3 - Reviewing outbound traffic
