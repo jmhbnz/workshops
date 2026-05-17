@@ -135,8 +135,14 @@ The ~setup/app-template.yaml~ file also handles the various permissions each wor
 #+begin_src bash
 echo "Applying template for each attendee"
 for i in $(seq 1 5); do
-  oc process --filename setup/app-template.yaml --param SUFFIX=$i
-done | oc apply --filename -
+
+  # Clean up any pre-existing exploited pod
+  oc delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --grace-period=0 --force 2>/dev/null || true
+  oc wait --for=delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --timeout=30s 2>/dev/null || true
+
+  # Hydrate the new pod and supporting resources
+  oc process --filename setup/app-template.yaml --param SUFFIX=$i | oc apply --filename -
+done
 
 echo "Waiting for all payment-gateway pods to initialize..."
 oc wait --for=condition=Ready pods --selector app=payment-gateway --all-namespaces --timeout=90s
@@ -183,8 +189,9 @@ done
 #+RESULTS: Deploy compromised workloads
 #+begin_example
 Applying template for each attendee
+pod "payment-gateway" force deleted from payment-gateway-1 namespace
 project.project.openshift.io/payment-gateway-1 unchanged
-pod/payment-gateway unchanged
+pod/payment-gateway created
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
@@ -192,9 +199,10 @@ rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+pod "payment-gateway" force deleted from payment-gateway-2 namespace
 project.project.openshift.io/payment-gateway-2 unchanged
-pod/payment-gateway unchanged
+pod/payment-gateway created
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
@@ -202,9 +210,10 @@ rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+pod "payment-gateway" force deleted from payment-gateway-3 namespace
 project.project.openshift.io/payment-gateway-3 unchanged
-pod/payment-gateway unchanged
+pod/payment-gateway created
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
@@ -212,9 +221,10 @@ rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+pod "payment-gateway" force deleted from payment-gateway-4 namespace
 project.project.openshift.io/payment-gateway-4 unchanged
-pod/payment-gateway unchanged
+pod/payment-gateway created
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
@@ -222,9 +232,10 @@ rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+pod "payment-gateway" force deleted from payment-gateway-5 namespace
 project.project.openshift.io/payment-gateway-5 unchanged
-pod/payment-gateway unchanged
+pod/payment-gateway created
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
@@ -232,7 +243,7 @@ rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
 Waiting for all payment-gateway pods to initialize...
 pod/payment-gateway condition met
 pod/payment-gateway condition met
