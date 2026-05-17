@@ -164,7 +164,7 @@ OpenShift supports software defined network segmentation through Kubernetes [`Ne
 
 Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the **Quick Create (+)** button in the top right corner. Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
 
-Paste in the network policy example below, then adjust the `namespace:` is updated to your user number.
+Paste in the network policy example below, then update the `namespace:` to your user number.
 
 Once updated, click **Create**.
 
@@ -173,6 +173,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: payment-gateway-deny-egress
+  namespace: payment-gateway-x
 spec:
   # This targets only the payment-gateway
   podSelector:
@@ -185,25 +186,33 @@ spec:
   egress: []
 ```
 
+<Zoom>
+![apply-networkpolicy](/workshops/static/images/fsi-security/apply-networkpolicy.png)
+*Apply Kubernetes network policy*
+</Zoom>
 
 With the breached workload now isolated, and no further egress traffic possible Morgan advises Sarah to take a quick break and then jump back online to assist her with some forensic evidence gathering.
 
 
 ## 2.5 Another pair of eyes
 
+During a security incident, `oc adm must-gather` can act as an easy to use forensic black box recorder, instantly capturing an unalterable snapshot of the cluster's state and history before critical data can be erased or rotated out. Gathering this comprehensive environment information right away is vital when engaging vendor support or external incident investigation suppport; it provides platform specialists with the exact telemetry they need to piece together how the breach occurred and verify the extent of a compromise.
+
 With everything happening so quickly, after the short break Sarah opens a case with Red Hat support to confirm their initial findings around the use of a compromised credential and ensure she and Morgan did not miss anything.
 
-Let's run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new). 
+Let's return to our web terminal and run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new). 
 
 > **Important:** For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
 
 ```bash
-oc adm must-gather -- /usr/bin/gather_audit_logs
+oc adm must-gather \
+  --image=quay.io/openshift/origin-must-gather:latest \
+  --run-namespace="$(oc project --short)" \
+  --dest-dir=/tmp/incident-artifacts \
+  -- /usr/bin/gather_audit_logs
 ```
 
-Documentation you may find helpful is:
-
-- [https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view)](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/security_and_compliance/audit-log-view)
+Feel free to take a moment to explore the files that were just created on disk within your web terminal.
 
 ![support-case](/workshops/static/images/fsi-security/sarah-support.png)
 
