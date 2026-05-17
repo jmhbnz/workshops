@@ -108,6 +108,12 @@ rules:
       - "nodes/proxy"
       - "nodes"
     verbs: ["get", "list"]
+  - apiGroups: ["config.openshift.io"]
+    resources:
+      - clusterversions
+      - clusteroperators
+      - apiservers
+    verbs: ["get", "list"]
 EOF
 #+end_src
 
@@ -178,13 +184,14 @@ done
 #+begin_example
 Applying template for each attendee
 project.project.openshift.io/payment-gateway-1 unchanged
-pod/payment-gateway created
+pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
 role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 created
 project.project.openshift.io/payment-gateway-2 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -193,6 +200,7 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 created
 project.project.openshift.io/payment-gateway-3 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -201,6 +209,7 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 created
 project.project.openshift.io/payment-gateway-4 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -209,6 +218,7 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 created
 project.project.openshift.io/payment-gateway-5 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -217,6 +227,7 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 created
 Waiting for all payment-gateway pods to initialize...
 pod/payment-gateway condition met
 pod/payment-gateway condition met
