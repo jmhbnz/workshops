@@ -58,14 +58,13 @@ echo "==> Triggering fresh CRIU checkpoint on node: $NODE_NAME..."
 
 API_RESPONSE=$(curl --silent --insecure \
   --header "Authorization: Bearer $(oc whoami --show-token)" \
-  --request POST "${OPENSHIFT_API_URL}/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/${CURRENT_NS}/payment-gateway/httpd")
+  --request POST "$(oc whoami --show-server)/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/${CURRENT_NS}/payment-gateway/httpd")
 
 TARBALL_PATH=$(echo "$API_RESPONSE" | jq -r '.items[0] // empty')
 
 if [ -z "$TARBALL_PATH" ] || [ "$TARBALL_PATH" = "null" ]; then
   echo "[!] ERROR: Checkpoint failed. API response was:"
   echo "$API_RESPONSE"
-  return 1 2>/dev/null || exit 1
 fi
 
 CHECKPOINT_FILE=${TARBALL_PATH##*/}
