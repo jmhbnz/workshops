@@ -107,7 +107,7 @@ rules:
       - "nodes/log"
       - "nodes/proxy"
       - "nodes"
-    verbs: ["get", "list"]
+    verbs: ["get", "list", "create"]
   - apiGroups: ["config.openshift.io"]
     resources:
       - clusterversions
@@ -191,7 +191,8 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
 project.project.openshift.io/payment-gateway-2 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -200,7 +201,8 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
 project.project.openshift.io/payment-gateway-3 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -209,7 +211,8 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
 project.project.openshift.io/payment-gateway-4 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -218,7 +221,8 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
 project.project.openshift.io/payment-gateway-5 unchanged
 pod/payment-gateway unchanged
 serviceaccount/cicd-pipeline-runner-sa unchanged
@@ -227,7 +231,8 @@ role.rbac.authorization.k8s.io/container-executor unchanged
 rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding configured
 Waiting for all payment-gateway pods to initialize...
 pod/payment-gateway condition met
 pod/payment-gateway condition met
@@ -293,4 +298,48 @@ EOF
 #+RESULTS: Enable rhacs externalip
 #+begin_example
 configmap/collector-config created
+#+end_example
+
+
+* Enable creating criu checkpoints
+
+#+NAME: Rbac for criu
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: kube-apiserver-checkpoints
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - nodes/checkpoint
+    verbs:
+      - get
+      - create
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: kube-apiserver-checkpoints
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: kube-apiserver-checkpoints
+subjects:
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: kube-apiserver
+  - apiGroup: rbac.authorization.k8s.io
+    kind: User
+    name: system:kube-apiserver
+EOF
+#+end_src
+
+#+RESULTS: Rbac for criu
+#+begin_example
+clusterrole.rbac.authorization.k8s.io/kube-apiserver-checkpoints created
+clusterrolebinding.rbac.authorization.k8s.io/kube-apiserver-checkpoints created
 #+end_example
