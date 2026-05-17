@@ -343,3 +343,30 @@ EOF
 clusterrole.rbac.authorization.k8s.io/kube-apiserver-checkpoints created
 clusterrolebinding.rbac.authorization.k8s.io/kube-apiserver-checkpoints created
 #+end_example
+
+
+* Store checkpointctl in a bucket
+
+#+NAME: Create bucket
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: objectbucket.io/v1alpha1
+kind: ObjectBucketClaim
+metadata:
+  name: workshop-assets
+  namespace: openshift-storage
+spec:
+  generateBucketName: workshop-assets
+  storageClassName: openshift-storage.noobaa.io
+EOF
+#+end_src
+
+#+RESULTS: Create bucket
+#+begin_example
+objectbucketclaim.objectbucket.io/workshop-assets created
+#+end_example
+
+
+Once the bucket exists we need to compile ~checkpointctl~ statically via ~make release~ on the source and upload the resulting binary to the bucket.
+
+We can then generate a share link for the binary which needs to be updated into the lab instructions.

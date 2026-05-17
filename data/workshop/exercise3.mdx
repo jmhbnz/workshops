@@ -90,7 +90,57 @@ After a short wait you should see that a checkpoint has been created.
 
 ## 3.2 Exploring the checkpoint
 
-TODO: Find a way to introspect the checkpoint without requiring attendees to download it onto their laptops.
+> **Sarah:** Alright Morgan, we successfully streamed the container's memory checkpoint down to the terminal. Now we need to figure out exactly what the attacker was running.
+
+> **Morgan:** Perfect!  We can use the `checkpointctl` tool to take a look at it.
+
+Run the script below in your web terminal to make the `checkpointctl` binary available.
+
+```bash
+echo "==> Fetching precompiled checkpointctl toolkit..."
+curl --silent --fail --location \
+  'https://console-openshift-console.apps.cluster-6lrcm.dynamic2.redhatworkshops.io/api/proxy/plugin/odf-console/s3/workshop-assets-b00f6110-c782-408d-a723-77cfac0701a8/bin/checkpointctl?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Content-Sha256=UNSIGNED-PAYLOAD&X-Amz-Credential=WL3UlXvmj9ikIsaKPH3a%2F20260517%2Fnone%2Fs3%2Faws4_request&X-Amz-Date=20260517T230223Z&X-Amz-Expires=43200&X-Amz-Signature=bb11b59d011c3fe8af0fcb927f33c406dd57f0fa98778a9116934b47480cd859&X-Amz-SignedHeaders=host&x-amz-checksum-mode=ENABLED&x-id=GetObject' \
+  --output /tmp/checkpointctl
+
+chmod +x /tmp/checkpointctl
+mkdir -p $HOME/bin
+mv /tmp/checkpointctl $HOME/bin/checkpointctl
+export PATH=$HOME/bin:$PATH
+
+echo "==> Toolkit loaded successfully!"
+checkpointctl
+
+echo "--------------------------------------------------------"
+echo "==> To inspect your captured memory dump, run:"
+echo "checkpointctl inspect /tmp/\$CHECKPOINT_FILE"
+```
+
+
+Once `checkpointctl` is installed in your web terminal run the command below to inspect the process tree of your checkpoint(s).
+
+```bash
+checkpointctl inspect --ps-tree-env /tmp/checkpoint-payment-gateway_payment-gateway*
+```
+
+There are other parameters for `checkpointctl inspect`. Take some time to run `checkpointctl inspect --help` and explore some of the other possible flags to get a better understanding of what details we can inspect for a given checkpoint.
+
+> **Sarah:** This is cool, I've never played with checkpoints like this before. We have some good metadata there. It shows the container runtime was CRI-O, gives us the exact timestamp of the snapshot, and lists the root process.
+
+> **Morgan:** Check out the process tree section—there's a PID running a script called `exfil.sh`. That's our smoking gun. Let's dig into the memory pages next to extract the environment variables and network sockets they left behind.
+
+```bash
+bash-5.1 ~ $ echo "==> Extracting raw uncompressed memory images from checkpoint..."
+
+# Create a clean working directory
+mkdir -p /tmp/forensics-dump
+
+# Extract using -xf (eXtract File) instead of -xzf
+tar -xf "/tmp/$CHECKPOINT_FILE" -C /tmp/forensics-dump/
+
+echo "==> Success! Listing raw memory image files:"
+ls -lh /tmp/forensics-dump/checkpoint/
+```
+
 
 
 ## 3.3 Forensic analysis resources
