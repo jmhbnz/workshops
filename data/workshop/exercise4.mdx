@@ -183,11 +183,6 @@ curl -sf "https://${SOCKETIO_URL}/evidence"
 
 This time the response will be empty — **no evidence file was created** ⛔. The exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Red Hat Hardened Images distroless image. The pickle deserialization still triggered, but the code execution failed.
 
-<Zoom>
-![exploit-job-failed](/workshops/static/images/fsi-security/exploit-job-fail.png)
-*Exploit fails after image hardening*
-</Zoom>
-
 > **Key takeaway:** The hardened application image didn't fix the vulnerable library code. The `python-socketio 5.13.0` package still calls `pickle.loads()`. But by removing the shell and minimising the image contents, the blast radius of the exploit is drastically reduced. Defence in depth means the vulnerability exists but **cannot be weaponised**.
 
 Excellent work! You've seen how a real-world Remote Code Execution vulnerability can be exploited in a containerised environment, and how adopting Red Hat Hardened Images provides critical defence in depth even when application-level vulnerabilities exist.
