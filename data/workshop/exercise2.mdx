@@ -141,7 +141,7 @@ Log in to the Red Hat Advanced Cluster Security dashboard using the username `ac
 *Red Hat Advanced Cluster Security authentication provider*
 </Zoom>
 
-Navigate to **Network Graph** on the left menu, then filter to your `payment-gateway-` namespace and the `payment-gateway` deployment using the dropdown filters at the top of the page.
+Navigate to **Network Graph** on the left menu, then filter to your `payment-gateway-x` namespace and the `payment-gateway` deployment using the dropdown filters at the top of the page.
 
 <Zoom>
 ![rhacs-filters](/workshops/static/images/fsi-security/rhacs-filters.png)
@@ -162,9 +162,11 @@ Before applying any policy Morgan asks Sarah to confirm what she is seeing in th
 
 OpenShift supports software defined network segmentation through Kubernetes [`NetworkPolicy`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/network_security/network-policy).  As a platform engineer, you can define network policies that restrict traffic to pods in your cluster. In an incident situation a NetworkPolicy is a critical tool to quickly adjust what network flows are possible.
 
-Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the **Quick Create (+)** button in the top right corner. Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
+Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the **Quick Create (+)** button in the top right corner, then clicking **Import YAML** in the menu. 
 
-Paste in the network policy example below, then update the `namespace:` to your user number.
+> **Note:** Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
+
+On the **Import YAML** window, paste in the network policy example below, then update the `namespace:` to your user number.
 
 Once updated, click **Create**.
 
