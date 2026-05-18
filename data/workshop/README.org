@@ -123,7 +123,7 @@ clusterrole.rbac.authorization.k8s.io/node-log-viewer configured
 #+end_example
 
 
-* Deploy compromised workloads
+* Deploy exercise 2 & 3 compromised workloads
 
 For the purposes of exercise 2 we need an existing project and demo workload for each workshop user.
 
@@ -200,6 +200,7 @@ rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
 pod "payment-gateway" force deleted from payment-gateway-2 namespace
 project.project.openshift.io/payment-gateway-2 unchanged
 pod/payment-gateway created
@@ -211,6 +212,7 @@ rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
 pod "payment-gateway" force deleted from payment-gateway-3 namespace
 project.project.openshift.io/payment-gateway-3 unchanged
 pod/payment-gateway created
@@ -222,6 +224,7 @@ rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
 pod "payment-gateway" force deleted from payment-gateway-4 namespace
 project.project.openshift.io/payment-gateway-4 unchanged
 pod/payment-gateway created
@@ -233,6 +236,7 @@ rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
 pod "payment-gateway" force deleted from payment-gateway-5 namespace
 project.project.openshift.io/payment-gateway-5 unchanged
 pod/payment-gateway created
@@ -244,6 +248,7 @@ rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
 clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
 clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 unchanged
 rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
 Waiting for all payment-gateway pods to initialize...
 pod/payment-gateway condition met
 pod/payment-gateway condition met
@@ -256,6 +261,77 @@ Simulating live 'oc exec' intrusion across environments...
 [+] Namespace payment-gateway-3 weaponized via simulated session execution.
 [+] Namespace payment-gateway-4 weaponized via simulated session execution.
 [+] Namespace payment-gateway-5 weaponized via simulated session execution.
+#+end_example
+
+
+* Deploy exercise 4 vulnerable workload
+
+Deploy exercise 4 vulnerable messaging application.
+
+#+NAME: Deploy vulnerable workloads
+#+begin_src bash
+echo "Applying template for each attendee"
+for i in $(seq 1 5); do
+
+  export NAMESPACE=vulnerable-workload-${i}
+  envsubst < setup/exercise4/k8s/namespace.yaml | oc apply --filename -
+  envsubst < setup/exercise4/k8s/redis.yaml | oc apply --filename -
+  envsubst < setup/exercise4/k8s/edge-server.yaml | oc apply --filename -
+  envsubst < setup/exercise4/k8s/socketio-server.yaml | oc apply --filename -
+  envsubst < setup/exercise4/k8s/edge-server-route.yaml | oc apply --filename -
+  envsubst < setup/exercise4/k8s/socketio-server-route.yaml | oc apply --filename -
+
+done
+#+end_src
+
+#+RESULTS: Deploy vulnerable workloads
+#+begin_example
+Applying template for each attendee
+namespace/vulnerable-workload-1 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-2 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-3 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-4 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-5 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
 #+end_example
 
 

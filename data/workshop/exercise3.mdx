@@ -32,7 +32,7 @@ Time: 07:23 AM. The caffeine is finally starting to kick in, but the tension fro
 
 Container checkpointing was introduced as an alpha feature in Kubernetes v1.25 and graduated to beta in Kubernetes v1.30 and is a [Generally Available feature in OpenShift 4.17 onwards](https://access.redhat.com/solutions/7008477). This functionality allows running containers to be transparently checkpointed to persistent storage and later restored to resume execution, or migrated across nodes and clusters.
 
-The content of container checkpoints can be further analyzed with the `checkpointctl` tool. This allows to perform forensic analysis in case of security incidents (e.g., suspected compromise, data exfiltration) or application failures by inspecting the saved process memory, open files, sockets, and execution context captured in the checkpoint.
+The content of container checkpoints can be further analyzed with the [`checkpointctl`](https://github.com/checkpoint-restore/checkpointctl) tool. This allows to perform forensic analysis in case of security incidents (e.g., suspected compromise, data exfiltration) or application failures by inspecting the saved process memory, open files, sockets, and execution context captured in the checkpoint.
 
 > **Sarah**: OK here we go, I need to use the kubelet API directly. I have to run a `curl` command against the local kubelet API endpoint on the specific worker node where the `payment-gateway` is sitting.
 

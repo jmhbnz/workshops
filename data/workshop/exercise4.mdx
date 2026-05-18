@@ -43,34 +43,11 @@ When this object is unpickled by the vulnerable server, it runs the shell comman
 
 ## 4.2 Deploy the vulnerable environment
 
-Let's deploy a vulnerable Socket.IO application to our cluster. We'll start with a typical setup that many teams have in production. This is a community Redis image as the message broker, and the application built on a standard Red Hat UBI image with a full shell environment.
+For this workshop we've deployed a vulnerable Socket.IO application to our cluster. We'll start with a typical setup that many teams have in production. This is a community Redis image as the message broker, and the application built on a standard Red Hat UBI image with a full shell environment.
 
-First, set up your personal namespace. Each participant gets their own namespace based on their username:
+First, take a look at your personal `vulnerable-workload-` namespace.
 
-```bash
-export NAMESPACE=ex4-$USER
-```
-
-The environment consists of:
-
-- **Redis** — the message broker, using the community `docker.io/redis:7-alpine` image
-- **Socket.IO server** — a Python application using `python-socketio==5.13.0` (the vulnerable version), built on a standard UBI image that includes a shell
-- **Edge server** — a Flask webhook server that accepts HTTP payloads and publishes them to Redis
-
-```bash
-envsubst < setup/exercise4/k8s/namespace.yaml | oc apply --filename -
-envsubst < setup/exercise4/k8s/redis.yaml | oc apply --filename -
-envsubst < setup/exercise4/k8s/edge-server.yaml | oc apply --filename -
-envsubst < setup/exercise4/k8s/socketio-server.yaml | oc apply --filename -
-envsubst < setup/exercise4/k8s/edge-server-route.yaml | oc apply --filename -
-envsubst < setup/exercise4/k8s/socketio-server-route.yaml | oc apply --filename -
-```
-
-Wait for all pods to become ready:
-
-```bash
-oc --namespace $NAMESPACE get pods --watch
-```
+In the OpenShift Web Console, navigate to **Workloads** --> **Pods** and ensure you have the `vulnerable-workload-` namespace selected.
 
 You should see three running pods: `message-broker`, `socketio-server`, and `edge-server`.
 
@@ -79,9 +56,12 @@ You should see three running pods: `message-broker`, `socketio-server`, and `edg
 *Vulnerable application pods running*
 </Zoom>
 
+
 ## 4.3 Trigger the exploit
 
 Now, let's act as the attacker. We'll send a malicious pickle payload to the edge server's public route, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it, in doing so executing our code.
+
+We'll do this from within a Web Terminal, so open a fresh one if needed.
 
 First, grab the route URLs and download the pre-built exploit payload:
 
