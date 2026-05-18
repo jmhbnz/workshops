@@ -121,30 +121,47 @@ Once `checkpointctl` is installed in your web terminal run the command below to 
 checkpointctl inspect --ps-tree-env /tmp/checkpoint-payment-gateway_payment-gateway*
 ```
 
+You should see a summary of the process tree that was running inside the container at the point in time the checkpoint was taken, an example is below. Of interest from a forensics perspective is the process with id `235` which is running a bash script `exfil.sh`.
+
+```text
+httpd
+├── Image: image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest
+├── ID: 05f54e5265533cab092d617c14b38feb30a8954740b8453f4ea3269597942c77
+├── Runtime: crun
+├── Created: 2026-05-17T23:48:42.150348129Z
+├── Checkpointed: 2026-05-18T00:01:38Z
+├── Engine: CRI-O
+├── IP: 10.232.2.31
+├── Checkpoint size: 48.6 MiB
+│   └── Memory pages size: 48.3 MiB
+├── Root FS diff size: 13.5 KiB
+└── Process tree
+    └── [1]  httpd
+        ├── [48]  cat
+        ├── [49]  cat
+        ├── [50]  cat
+        ├── [51]  cat
+        ├── [52]  httpd
+        ├── [53]  httpd
+        ├── [68]  httpd
+        ├── [106]  httpd
+        └── [235]  exfil.sh
+            └── [283]  sleep
+```
+
 There are other parameters for `checkpointctl inspect`. Take some time to run `checkpointctl inspect --help` and explore some of the other possible flags to get a better understanding of what details we can inspect for a given checkpoint.
 
 > **Sarah:** This is cool, I've never played with checkpoints like this before. We have some good metadata there. It shows the container runtime was CRI-O, gives us the exact timestamp of the snapshot, and lists the root process.
 
-> **Morgan:** Check out the process tree section—there's a PID running a script called `exfil.sh`. That's our smoking gun. Let's dig into the memory pages next to extract the environment variables and network sockets they left behind.
-
-```bash
-bash-5.1 ~ $ echo "==> Extracting raw uncompressed memory images from checkpoint..."
-
-# Create a clean working directory
-mkdir -p /tmp/forensics-dump
-
-# Extract using -xf (eXtract File) instead of -xzf
-tar -xf "/tmp/$CHECKPOINT_FILE" -C /tmp/forensics-dump/
-
-echo "==> Success! Listing raw memory image files:"
-ls -lh /tmp/forensics-dump/checkpoint/
-```
+> **Morgan:** Check out the process tree section—there's a PID running a script called `exfil.sh`. That's our smoking gun. Let's dig into the memory pages next to extract the environment variables and network sockets they left behind.  Leave that to me and the Infosec team, we need to go through this with a fine tooth comb and document everything.
 
 
+## 3.3 Forensics resources
 
-## 3.3 Forensic analysis resources
+From a platform administration perspective our goal here is become confident and practice our skills taking forensics checkpoints.
 
-TODO: Where can interested attendees go to learn more?
+If you want to dive deeper into the world of volatile memory forensics and runtime snapshots, there are fantastic open-source ecosystems to explore. To learn more about how container checkpoints are structured under the hood, check out the official CRIU (Checkpoint/Restore In Userspace) project documentation at criu.org, which details how Linux process states are frozen and resurrected. 
 
+For practical hands-on security analysis, look into the [Volatility Framework](https://volatilityfoundation.org), the industry-standard memory forensics platform, as well as the [CNCF Kubernetes Security Specialist](https://www.cncf.io/training/certification/cks) (CKS) learning tracks, which frequently cover container runtime security, node isolation, and live incident response strategies.
 
-Now that we have a forensic checkpoint for the breached workload we can move on to [Exercise 4](/workshop/exercise4) 🚀
+Feel free to take some time now exploring those resources. When you are ready let's move on to [Exercise 4](/workshop/exercise4)!
