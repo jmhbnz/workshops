@@ -144,7 +144,9 @@ oc --namespace $NAMESPACE exec deploy/socketio-server -- rm -f /tmp/evidence/pwn
 Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Red Hat Hardened Images distroless Python image:
 
 ```bash
-envsubst < setup/exercise4/k8s/socketio-server-hardened.yaml | oc apply --filename -
+curl --silent --fail --location "https://raw.githubusercontent.com/jmhbnz/workshops/main/data/workshop/setup/exercise4/k8s/socketio-server-hardened.yaml" \
+  | sed "s/\${SUFFIX}/${SUFFIX}/g; s/\${NAMESPACE}/${NAMESPACE}/g" \
+  | oc apply --filename -
 ```
 
 Wait for the new pod to roll out:
@@ -182,7 +184,7 @@ curl -sf "https://${SOCKETIO_URL}/evidence"
 This time the response will be empty — **no evidence file was created** ⛔. The exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Red Hat Hardened Images distroless image. The pickle deserialization still triggered, but the code execution failed.
 
 <Zoom>
-![exploit-job-failed](/workshops/static/images/fsi-security/exploit-job-failed.png)
+![exploit-job-failed](/workshops/static/images/fsi-security/exploit-job-fail.png)
 *Exploit fails after image hardening*
 </Zoom>
 
