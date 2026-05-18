@@ -103,7 +103,7 @@ You should see a new violation: **Unauthorized Process Execution** for the `paym
 
 Locking baselines one deployment at a time through the web console is fine for a targeted change, but ACME has hundreds of deployments. Morgan wants every workload in the `payment-gateway` namespace locked down before end of day.
 
-Fortunately, RHACS exposes a full [REST API](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io/main/apidocs) that we can use to automate this. Let's write a script that queries all process baselines for a given namespace and locks each one.
+Fortunately, RHACS exposes a full [REST API](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io/main/apidocs) that we can use to automate this. The API includes a [bulk lock endpoint](https://github.com/stackrox/stackrox/blob/master/proto/api/v1/process_baseline_service.proto) that can lock all process baselines for a given cluster and namespace in a single call.
 
 First, generate an API token in the RHACS web console:
 
@@ -116,42 +116,37 @@ Now set your environment variables:
 
 ```bash
 export ROX_API_TOKEN="<your-token-here>"
-export ROX_CENTRAL_ADDRESS="central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io:443"
+export ROX_CENTRAL_ADDRESS="central-stackrox.apps.cluster-6lrcm.dynamic2.redhatworkshops.io:443"
 ```
 
-Run the following script to lock all process baselines in the `payment-gateway` namespace:
+We need the cluster ID for the bulk lock request. Retrieve it with:
 
 ```bash
-NAMESPACE="payment-gateway"
-
-DEPLOYMENT_IDS=$(curl --silent --insecure \
+curl --silent --insecure \
   --header "Authorization: Bearer ${ROX_API_TOKEN}" \
-  "https://${ROX_CENTRAL_ADDRESS}/v1/deployments?query=Namespace:${NAMESPACE}" \
-  | jq -r '.deployments[].id')
-
-for DEPLOY_ID in $DEPLOYMENT_IDS; do
-  DEPLOY_NAME=$(curl --silent --insecure \
-    --header "Authorization: Bearer ${ROX_API_TOKEN}" \
-    "https://${ROX_CENTRAL_ADDRESS}/v1/deployments/${DEPLOY_ID}" \
-    | jq -r '.name')
-
-  BASELINE_IDS=$(curl --silent --insecure \
-    --header "Authorization: Bearer ${ROX_API_TOKEN}" \
-    "https://${ROX_CENTRAL_ADDRESS}/v1/processbaselines/key?deploymentId=${DEPLOY_ID}" \
-    | jq -r '.key.deploymentId')
-
-  curl --silent --insecure \
-    --header "Authorization: Bearer ${ROX_API_TOKEN}" \
-    --header "Content-Type: application/json" \
-    --request PUT \
-    "https://${ROX_CENTRAL_ADDRESS}/v1/processbaselines/${DEPLOY_ID}/lock" \
-    --data '{"locked": true}' | jq .
-
-  echo "Locked baseline for deployment: ${DEPLOY_NAME}"
-done
+  "https://${ROX_CENTRAL_ADDRESS}/v1/clusters" \
+  | jq -r '.clusters[] | "\(.id) \(.name)"'
 ```
 
-You should see output confirming each deployment's baseline has been locked. Navigate back to the RHACS **Risk** view and verify that the baselines for all deployments in the `payment-gateway` namespace now show as locked.
+Set the cluster ID and namespace from the output above:
+
+```bash
+export CLUSTER_ID="<your-cluster-id>"
+export NAMESPACE="payment-gateway-x"
+```
+
+Now lock all process baselines in the `payment-gateway-x` namespace with a single API call:
+
+```bash
+curl --silent --insecure \
+  --header "Authorization: Bearer ${ROX_API_TOKEN}" \
+  --header "Content-Type: application/json" \
+  --request PUT \
+  "https://${ROX_CENTRAL_ADDRESS}/v1/processbaselines/bulk/lock" \
+  --data "{\"cluster_id\": \"${CLUSTER_ID}\", \"namespaces\": [\"${NAMESPACE}\"]}" | jq .
+```
+
+You should see `{"success": true}` confirming all baselines in the namespace have been locked. Navigate back to the RHACS **Risk** view and verify that the baselines for all deployments in the `payment-gateway` namespace now show as locked.
 
 > **Morgan**: This is exactly what I needed. We can roll this out across every namespace on the cluster as part of our hardening sprint. Between the image hardening from earlier and the process baselining, we've got real defence in depth.
 
