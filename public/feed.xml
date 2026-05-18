@@ -17,7 +17,7 @@
     <description>Let&#39;s get familiar with our workshop setup.</description>
     <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>workshop setup</category>
   </item>
 
   <item>
@@ -27,7 +27,7 @@
     <description>The call no-one wants to get</description>
     <pubDate>Fri, 08 May 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>openshift</category><category>security</category><category>incident response</category>
   </item>
 
   <item>
@@ -37,7 +37,7 @@
     <description>Let&#39;s explore some forensics tools</description>
     <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>openshift</category><category>security</category><category>forensic analysis</category>
   </item>
 
   <item>
@@ -47,7 +47,7 @@
     <description>Exploiting a real remote code execution vulnerability</description>
     <pubDate>Sun, 10 May 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>openshift</category><category>security</category><category>image hardening</category>
   </item>
 
   <item>
@@ -57,7 +57,7 @@
     <description>Arbitrary process execution?? I don&#39;t think so Tim 🙅🏻‍♂️</description>
     <pubDate>Mon, 11 May 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category>
+    <category>openshift</category><category>security</category><category>rhacs</category><category>process baselining</category>
   </item>
 
     </channel>
