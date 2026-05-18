@@ -45,7 +45,7 @@ Ensure your `payment-gateway-x` project is selected, then click **Start**.
 *Select OpenShift Web Terminal project*
 </Zoom>
 
-Run the `oc` command below to query the audit logs held on one of our control nodes specifically for `exec` events occurring in the namespace of interest.
+Run the bash script below which uses `oc adm` to query the audit logs held on our control nodes specifically for `exec` events occurring in the namespace of interest.
 
 ```bash
 namespace=$(oc project --short)
