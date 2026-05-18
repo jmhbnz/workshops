@@ -116,13 +116,13 @@ Now set your environment variables:
 
 ```bash
 export ROX_API_TOKEN="<your-token-here>"
-export ROX_CENTRAL_ADDRESS="central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io:443"
+export ROX_CENTRAL_ADDRESS="central-stackrox.apps.cluster-6lrcm.dynamic2.redhatworkshops.io:443"
 ```
 
-Run the following script to lock all process baselines in the `payment-gateway` namespace:
+Run the following script to lock all process baselines in the `payment-gateway-x` namespace:
 
 ```bash
-NAMESPACE="payment-gateway"
+NAMESPACE="payment-gateway-x"
 
 DEPLOYMENT_IDS=$(curl --silent --insecure \
   --header "Authorization: Bearer ${ROX_API_TOKEN}" \
@@ -144,7 +144,7 @@ for DEPLOY_ID in $DEPLOYMENT_IDS; do
     --header "Authorization: Bearer ${ROX_API_TOKEN}" \
     --header "Content-Type: application/json" \
     --request PUT \
-    "https://${ROX_CENTRAL_ADDRESS}/v1/processbaselines/${DEPLOY_ID}/lock" \
+    "https://${ROX_CENTRAL_ADDRESS}/v1processbaselines//${DEPLOY_ID}/lock" \
     --data '{"locked": true}' | jq .
 
   echo "Locked baseline for deployment: ${DEPLOY_NAME}"
