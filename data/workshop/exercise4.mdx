@@ -61,9 +61,15 @@ You should see three running pods: `message-broker`, `socketio-server`, and `edg
 
 Now, let's act as the attacker. We'll send a malicious pickle payload to the edge server's public route, which forwards it to the Redis broker, where the vulnerable Socket.IO server picks it up and deserializes it, in doing so executing our code.
 
-We'll do this from within a Web Terminal, so open a fresh one if needed.
+We'll do this from within a Web Terminal, so open a fresh one now if you closed this previously.
 
-First, grab the route URLs and download the pre-built exploit payload:
+First thing we need to do is set our namespace variable, ensure you update this from `vulnerable-workload-x` to reflect your assigned namespace number.
+
+```bash
+export NAMESPACE=vulnerable-workload-x
+```
+
+Now let's grab the route URLs for the application, and download the pre-built exploit payload:
 
 ```bash
 export NAMESPACE=vulnerable-workload-x
