@@ -21,11 +21,11 @@ Sarah threw open her laptop and immediately connected to the bank's VPN, trying 
 
 Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster-6lrcm.dynamic2.redhatworkshops.io) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
 
-> **Sarah** Ok I'm logged in, do you want me to kill the pod? What do we do??
+> **Sarah**: Ok I'm logged in, do you want me to kill the pod? What do we do??
 
-> **Morgan** Whatever you do, don't kill the pod yet!  We'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? Is there anything you can see from your side on how this started Sarah??  We need to know if this is bigger than just one pod or not.
+> **Morgan**: Whatever you do, don't kill the pod yet!  We'll lose all the in memory evidence if we do that. We're monitoring the egress traffic and we'll isolate that shortly as our first actual counter move. For now I need you to collect some information. First up, how the hell are they executing this reverse shell? Is there anything you can see from your side on how this started Sarah??  We need to know if this is bigger than just one pod or not.
 
-> **Sarah** Let me take a look in the OpenShift Audit Logs, give me a few minutes to hunt through the logs.
+> **Sarah**: Let me take a look in the OpenShift Audit Logs, give me a few minutes to hunt through the logs.
 
 Throughout this workshop you'll be using a namespace assigned to your user number, for example `payment-gateway-1` for `user1`.
 
@@ -109,25 +109,25 @@ After running the command you should see a log entry similar to the one below.  
 }
 ```
 
-> **Sarah:** (Rubbing her eyes, voice raspy) Morgan, I’m looking at the master node audit logs right now. Tell me you’re seeing this on my shared screen in Teams?
+> **Sarah:**: (Rubbing her eyes, voice raspy) Morgan, I’m looking at the master node audit logs right now. Tell me you’re seeing this on my shared screen in Teams?
 
-> **Morgan:** (Over the phone, typing audio in the background) I see it. I'm looking at the requestURI block right now... f&%$. Someone just spawned an interactive shell.
+> **Morgan:**: (Over the phone, typing audio in the background) I see it. I'm looking at the requestURI block right now... f&%$. Someone just spawned an interactive shell.
 
-> **Sarah:** It’s worse than that. Look at the URL encoding in the query string. They didn't just open a terminal; they fed a full payload straight into the exec subresource. If you decode those hex characters, they're exporting a C2 server IP.
+> **Sarah:**: It’s worse than that. Look at the URL encoding in the query string. They didn't just open a terminal; they fed a full payload straight into the exec subresource. If you decode those hex characters, they're exporting a C2 server IP.
 
-> **Morgan:** Wait, scroll back up... %2Ftmp%2F.hidden_toolkit%2Fexfil.sh. They're building a hidden persistence directory right inside the /tmp directory of our production gateway.
+> **Morgan:**: Wait, scroll back up... %2Ftmp%2F.hidden_toolkit%2Fexfil.sh. They're building a hidden persistence directory right inside the /tmp directory of our production gateway.
 
-> **Sarah:** Exactly. And it worked. Look at the responseStatus.code. It’s a 101.
+> **Sarah:**: Exactly. And it worked. Look at the responseStatus.code. It’s a 101.
 
-> **Morgan:** HTTP 101 Switching Protocols... the API server upgraded the connection to a live WebSocket. That means the attacker successfully established a persistent bidirectional stream directly into the httpd container. Who authorized this? Is it a compromised admin account?
+> **Morgan:**: HTTP 101 Switching Protocols... the API server upgraded the connection to a live WebSocket. That means the attacker successfully established a persistent bidirectional stream directly into the httpd container. Who authorized this? Is it a compromised admin account?
 
-> **Sarah:** No, look at the user object. The username is `system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa`.
+> **Sarah:**: No, look at the user object. The username is `system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa`.
 
-> **Morgan:** (Stunned silence for a second) The automated CI/CD pipeline runner? That account shouldn't even be interacting with live pods. It’s only supposed to push manifests to the cluster!
+> **Morgan:**: (Stunned silence for a second) The automated CI/CD pipeline runner? That account shouldn't even be interacting with live pods. It’s only supposed to push manifests to the cluster!
 
-> **Sarah:** Someone over-permissioned that pipeline service account, and its token just got leaked. Morgan, I don't care what time it is, wake up the payment gateway application team. We need to investigate how that CI/CD credential got compromised.
+> **Sarah:**: Someone over-permissioned that pipeline service account, and its token just got leaked. Morgan, I don't care what time it is, wake up the payment gateway application team. We need to investigate how that CI/CD credential got compromised.
 
-> **Morgan:** On it.
+> **Morgan:**: On it.
 
 
 ## 2.3 - Reviewing outbound traffic
@@ -158,7 +158,7 @@ Before applying any policy Morgan asks Sarah to confirm what she is seeing in th
 
 ## 2.4 - Isolate the workload
 
-> **Sarah** Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway`. Let's cut this traffic off right now with a network policy.
+> **Sarah**: Ok Morgan, I'm seeing what you are in terms of unexpected egress traffing from `payment-gateway`, the external IP address is `185.199.108.153`. Let's cut this traffic off right now with a network policy.
 
 OpenShift supports software defined network segmentation through Kubernetes [`NetworkPolicy`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/network_security/network-policy).  As a platform engineer, you can define network policies that restrict traffic to pods in your cluster. In an incident situation a NetworkPolicy is a critical tool to quickly adjust what network flows are possible.
 
