@@ -109,23 +109,23 @@ If the exploit worked, you'll see output like:
 
 [Red Hat Hardened Images](https://images.redhat.com) is Red Hat's catalog of minimal, hardened container images, available at no-cost. These images are built with a *distroless* philosophy:
 
-- **No shell** — no `bash`, `sh`, or any other shell binary
-- **No package manager** — no `dnf`, `rpm`, or `apt`
-- **Minimal attack surface** — only the runtime and its dependencies are included
-- **Non-root by default** — containers run as a non-privileged user
+- **No shell** - no `bash`, `sh`, or any other shell binary
+- **No package manager** - no `dnf`, `rpm`, or `apt`
+- **Minimal attack surface** - only the runtime and its dependencies are included
+- **Non-root by default** - containers run as a non-privileged user
 
 This matters for CVE-2025-61765 because the exploit payload calls `subprocess.call(["/bin/bash", "-c", ...])`. If there's no `/bin/bash` in the container, the deserialization still happens but the **code execution fails** because there's nothing to execute.
 
 Let's compare the two Containerfiles for the Socket.IO server:
 
-**Vulnerable** (`Containerfile`) — built on UBI 9, which includes a full shell environment:
+**Vulnerable** (`Containerfile`) - built on UBI 9, which includes a full shell environment:
 
 ```dockerfile
 FROM registry.redhat.io/ubi9/python-311
 # ... has bash, coreutils, rpm, etc.
 ```
 
-**Hardened** (`Containerfile.hardened`) — multi-stage build, runtime stage uses the [Red Hat Hardened Images](https://www.redhat.com/en/blog/red-hat-hardened-images) distroless Python image. It also uses `requirements-hardened.txt`, which removes the version pin so `pip` pulls the latest (patched) `python-socketio`:
+**Hardened** (`Containerfile.hardened`) - multi-stage build, runtime stage uses the [Red Hat Hardened Images](https://www.redhat.com/en/blog/red-hat-hardened-images) distroless Python image. It also uses `requirements-hardened.txt`, which removes the version pin so `pip` pulls the latest (patched) `python-socketio`:
 
 ```dockerfile
 FROM registry.access.redhat.com/hi/python:latest-builder AS builder
@@ -160,7 +160,21 @@ Wait for the new pod to roll out:
 oc --namespace $NAMESPACE rollout status deploy/socketio-server
 ```
 
-Verify the new pod is running the hardened image:
+If we return to the OpenShift Web Console now, looking at the pod creation column you'll see a fresh `socketio-server` pod deployed.
+
+<Zoom>
+![hardened-socket-io](/workshops/static/images/fsi-security/hardened-image-running.png)
+*Hardened socketio-server image running*
+</Zoom>
+
+We can also check the image in use by clicking on the pod name and scrolling down to the **Containers** section. You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
+
+<Zoom>
+![new-container-image](/workshops/static/images/fsi-security/hardened-image.png)
+*Hardened socketio-server image*
+</Zoom>
+
+We can also verify the new pod is running the hardened image with the command line:
 
 ```bash
 oc --namespace $NAMESPACE get deploy socketio-server --output jsonpath='{.spec.template.spec.containers[0].image}'
