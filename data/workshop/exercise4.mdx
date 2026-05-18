@@ -72,7 +72,6 @@ export NAMESPACE=vulnerable-workload-x
 Now let's grab the route URLs for the application, and download the pre-built exploit payload:
 
 ```bash
-export NAMESPACE=vulnerable-workload-x
 export EDGE_URL=$(oc --namespace $NAMESPACE get route edge-server --output jsonpath='{.spec.host}')
 export SOCKETIO_URL=$(oc --namespace $NAMESPACE get route socketio-server --output jsonpath='{.spec.host}')
 curl -sSfL https://raw.githubusercontent.com/jmhbnz/workshops/main/data/workshop/setup/exercise4/exploit/payload.bin -o /tmp/payload.bin
