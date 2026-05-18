@@ -22,7 +22,7 @@ WARNING: Using insecure TLS client config. Setting this option is not supported!
 
 Login successful.
 
-You have access to 81 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 98 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
 Using project "default".
 #+end_example
@@ -185,83 +185,6 @@ EOF
   echo "[+] Namespace ${namespace} weaponized via simulated session execution."
 done
 #+end_src
-
-#+RESULTS: Deploy compromised workloads
-#+begin_example
-Applying template for each attendee
-pod "payment-gateway" force deleted from payment-gateway-1 namespace
-project.project.openshift.io/payment-gateway-1 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
-pod "payment-gateway" force deleted from payment-gateway-2 namespace
-project.project.openshift.io/payment-gateway-2 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
-pod "payment-gateway" force deleted from payment-gateway-3 namespace
-project.project.openshift.io/payment-gateway-3 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
-pod "payment-gateway" force deleted from payment-gateway-4 namespace
-project.project.openshift.io/payment-gateway-4 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
-pod "payment-gateway" force deleted from payment-gateway-5 namespace
-project.project.openshift.io/payment-gateway-5 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
-Waiting for all payment-gateway pods to initialize...
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-Simulating live 'oc exec' intrusion across environments...
-[+] Namespace payment-gateway-1 weaponized via simulated session execution.
-[+] Namespace payment-gateway-2 weaponized via simulated session execution.
-[+] Namespace payment-gateway-3 weaponized via simulated session execution.
-[+] Namespace payment-gateway-4 weaponized via simulated session execution.
-[+] Namespace payment-gateway-5 weaponized via simulated session execution.
-#+end_example
 
 
 * Deploy exercise 4 vulnerable workload
@@ -457,3 +380,32 @@ objectbucketclaim.objectbucket.io/workshop-assets created
 Once the bucket exists we need to compile ~checkpointctl~ statically via ~make release~ on the source and upload the resulting binary to the bucket.
 
 We can then generate a share link for the binary which needs to be updated into the lab instructions.
+
+
+* Increase audit log retention
+
+We are querying audit logs directly off control nodes, so we need to crank up the retention on the main ~audit.log~ file so events stick around.
+
+We'll change from the default 10 100mb files to 3 2048mb files.
+
+#+NAME: Increase audit log retention
+#+begin_src bash
+cat <<EOF | oc apply -f -
+apiVersion: operator.openshift.io/v1
+kind: KubeAPIServer
+metadata:
+  name: cluster
+spec:
+  unsupportedConfigOverrides:
+    apiServerArguments:
+      audit-log-maxsize:
+        - "2048"
+      audit-log-maxbackup:
+        - "3"
+EOF
+#+end_src
+
+#+RESULTS: Increase audit log retention
+#+begin_example
+kubeapiserver.operator.openshift.io/cluster configured
+#+end_example
