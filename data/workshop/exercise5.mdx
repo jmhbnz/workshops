@@ -31,22 +31,22 @@ oc --namespace payment-gateway-x exec -it pod/payment-gateway -- /bin/bash -c "w
 
 You should see output confirming the shell ran successfully, displaying the user and hostname inside the container. This is exactly the kind of capability a threat actor exploits after gaining initial access — once they can execute arbitrary processes, they can download toolkits, exfiltrate data, or establish persistence.
 
-> **Morgan**: See that? Anyone with exec permissions can drop into a shell and run whatever they want. The network policy buys us time, but it doesn't stop code execution inside the container. We need something that catches this at the process level.
+> **Morgan**: See that? Anyone with exec permissions can drop into a shell and run whatever they want. The network policy improvements we've been rolling out buys us time, but it doesn't stop code execution inside the container. We need something that catches this at the process level, and does so automatically.
 
 > **Sarah**: Agreed. Let's look at what RHACS can do for us here.
 
 
 ## 5.2 Introduce process baselining
 
-Red Hat Advanced Cluster Security (RHACS) uses [eBPF](https://ebpf.io/) (extended Berkeley Packet Filter) probes on each cluster node to monitor every process that starts inside a container — in real time, with zero instrumentation required in the application itself. It's actually an embedded instance of the [Falco](https://github.com/falcosecurity/libs) eBPF probes.
+Red Hat Advanced Cluster Security (RHACS) uses [eBPF](https://ebpf.io/) (extended Berkeley Packet Filter) probes on each cluster node to monitor every process that starts inside a container in real time, with zero instrumentation required in the application itself. It's actually an embedded instance of the [Falco](https://github.com/falcosecurity/libs) eBPF probes.
 
 When a deployment is first observed, RHACS enters an **observation window** where it records every process that runs inside each container. This set of observed processes forms the **process baseline**. Think of it as a representation of "normal" behaviour for that container.
 
-While the baseline is **unlocked**, RHACS continues to add newly observed processes to the baseline — it's learning. Once the baseline is **locked**, any process execution that falls outside the baseline is flagged as an **anomalous process** violation.
+While the baseline is **unlocked**, RHACS continues to add newly observed processes to the baseline it's learning. Once the baseline is **locked**, any process execution that falls outside the baseline is flagged as an **anomalous process** violation.
 
-This gives platform and security teams a powerful runtime control, based on behavioural analysis: even if a vulnerability allows remote code execution, RHACS will detect and alert on the anomalous process that the exploit attempts to run.
+This gives platform and security teams an extremely powerful runtime control, based on behavioural analysis: even if a vulnerability allows remote code execution, RHACS will detect and alert on the anomalous process that the exploit attempts to run.
 
-Let's see this in action. Open the [RHACS web console](https://central-tssc-acs.apps.cluster-wg67f.dynamic2.redhatworkshops.io) and navigate to **Risk** from the left-hand menu. Search for the `payment-gateway` pod.
+Let's see this in action. Let's return to the [RHACS web console](https://central-stackrox.apps.cluster-6lrcm.dynamic2.redhatworkshops.io) and navigate to **Risk** from the left-hand menu. Search for the `payment-gateway` pod.
 
 Click on the pod to open its risk details, then select the **Process Discovery** tab. You'll see the list of processes that RHACS has observed running in the container.
 
