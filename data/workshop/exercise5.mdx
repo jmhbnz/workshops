@@ -23,8 +23,10 @@ Before we introduce any runtime controls, let's first prove an attacker (or anyo
 
 We'll use the `payment-gateway` pod from our incident scenario. Run the following command to exec into the container and launch a shell:
 
+Remember to set your `namespace:` in the command below before executing it within your web terminal.
+
 ```bash
-oc --namespace payment-gateway exec -it deploy/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Arbitrary process execution successful'"
+oc --namespace payment-gateway-x exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Arbitrary process execution successful'"
 ```
 
 You should see output confirming the shell ran successfully, displaying the user and hostname inside the container. This is exactly the kind of capability a threat actor exploits after gaining initial access — once they can execute arbitrary processes, they can download toolkits, exfiltrate data, or establish persistence.
