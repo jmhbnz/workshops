@@ -29,7 +29,7 @@ Remember to set your `namespace:` in the command below before executing it withi
 oc --namespace payment-gateway-x exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Arbitrary process execution successful'"
 ```
 
-You should see output confirming the shell ran successfully, displaying the user and hostname inside the container. This is exactly the kind of capability a threat actor exploits after gaining initial access — once they can execute arbitrary processes, they can download toolkits, exfiltrate data, or establish persistence.
+You should see output confirming the shell ran successfully, displaying the user and hostname inside the container. This is exactly the kind of capability a threat actor exploits after gaining initial access. Once they can execute arbitrary processes, they can download toolkits, exfiltrate data, or establish persistence.
 
 > **Morgan**: See that? Anyone with exec permissions can drop into a shell and run whatever they want. The network policy improvements we've been rolling out buys us time, but it doesn't stop code execution inside the container. We need something that catches this at the process level, and does so automatically.
 
@@ -50,7 +50,7 @@ Let's see this in action. Let's return to the [RHACS web console](https://centra
 
 Click on the pod to open its risk details, then select the **Process Discovery** tab. You'll see the list of processes that RHACS has observed running in the container.
 
-Notice that the baseline is currently **unlocked** — RHACS is still in its observation window and will continue adding any new processes it sees to the baseline. This means our earlier `exec` command may have been captured, but it won't trigger a violation because the baseline hasn't been enforced yet.
+Notice that the baseline is currently **unlocked**. RHACS is still in its observation window and will continue adding any new processes it sees to the baseline. This means our earlier `exec` command may have been captured, but it won't trigger a violation because the baseline hasn't been enforced yet.
 
 > **Morgan**: So right now it's just watching and learning?
 
@@ -59,14 +59,14 @@ Notice that the baseline is currently **unlocked** — RHACS is still in its obs
 
 ## 5.3 Lock a baseline
 
-Now we'll lock the process baseline for the `payment-gateway` container. Once locked, only the processes already in the baseline will be considered "normal" — everything else triggers a violation.
+Now we'll lock the process baseline for the `payment-gateway` container. Once locked, only the processes already in the baseline will be considered "normal". Everything else triggers a violation.
 
 In the RHACS web console:
 
 1. Navigate to **Risk** and select the `payment-gateway` deployment
 2. Click the **Process Discovery** tab
-3. Review the list of baselined processes — these should be the legitimate application processes (e.g., the `httpd` web server and its worker processes)
-4. If you see `/bin/bash` or other shell processes in the baseline from our earlier exec, **remove them** by clicking the **X** next to the process entry — we don't want shells to be considered normal behaviour
+3. Review the list of baselined processes, these should be the legitimate application processes (e.g., the `httpd` web server and its worker processes)
+4. If you see `/bin/bash` or other shell processes in the baseline from our earlier exec, **remove them** by clicking the **X** next to the process entry. We don't want shells to be considered normal behaviour
 5. Click the **Lock** icon (🔒) to lock the baseline
 
 Here's a view of a locked process baseline:
@@ -80,23 +80,23 @@ Here's a view of a locked process baseline:
 With the baseline locked, let's prove it works. Run the same exec command we used earlier:
 
 ```bash
-oc --namespace payment-gateway exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
+oc --namespace payment-gateway-x exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
 ```
 
 The command itself will still execute (RHACS is **detecting**, not **blocking** by default), but now navigate back to the RHACS web console and check the **Violations** page from the left-hand menu.
 
-You should see a new violation: **Unauthorized Process Execution** for the `payment-gateway` deployment. Click on it to see the details — RHACS has recorded that `/bin/bash` was executed and it was not in the locked baseline.
+You should see a new violation: **Unauthorized Process Execution** for the `payment-gateway` deployment. Click on it to see the details. RHACS has recorded that `/bin/bash` was executed and it was not in the locked baseline.
 
 ![locked4.png](/workshops/static/images/fsi-security/locked4.png)
 
 ![locked5.png](/workshops/static/images/fsi-security/locked5.png)
 
 
-> **Sarah**: There it is Morgan — the shell exec just lit up as a violation. If we'd had this in place during the incident, the SOC would have been alerted the moment the threat actor tried to run their reverse shell.
+> **Sarah**: There it is Morgan, the shell exec just lit up as a violation. If we'd had this in place during the incident, the SOC would have been alerted the moment the threat actor tried to run their reverse shell.
 
 > **Morgan**: Now we're talking. Can we make this block the process rather than just alert?
 
-> **Sarah**: Yes — RHACS enforcement policies can be configured to kill pods or block exec at runtime. For now, the detection gives us immediate visibility. We can tighten enforcement once the team is comfortable with the baseline accuracy across all our workloads.
+> **Sarah**: Yeah that's the next step. RHACS enforcement policies can be configured to kill pods or block exec at runtime. For now, the detection gives us immediate visibility. We can tighten enforcement once the team is comfortable with the baseline accuracy across all our workloads.
 
 
 ## 5.4 Automate locking of baselines for entire namespace
