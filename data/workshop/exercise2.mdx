@@ -19,7 +19,7 @@ Sarah threw open her laptop and immediately connected to the bank's VPN, trying 
 
 ## 2.1 - Identify the compromised credentials
 
-Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster-6lrcm.dynamic2.redhatworkshops.io) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
+Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
 
 > **Sarah**: Ok I'm logged in, do you want me to kill the pod? What do we do??
 
@@ -53,9 +53,9 @@ namespace=$(oc project --short)
 for master in $(oc get nodes --selector node-role.kubernetes.io/master --output name); do
   echo "=== Searching logs on ${master} ==="
   oc adm node-logs "${master}" --path=kube-apiserver/audit.log \
-    | jq --arg ns "${namespace}" 'first(select(.objectRef.namespace == $ns 
+    | jq --arg ns "${namespace}" 'first(select(.objectRef.namespace == $ns
           and .objectRef.name == "payment-gateway"
-          and .verb == "create" 
+          and .verb == "create"
           and .objectRef.subresource == "exec"))'
 done
 ```
@@ -132,7 +132,7 @@ After running the command you should see a log entry similar to the one below.  
 
 ## 2.3 - Reviewing outbound traffic
 
-After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster-6lrcm.dynamic2.redhatworkshops.io/main/network-graph) to review network traffic and draft the new network policy.
+After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com//main/network-graph) to review network traffic and draft the new network policy.
 
 Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider.
 
@@ -162,7 +162,7 @@ Before applying any policy Morgan asks Sarah to confirm what she is seeing in th
 
 OpenShift supports software defined network segmentation through Kubernetes [`NetworkPolicy`](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/network_security/network-policy).  As a platform engineer, you can define network policies that restrict traffic to pods in your cluster. In an incident situation a NetworkPolicy is a critical tool to quickly adjust what network flows are possible.
 
-Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the **Quick Create (+)** button in the top right corner, then clicking **Import YAML** in the menu. 
+Apply the default deny egress network policy by returning to the OpenShift Web Console and clicking the **Quick Create (+)** button in the top right corner, then clicking **Import YAML** in the menu.
 
 > **Note:** Ordinarly this type of change would be delivered through a GitOps methodology but given this is an active incident we are using break glass credentials and performing actions directly on the cluster.
 
@@ -183,7 +183,7 @@ spec:
       app: payment-gateway
   policyTypes:
     - Egress
-  # Leaving egress empty here acts as a total block 
+  # Leaving egress empty here acts as a total block
   # for any traffic originating from matching pods.
   egress: []
 ```
@@ -202,7 +202,7 @@ During a security incident, `oc adm must-gather` can act as an easy to use foren
 
 With everything happening so quickly, after the short break Sarah opens a case with Red Hat support to confirm their initial findings around the use of a compromised credential and ensure she and Morgan did not miss anything.
 
-Let's return to our web terminal and run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new). 
+Let's return to our web terminal and run the following command to retrieve the audit logs directly from the cluster, into a directory that can be easily zipped and attached to a case at [https://access.redhat.com/support/cases/#/case/new](https://access.redhat.com/support/cases/#/case/new).
 
 > **Important:** For this workshop we won't actually open a case, however if this were a real event, quickly engaging expert assistance is highly recommended and we should practice the process of retrieving logs in a sharable, structured format.
 
