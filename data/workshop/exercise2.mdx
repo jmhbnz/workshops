@@ -132,7 +132,7 @@ After running the command you should see a log entry similar to the one below.  
 
 ## 2.3 - Reviewing outbound traffic
 
-After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com//main/network-graph) to review network traffic and draft the new network policy.
+After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/main/network-graph) to review network traffic and draft the new network policy.
 
 Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider.
 
@@ -219,3 +219,6 @@ Feel free to take a moment to explore the files that were just created on disk w
 ![support-case](/workshops/static/images/fsi-security/sarah-support.png)
 
 Well done, with the breach investigated and contained you're ready to move on to forensic analysis in [Exercise 3](/workshop/exercise3)! 🎉
+
+## Stretch activity
+Can you see any alerts in (Red Hat Advanced Cluster Security for Kubernetes (RHACS))[https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/] that provide detection of the breach?
