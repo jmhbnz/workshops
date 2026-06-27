@@ -1,0 +1,140 @@
+#+TITLE: Openshift automation workshop
+#+DATE: <2026-06-25 Thu>
+#+AUTHOR: James Blair
+
+
+This document captures the steps required to set up an instance of the workshop. The base for the workshop is [[https://catalog.demo.redhat.com/catalog/babylon-catalog-prod?item=babylon-catalog-prod/pert.aap25-operator-deployment.prod&utm_source=webapp&utm_medium=share-link][Ansible Automation Platform Operator Deployment]] requested via the Red Hat demo system. Once your environment has been provisioned you can proceed with the steps below.
+
+
+* Log in to cluster
+
+Let's start by logging in as the cluster admin. Define these variables in a ~.env~ file in the base of this workshop directory.
+
+#+NAME: Login to openshift cluster
+#+begin_src bash
+source .env
+oc login "${OCP_API_URL}" --username "${OCP_USERNAME}" --password "${OCP_PASSWORD}" --insecure-skip-tls-verify
+#+end_src
+
+#+RESULTS: Login to openshift cluster
+#+begin_example
+WARNING: Using insecure TLS client config. Setting this option is not supported!
+
+Login successful.
+
+You have access to 83 projects, the list has been suppressed. You can list all projects with 'oc projects'
+
+Using project "default".
+#+end_example
+
+
+* Cluster theming
+
+To set up for this workshop and help build the style we're going to make some visual customisations to the OpenShift cluster to make it feel more like a customer production cluster. This helps us tell a narrative story throughout the workshop.
+
+
+** Update cluster logo
+
+#+NAME: Update cluster logo
+#+begin_src bash
+oc create configmap console-custom-logo --from-file=/home/${USER}/Documents/workshops/public/static/images/fsi-security/logo.png --namespace openshift-config
+
+cat << EOF | oc apply --filename -
+apiVersion: operator.openshift.io/v1
+kind: Console
+metadata:
+  name: cluster
+spec:
+  customization:
+    customLogoFile:
+      key: logo.png
+      name: console-custom-logo
+    customProductName: ACME Financial Services OpenShift Console
+  perspectives:
+    - id: admin
+      visibility:
+        state: Enabled
+    - id: dev
+      visibility:
+        state: Disabled
+EOF
+#+end_src
+
+#+RESULTS: Update cluster logo
+#+begin_example
+configmap/console-custom-logo created
+console.operator.openshift.io/cluster configured
+#+end_example
+
+
+** Add an interesting notification banner
+
+#+NAME: Create console banner
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: console.openshift.io/v1
+kind: ConsoleNotification
+metadata:
+  name: acme-banner
+spec:
+  text: ACME Financial Services Production OpenShift
+  location: BannerTop
+  color: 'darkblue'
+  backgroundColor: '#fff'
+EOF
+#+end_src
+
+#+RESULTS: Create console banner
+#+begin_example
+consolenotification.console.openshift.io/acme-banner created
+#+end_example
+
+
+* Patch cluster version
+
+By default the **Ansible Automation Platform Operator Deployment** environment we are based on comes with OpenShift ~4.20~, ideally we should showcase modern versions of our software so we need to patch the channel of the cluster to ~fast-4.21~ and begin an upgrade to ~4.21~.
+
+Note: This will likely take over an hour to complete.
+
+#+NAME: Patch openshift version
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: config.openshift.io/v1
+kind: ClusterVersion
+metadata:
+  name: version
+spec:
+  channel: fast-4.21
+  desiredUpdate:
+    image: quay.io/openshift-release-dev/ocp-release@sha256:7224f77afb20aedaf82bfc13ca11699689bd5b06795d6d1740dbd4c265150c44
+    version: 4.21.21
+EOF
+#+end_src
+
+#+RESULTS: Patch openshift version
+#+begin_example
+clusterversion.config.openshift.io/version configured
+#+end_example
+
+
+* Upgrade automation platform
+
+Alongside updating the version of OpenShift, Ansible Automation Platform ~2.6~ is installed in this cluster via the operator. We should bump this to ~2.7~ by simply patching the operator ~Subscription~.
+
+#+NAME: Patch aap subscription
+#+begin_src bash
+cat << EOF | oc apply --filename -
+apiVersion: operators.coreos.com/v1alpha1
+kind: Subscription
+metadata:
+  name: ansible-automation-platform-operator
+  namespace: aap
+spec:
+  channel: stable-2.7
+EOF
+#+end_src
+
+#+RESULTS: Patch aap subscription
+#+begin_example
+subscription.operators.coreos.com/ansible-automation-platform-operator configured
+#+end_example

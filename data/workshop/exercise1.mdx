@@ -1,39 +1,28 @@
 ---
-title: Introducing Ansible Automation Platform for OpenShift operations
+title: Getting started
 exercise: 1
-date: '2026-06-22'
-tags: ['ansible', 'automation', 'etcd', 'backup']
+date: '2026-06-21'
+tags: ['ansible', 'automation', 'workshop']
 draft: false
 authors: ['default']
-summary: "Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster."
+summary: "How to get started with the workshop"
 ---
 
-Welcome to the *AAP + OpenShift automation workshop*.
+Welcome to the *OpenShift automation workshop*.
 
-In this workshop you'll explore how platform engineers can use Ansible Automation Platform to automate common operational tasks in OpenShift.
+In this workshop you'll explore how platform engineers can use [Ansible Automation Platform](https://www.redhat.com/en/technologies/management/ansible) to automate common operational tasks in OpenShift with re-usable, composable playbooks assembled in to end to end workflows.
 
-Rather than manually executing cluster administration tasks, you'll build reusable automation that can be triggered on demand or integrated into operational workflows.
+Additionally this workshop will provide some foundational knowledge and experience of working with Ansible Automation Platform so OpenShift platform engineers will be prepared to support ansible users within their organisation.
 
+**Let's get started!**
 
 
 ## 1.1 - The scenario
 
-You are a platform engineer at ACME Financial Services. The platform team is responsible for ensuring cluster reliability, security, and recoverability across multiple OpenShift environments.
+For this hands on workshop, we're going to be an OpenShift team member at **ACME Financial Services**, a large bank operating in New Zealand. They run a significant number of customer facing workloads on OpenShift and have a small core team of platform engineers supporting the platform.
 
-One of your critical responsibilities is ensuring **etcd backups are performed regularly and stored safely off-cluster**.
+![acme](/workshops/static/images/fsi-security/acme.jpg)
 
-Historically, this has been a bash scripted process run by engineers during maintenance windows which was cumbersome to maintain.
+Throughout this workshop we'll be in the shoes of Sarah, a senior OpenShift Platform Engineer at ACME, a day in the life for her typically sees her handling platform health and maintenance tasks, assisting application teams with feature requests and she is also rostered on to the platform incident management queue on a regular rotation.
 
-Your mission is to replace this manual process with an Ansible Automation Platform Job Template.
-
-
-## 1.2 - What you're working with
-
-In this environment you already have:
-
-- A functional OpenShift cluster
-- Ansible Automation Platform installed and configured
-- Credentials allowing AAP to interact with the OpenShift cluster
-- Access to a pre-created Automation Controller project
-
-Your goal is to wire these components together into a repeatable automation workflow.
+![acme](/workshops/static/images/fsi-security/sarah-desk.png)

@@ -1,0 +1,39 @@
+---
+title: Introducing Ansible Automation Platform for OpenShift operations
+exercise: 1
+date: '2026-06-22'
+tags: ['ansible', 'automation', 'etcd', 'backup']
+draft: false
+authors: ['default']
+summary: "Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster."
+---
+
+Welcome to the *AAP + OpenShift automation workshop*.
+
+In this workshop you'll explore how platform engineers can use Ansible Automation Platform to automate common operational tasks in OpenShift.
+
+Rather than manually executing cluster administration tasks, you'll build reusable automation that can be triggered on demand or integrated into operational workflows.
+
+
+
+## 1.1 - The scenario
+
+You are a platform engineer at ACME Financial Services. The platform team is responsible for ensuring cluster reliability, security, and recoverability across multiple OpenShift environments.
+
+One of your critical responsibilities is ensuring **etcd backups are performed regularly and stored safely off-cluster**.
+
+Historically, this has been a bash scripted process run by engineers during maintenance windows which was cumbersome to maintain.
+
+Your mission is to replace this manual process with an Ansible Automation Platform Job Template.
+
+
+## 1.2 - What you're working with
+
+In this environment you already have:
+
+- A functional OpenShift cluster
+- Ansible Automation Platform installed and configured
+- Credentials allowing AAP to interact with the OpenShift cluster
+- Access to a pre-created Automation Controller project
+
+Your goal is to wire these components together into a repeatable automation workflow.
