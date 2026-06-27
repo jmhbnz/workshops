@@ -7,57 +7,17 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Thu, 07 May 2026 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Mon, 22 Jun 2026 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise1</guid>
-    <title>Understanding our workshop environment</title>
+    <title>Introducing Ansible Automation Platform for OpenShift operations</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise1</link>
-    <description>Let&#39;s get familiar with our workshop setup.</description>
-    <pubDate>Thu, 07 May 2026 00:00:00 GMT</pubDate>
+    <description>Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster.</description>
+    <pubDate>Mon, 22 Jun 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>workshop setup</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
-    <title>The incident</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
-    <description>The call no-one wants to get</description>
-    <pubDate>Fri, 08 May 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category><category>incident response</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise3</guid>
-    <title>The forensic investigation</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise3</link>
-    <description>Let&#39;s explore some forensics tools</description>
-    <pubDate>Sat, 09 May 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category><category>forensic analysis</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise4</guid>
-    <title>The vulnerable workload</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise4</link>
-    <description>Exploiting a real remote code execution vulnerability</description>
-    <pubDate>Sun, 10 May 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category><category>image hardening</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise5</guid>
-    <title>The security posture transformation</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise5</link>
-    <description>Arbitrary process execution?? I don&#39;t think so Tim 🙅🏻‍♂️</description>
-    <pubDate>Mon, 11 May 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>openshift</category><category>security</category><category>rhacs</category><category>process baselining</category>
+    <category>ansible</category><category>automation</category><category>etcd</category><category>backup</category>
   </item>
 
     </channel>
