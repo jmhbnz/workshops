@@ -1,52 +1,39 @@
 ---
-title: Understanding our workshop environment
+title: Introducing Ansible Automation Platform for OpenShift operations
 exercise: 1
-date: '2026-05-07'
-tags: ['workshop setup']
+date: '2026-06-22'
+tags: ['ansible', 'automation', 'etcd', 'backup']
 draft: false
 authors: ['default']
-summary: "Let's get familiar with our workshop setup."
+summary: "Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster."
 ---
 
-Welcome to the OpenShift security workshop! Here you'll be able to practice your prowess responding to a security breach and making security posture improvements in a safe environment.
+Welcome to the *AAP + OpenShift automation workshop*.
+
+In this workshop you'll explore how platform engineers can use Ansible Automation Platform to automate common operational tasks in OpenShift.
+
+Rather than manually executing cluster administration tasks, you'll build reusable automation that can be triggered on demand or integrated into operational workflows.
 
 
-**Let's get started!**
+
+## 1.1 - The scenario
+
+You are a platform engineer at ACME Financial Services. The platform team is responsible for ensuring cluster reliability, security, and recoverability across multiple OpenShift environments.
+
+One of your critical responsibilities is ensuring **etcd backups are performed regularly and stored safely off-cluster**.
+
+Historically, this has been a bash scripted process run by engineers during maintenance windows which was cumbersome to maintain.
+
+Your mission is to replace this manual process with an Ansible Automation Platform Job Template.
 
 
-## 1.1 - The workshop scenario
+## 1.2 - What you're working with
 
-For this hands on workshop, we're going to be an OpenShift team member at ACME Financial Services, a large bank operating in New Zealand. They run a significant number of customer facing workloads on OpenShift and have a small core team of platform engineers supporting the platform.
+In this environment you already have:
 
-![acme](/workshops/static/images/fsi-security/acme.jpg)
+- A functional OpenShift cluster
+- Ansible Automation Platform installed and configured
+- Credentials allowing AAP to interact with the OpenShift cluster
+- Access to a pre-created Automation Controller project
 
-
-Throughout this workshop we'll be in the shoes of Sarah, a senior OpenShift Platform Engineer at ACME, a day in the life for her typically sees her handling platform health and maintenance tasks, assisting application teams with feature requests and she is also rostered on to the platform incident management queue on a regular rotation.
-
-![acme](/workshops/static/images/fsi-security/sarah-desk.png)
-
-
-## 1.2 - Understanding the environment
-
-For this workshop you'll be given access to the ACME Financial Services Production OpenShift `4.20` cluster and some supporting tools.
-
-You can and are encouraged to use any supporting documentation or other resources in order to tackle each of the workshop tasks.
-
-<Zoom>
-![cluster](/workshops/static/images/fsi-security/acme-cluster.png)
- *ACME Financial Services OpenShift Web Console*
-</Zoom>
-
-
-## 1.3 - Obtain your environment
-
-To get underway open your web browser and navigate to this Google Sheet to allocate yourself a workshop environment [https://hackmd.io/@76BaPZwESl2tHIGLPhxVbQ/rk2vvNt1Gl](https://hackmd.io/@76BaPZwESl2tHIGLPhxVbQ/rk2vvNt1Gl)
-
-Put your name next to any unallocated environment and use credentials on that row to log in to the OpenShift Web Console [https://console-openshift-console.apps.cluster-sr857.sr857.sandbox1037.opentlc.com](https://console-openshift-console.apps.cluster-sr857.sr857.sandbox1037.opentlc.com)
-
-<Zoom>
-![workshop](/workshops/static/images/fsi-security/workshop-registration.png)
-*Workshop registration page*
-</Zoom>
-
-If you have an environment and are logged in to the OpenShift Web Console, you're now ready to move on to [Exercise 2](/workshop/exercise2), let the challenge begin! 🎉
+Your goal is to wire these components together into a repeatable automation workflow.
