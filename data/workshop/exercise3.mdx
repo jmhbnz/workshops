@@ -1,0 +1,26 @@
+---
+title: Automating etcd backups
+exercise: 3
+date: '2026-06-23'
+tags: ['ansible', 'automation', 'openshift', 'etcd', 'backups']
+draft: false
+authors: ['default']
+summary: "Creating our first automation job! 🚀"
+---
+
+With a clear understanding of how Ansible Automation Platform has been deployed on to OpenShift, and now logged in to the platform Sarah gets to work automating etcd backups.
+
+> **Background** [etcd](https://etcd.io) is a distributed, reliable key-value store for the most critical data of a distributed system. Within Kubernetes it maintains the state of your cluster, and all resources within it.
+
+![sarah-etcd-backups](/workshops/static/images/ocp-aap/sarah-etcd.png)
+
+
+## 3.1 - Creating a project
+
+**Projects** are a foundational concept of the automation controller. Essentially they point to a git repository where your ansible playbooks are stored.
+
+Let's create one now using the web interface.
+
+Click on **Automation Execution** in the left menu, then click on **Projects**.
+
+ 

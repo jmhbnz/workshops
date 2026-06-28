@@ -59,7 +59,7 @@ Click on the **All instances** tab at the top of the tab.
 
 Click on the `AnsibleAutomationPlatform` resource named `aap`. This is the metaresource responsible for deploying the platform.
 
-Take a moment to review the YAML specification for this metaresource to understand how this deploys the various components that make up the platform such as `controller`, `eda` and `hub`. A sample is included below:
+Take some time to review the YAML specification for this metaresource to understand how this deploys the various components that make up the platform such as `controller`, `eda` and `hub`. A sample is included below:
 
 ```yaml
 apiVersion: aap.ansible.com/v1alpha1
@@ -94,13 +94,13 @@ spec:
 
 ## 2.4 - Locating the aap route
 
-With a fresh understanding of how Ansible AUtomation Platform has been deployed to the cluster Sarah retrieves the route and logs in.
+With a fresh understanding of how Ansible Automation Platform has been deployed to the cluster Sarah retrieves the route and logs in.
 
 Click on **Networking** in the left menu, then click on **Routes**.
 
 Ensure you have the `aap` project selected in the project dropdown at the top. You should see a Route resource named `aap`.
 
-Clicking the **Location** URL in the table you will be greeted by the platform login.
+Clicking the **Location** URL for the `aap` route you will be greeted by the platform login.
 
 <Zoom>
 ![cluster](/workshops/static/images/ocp-aap/aap-login.png)
@@ -118,4 +118,7 @@ Upon logging in you will be greeted with essentially a blank web console. A sing
 ![cluster](/workshops/static/images/ocp-aap/aap-console.png)
  *Ansible automation platform web console*
 </Zoom>
+
+
+Take some time to explore the web interface, with a particular focus on the **Automation Controller** section. When you're ready we'll move on to [Exercise 3](/workshop/exercise3), to create our first automation job template 🚀.
 
