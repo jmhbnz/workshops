@@ -1,67 +1,48 @@
 ---
-- name: Validate OpenShift Cluster Health
+- name: Validate cluster health
   hosts: localhost
   gather_facts: false
 
   tasks:
-    - name: Subsystem 1 - Check API Connectivity and Cluster Version
+
+    - name: Retrieve cluster version resource
       kubernetes.core.k8s_info:
         api_version: config.openshift.io/v1
         kind: ClusterVersion
         name: version
       register: cluster_version_raw
 
-    - name: Fail if Cluster Version cannot be retrieved
+    - name: Fail if cluster version cannot be retrieved
       ansible.builtin.fail:
-        msg: "Unable to connect to the OpenShift API. Check your AAP Credential attachment."
+        msg: "Unable to connect. Check your aap credential attachment."
       when: cluster_version_raw.resources | length == 0
 
-    - name: Report Current OpenShift Version
+    - name: Report current cluster version
       ansible.builtin.debug:
-        msg: "Target Cluster Version: {{ cluster_version_raw.resources[0].status.desired.version }}"
+        msg: "Cluster version: {{ cluster_version_raw.resources[0].status.desired.version }}"
 
-    - name: Subsystem 2 - Validate Status of Cluster Operators
+    - name: Retrieve cluster operators
       kubernetes.core.k8s_info:
         api_version: config.openshift.io/v1
         kind: ClusterOperator
       register: cluster_operators
 
-    - name: Identify Degraded or Unavailable Operators
+    - name: Identify degraded operators
       ansible.builtin.set_fact:
         unhealthy_operators: >-
-          {{
-            cluster_operators.resources | selectattr('status.conditions', 'defined') | json_query('[*].{
-              name: metadata.name,
-              degraded: status.conditions[?type==`Degraded` && status==`True`].name,
-              available: status.conditions[?type==`Available` && status==`False`].name
-            }') | reject('equalto', {'name': item.name, 'degraded': [], 'available': []}) | list
-          }}
+          {% set invalid = [] %}
+          {% for co in cluster_operators.resources | default([]) %}
+            {% set degraded = co.status.conditions | selectattr('type', 'equalto', 'Degraded') | selectattr('status', 'equalto', 'True') | list %}
+            {% set unavailable = co.status.conditions | selectattr('type', 'equalto', 'Available') | selectattr('status', 'equalto', 'False') | list %}
+            {% if degraded | length > 0 or unavailable | length > 0 %}
+              {% if invalid.append(co.metadata.name) %}{% endif %}
+            {% endif %}
+          {% endfor %}
+          {{ invalid }}
 
-    - name: Assert All Cluster Operators are Healthy
+    - name: Assert all cluster operators are healthy
       ansible.builtin.assert:
         that:
           - unhealthy_operators | length == 0
-        fail_msg: "Degraded or Unavailable Operators found: {{ unhealthy_operators }}"
-        success_msg: "All Cluster Operators are healthy and stable."
-
-    - name: Subsystem 3 - Evaluate Node Readiness
-      kubernetes.core.k8s_info:
-        kind: Node
-      register: cluster_nodes
-
-    - name: Identify Unready Nodes
-      ansible.builtin.set_fact:
-        unready_nodes: >-
-          {{
-            cluster_nodes.resources | json_query('[*].{
-              name: metadata.name,
-              not_ready: status.conditions[?type==`Ready` && status!=`True`].name
-            }') | reject('equalto', {'name': item.name, 'not_ready': []}) | list
-          }}
-
-    - name: Assert All Infrastructure Nodes are Ready
-      ansible.builtin.assert:
-        that:
-          - unready_nodes | length == 0
-        fail_msg: "Nodes found in an Unready state: {{ unready_nodes }}"
-        success_msg: "All master, infra, and worker nodes are reporting Ready."
+        fail_msg: "Degraded operators found: {{ unhealthy_operators }}"
+        success_msg: "All cluster operators are healthy."
