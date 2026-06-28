@@ -27,22 +27,15 @@
         kind: ClusterOperator
       register: cluster_operators
 
-    - name: Identify degraded operators
-      ansible.builtin.set_fact:
-        unhealthy_operators: >-
-          {% set invalid = [] %}
-          {% for co in cluster_operators.resources | default([]) %}
-            {% set degraded = co.status.conditions | selectattr('type', 'equalto', 'Degraded') | selectattr('status', 'equalto', 'True') | list %}
-            {% set unavailable = co.status.conditions | selectattr('type', 'equalto', 'Available') | selectattr('status', 'equalto', 'False') | list %}
-            {% if degraded | length > 0 or unavailable | length > 0 %}
-              {% if invalid.append(co.metadata.name) %}{% endif %}
-            {% endif %}
-          {% endfor %}
-          {{ invalid }}
-
     - name: Assert all cluster operators are healthy
+      vars:
+        unhealthy_ops: >-
+          {{ cluster_operators.resources | default([])
+             | community.general.json_query('[?status.conditions[?type==`Degraded` && status==`True`]] .metadata.name')
+             + cluster_operators.resources | default([])
+             | community.general.json_query('[?status.conditions[?type==`Available` && status==`False`]] .metadata.name') }}
       ansible.builtin.assert:
         that:
-          - unhealthy_operators | length == 0
-        fail_msg: "Degraded operators found: {{ unhealthy_operators }}"
+          - unhealthy_ops | length == 0
+        fail_msg: "Degraded operators found: {{ unhealthy_ops | unique }}"
         success_msg: "All cluster operators are healthy."
