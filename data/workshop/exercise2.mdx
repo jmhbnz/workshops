@@ -91,3 +91,31 @@ spec:
   route_tls_termination_mechanism: Edge
 ```
 
+
+## 2.4 - Locating the aap route
+
+With a fresh understanding of how Ansible AUtomation Platform has been deployed to the cluster Sarah retrieves the route and logs in.
+
+Click on **Networking** in the left menu, then click on **Routes**.
+
+Ensure you have the `aap` project selected in the project dropdown at the top. You should see a Route resource named `aap`.
+
+Clicking the **Location** URL in the table you will be greeted by the platform login.
+
+<Zoom>
+![cluster](/workshops/static/images/ocp-aap/aap-login.png)
+ *Ansible automation platform login*
+</Zoom>
+
+
+## 2.5 - Logging in to aap
+
+Use the same username and password for your assigned environment that you used earlier to log in to OpenShift, to now log in to Ansible Automation Platform.
+
+Upon logging in you will be greeted with essentially a blank web console. A single host will be present in a demo inventory for `localhost`.
+
+<Zoom>
+![cluster](/workshops/static/images/ocp-aap/aap-console.png)
+ *Ansible automation platform web console*
+</Zoom>
+
