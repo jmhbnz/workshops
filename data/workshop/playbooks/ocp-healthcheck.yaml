@@ -29,20 +29,15 @@
 
     - name: Identify degraded operators
       ansible.builtin.set_fact:
-        unhealthy_operators: >-
-          {% set invalid = [] %}
-          {% for co in cluster_operators.resources | default([]) %}
-            {% set degraded = co.status.conditions | selectattr('type', 'equalto', 'Degraded') | selectattr('status', 'equalto', 'True') | list %}
-            {% set unavailable = co.status.conditions | selectattr('type', 'equalto', 'Available') | selectattr('status', 'equalto', 'False') | list %}
-            {% if degraded | length > 0 or unavailable | length > 0 %}
-              {% if invalid.append(co.metadata.name) %}{% endif %}
-            {% endif %}
-          {% endfor %}
-          {{ invalid }}
+        unhealthy_operators: "{{ unhealthy_operators + [item.0.metadata.name] }}"
+      loop: "{{ q('ansible.builtin.subelements', cluster_operators.resources | default([]), 'status.conditions', {'skip_missing': true}) }}"
+      when: >
+        (item.1.type == 'Degraded' and item.1.status == 'True') or
+        (item.1.type == 'Available' and item.1.status == 'False')
 
-    - name: Assert all cluster operators are healthy
+    - name: Assert all operators are healthy
       ansible.builtin.assert:
         that:
           - unhealthy_operators | length == 0
-        fail_msg: "Degraded operators found: {{ unhealthy_operators }}"
+        fail_msg: "Degraded operators found: {{ unhealthy_operators | unique }}"
         success_msg: "All cluster operators are healthy."
