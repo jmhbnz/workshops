@@ -15,16 +15,79 @@ There are some complex end to end workflows the ACME team would like to orchestr
 Another engineer recently installed Ansible Automation Platform on the cluster so Sarah takes a moment to get familiar with the installation before starting work on the new backup workflow.
 
 
-## 2.1 - The operator
+## 2.1 - The installed operator
 
 Let's start by reviewing the details of the installed Operator.
 
 Click on **Ecosystem** in the left menu, then click on **Installed Operators**.
 
-Searching for **Ansible** you will see the **Ansible Automation Platform** operator has already been installed in this environment.
+Searching for **Ansible** you will see version `2.7` of the **Ansible Automation Platform** operator has already been installed in this environment.
 
 <Zoom>
 ![cluster](/workshops/static/images/ocp-aap/aap-operator.png)
  *Installed ansible automation platform operator*
 </Zoom>
+
+
+## 2.2 - Subscription update channels
+
+Reviewing the aap operator [documentation](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.7/install-assembly_install_aap_operator#proc-install-aap-operator_procedure) Sarah notes there are two possible installation scopes for the operator:
+
+1. **Cluster scoped** - meaning the operator watches all namespaces in the cluster for potential Ansible Automation Platform resources to manage.
+
+2. **Namespace scoped** - meaning the operator is limited to watching a specific namespace.
+
+For many deployments the namespace scoped operator deployment is encouraged as this limits the privileges required by the operator and means it consumes less resources having only a single namespace to monitor.
+
+Click on the **Ansible Automation Platform** operator, then click on **Subscription** in the operatpr tabs.
+
+Clicking on the **Update channel** link you should see the available update channels, along with the choice of either cluster scoped or namespace scoped.
+
+Sarah notes that in future updating ansible automation platform will be triggered by updating this Subscription resource.
+
+<Zoom>
+![cluster](/workshops/static/images/ocp-aap/aap-operator-channel.png)
+ *Ansible automation platform operator update channels*
+</Zoom>
+
+
+## 2.3 - Reviewing custom resources
+
+With an existing deployment of the operator and ansible automation platform itself already running in the cluster, Sarah takes some time to review the existing custom resources being managed by the operator to get a feel for how the operator works.
+
+Click on the **All instances** tab at the top of the tab.
+
+Click on the `AnsibleAutomationPlatform` resource named `aap`. This is the metaresource responsible for deploying the platform.
+
+Take a moment to review the YAML specification for this metaresource to understand how this deploys the various components that make up the platform such as `controller`, `eda` and `hub`. A sample is included below:
+
+```yaml
+apiVersion: aap.ansible.com/v1alpha1
+kind: AnsibleAutomationPlatform
+metadata:
+  name: aap
+  namespace: aap
+spec:
+  controller:
+    disabled: false
+  eda:
+    disabled: false
+  hub:
+    content:
+      replicas: 1
+    disabled: false
+    file_storage_access_mode: ReadWriteMany
+    file_storage_size: 100Gi
+    file_storage_storage_class: ocs-external-storagecluster-cephfs
+    gunicorn_api_workers: 1
+    gunicorn_content_workers: 1
+    worker:
+      replicas: 1
+  image_pull_policy: IfNotPresent
+  lightspeed:
+    disabled: true
+  no_log: true
+  redis_mode: standalone
+  route_tls_termination_mechanism: Edge
+```
 

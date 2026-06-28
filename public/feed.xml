@@ -22,12 +22,12 @@
 
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
-    <title>Introducing Ansible Automation Platform for OpenShift operations</title>
+    <title>Exploring the platform</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
-    <description>Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster.</description>
+    <description>Taking a look at ansible automation platform</description>
     <pubDate>Mon, 22 Jun 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>etcd</category><category>backup</category>
+    <category>ansible</category><category>automation</category><category>operator</category><category>aap</category>
   </item>
 
     </channel>
