@@ -2,10 +2,6 @@
 - name: Validate OpenShift Cluster Health
   hosts: localhost
   gather_facts: false
-  vars:
-    # AAP automatically injects OpenShift credentials if an 'OpenShift' or 'Kubernetes'
-    # credential is attached to the Job Template. These fallbacks handle local testing.
-    k8s_auth_kind: "{{ lookup('ansible.builtin.env', 'K8S_AUTH_KIND') | default('kubeconfig', true) }}"
 
   tasks:
     - name: Subsystem 1 - Check API Connectivity and Cluster Version
@@ -13,12 +9,11 @@
         api_version: config.openshift.io/v1
         kind: ClusterVersion
         name: version
-        auth_kind: "{{ k8s_auth_kind }}"
       register: cluster_version_raw
 
     - name: Fail if Cluster Version cannot be retrieved
       ansible.builtin.fail:
-        msg: "Unable to connect to the OpenShift API. Check AAP credentials."
+        msg: "Unable to connect to the OpenShift API. Check your AAP Credential attachment."
       when: cluster_version_raw.resources | length == 0
 
     - name: Report Current OpenShift Version
@@ -29,7 +24,6 @@
       kubernetes.core.k8s_info:
         api_version: config.openshift.io/v1
         kind: ClusterOperator
-        auth_kind: "{{ k8s_auth_kind }}"
       register: cluster_operators
 
     - name: Identify Degraded or Unavailable Operators
@@ -53,7 +47,6 @@
     - name: Subsystem 3 - Evaluate Node Readiness
       kubernetes.core.k8s_info:
         kind: Node
-        auth_kind: "{{ k8s_auth_kind }}"
       register: cluster_nodes
 
     - name: Identify Unready Nodes
