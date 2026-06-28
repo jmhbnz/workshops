@@ -30,5 +30,15 @@
     <category>ansible</category><category>automation</category><category>operator</category><category>aap</category>
   </item>
 
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise3</guid>
+    <title>Automating etcd backups</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise3</link>
+    <description>Creating our first automation job! 🚀</description>
+    <pubDate>Tue, 23 Jun 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>openshift</category><category>etcd</category><category>backups</category>
+  </item>
+
     </channel>
   </rss>
