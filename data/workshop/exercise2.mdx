@@ -1,39 +1,30 @@
 ---
-title: Introducing Ansible Automation Platform for OpenShift operations
-exercise: 1
+title: Exploring the platform
+exercise: 2 
 date: '2026-06-22'
-tags: ['ansible', 'automation', 'etcd', 'backup']
+tags: ['ansible', 'automation', 'operator', 'aap']
 draft: false
 authors: ['default']
-summary: "Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster."
+summary: "Taking a look at ansible automation platform"
 ---
 
-Welcome to the *AAP + OpenShift automation workshop*.
+It's a new day at ACME Financial Services and Sarah has just picked up a new story to work on, automating etcd backups for the banks clusters.
 
-In this workshop you'll explore how platform engineers can use Ansible Automation Platform to automate common operational tasks in OpenShift.
+There are some complex end to end workflows the ACME team would like to orchestrate to complete a full backup process so the approach the bank has taken is to offload this workflow to Ansible Automation Platform.
 
-Rather than manually executing cluster administration tasks, you'll build reusable automation that can be triggered on demand or integrated into operational workflows.
-
-
-
-## 1.1 - The scenario
-
-You are a platform engineer at ACME Financial Services. The platform team is responsible for ensuring cluster reliability, security, and recoverability across multiple OpenShift environments.
-
-One of your critical responsibilities is ensuring **etcd backups are performed regularly and stored safely off-cluster**.
-
-Historically, this has been a bash scripted process run by engineers during maintenance windows which was cumbersome to maintain.
-
-Your mission is to replace this manual process with an Ansible Automation Platform Job Template.
+Another engineer recently installed Ansible Automation Platform on the cluster so Sarah takes a moment to get familiar with the installation before starting work on the new backup workflow.
 
 
-## 1.2 - What you're working with
+## 2.1 - The operator
 
-In this environment you already have:
+Let's start by reviewing the details of the installed Operator.
 
-- A functional OpenShift cluster
-- Ansible Automation Platform installed and configured
-- Credentials allowing AAP to interact with the OpenShift cluster
-- Access to a pre-created Automation Controller project
+Click on **Ecosystem** in the left menu, then click on **Installed Operators**.
 
-Your goal is to wire these components together into a repeatable automation workflow.
+Searching for **Ansible** you will see the **Ansible Automation Platform** operator has already been installed in this environment.
+
+<Zoom>
+![cluster](/workshops/static/images/ocp-aap/aap-operator.png)
+ *Installed ansible automation platform operator*
+</Zoom>
+

@@ -7,13 +7,23 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Mon, 22 Jun 2026 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Sun, 21 Jun 2026 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise1</guid>
-    <title>Introducing Ansible Automation Platform for OpenShift operations</title>
+    <title>Getting started</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise1</link>
+    <description>How to get started with the workshop</description>
+    <pubDate>Sun, 21 Jun 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>workshop</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
+    <title>Introducing Ansible Automation Platform for OpenShift operations</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
     <description>Use Ansible Automation Platform to automate an OpenShift etcd backup and store it off-cluster.</description>
     <pubDate>Mon, 22 Jun 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
