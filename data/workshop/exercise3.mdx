@@ -12,7 +12,7 @@ With a clear understanding of how Ansible Automation Platform has been deployed 
 
 > **Background:** [etcd](https://etcd.io) is a distributed, reliable key-value store for the most critical data of a distributed system. Within Kubernetes it maintains the state of your cluster, and all resources within it. Taking regular etcd backups is a platform best practice.
 
-![sarah-etcd-backups](/workshops/static/images/ocp-aap/sarah-etcd.png)
+![Sarah etcd backups](/workshops/static/images/ocp-aap/sarah-etcd.png)
 
 
 ## 3.1 - Creating a project
@@ -54,7 +54,9 @@ By creating a project Sarah has told Ansible Automation Platform where some of h
 
 Sarah has previously distilled the Red Hat [etcd backup documentation](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/etcd/backing-up-and-restoring-etcd-data#backing-up-etcd-data_etcd-backup) into an ansible playbook. 
 
-The playbook is live here: [https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/etcd-backup.yaml](https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/etcd-backup.yaml). Take some time to review this before we proceed.
+The playbook is available in source control here: [https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/etcd-backup.yaml](https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/etcd-backup.yaml). Take some time to review this before we proceed.
+
+> **Note:** This playbook is intentially relatively trivial. To minimize external dependencies for the workshop all the playbook does is generate the backup on a master node. In a production situation the backup would generally be replicated outside of the cluster, often to geographically resilient storage.
 
 To be able to run this playbook from Ansible Automation Platform we need to create a **Job Template** which will define which playbook is being run and what parameters it will be run with.
 
@@ -103,11 +105,16 @@ ok: [localhost] => {
 </Zoom>
 
 
+## 3.4 - Scheduling the job template
+
+With the job template in place Sarah can now trigger a backup on demand, but taking a regular backup automatically is a much better practice.
+
+For a strech exercise have a go at creating schedule for this job template now within the Ansible Automation Platform user interface.
+
+Call the schedule `acme-ocp-etcd-backup-daily` and set a frequency of daily.
 
 
+With a schedule created Sarah can tick that task off for the day! You can now move on to [Exercise 4](/workshop/exercise4), to create an end to end workflow 🚀.
 
-
-
-
-
+![Sarah etcd backups done](/workshops/static/images/ocp-aap/sarah-etcd-done.png)
 
