@@ -1,0 +1,39 @@
+---
+- name: Openshift etcd backup
+  hosts: localhost
+  gather_facts: true
+  vars:
+    host_backup_dir: "/home/core/assets/backup/backup-{{ ansible_date_time.iso8601_basic_short }}"
+
+  tasks:
+    - name: Fetch master nodes from cluster
+      kubernetes.core.k8s_info:
+        kind: Node
+        label_selectors:
+          - node-role.kubernetes.io/master=
+      register: master_nodes
+
+    - name: Select active target master node
+      ansible.builtin.set_fact:
+        target_master: "{{ master_nodes.resources[0].metadata.name }}"
+
+    - name: Report selected master target
+      ansible.builtin.debug:
+        msg: "Targeting control plane node [ {{ target_master }} ] for etcd snapshot creation."
+
+    - name: Execute etcd backup script via node debug breakout
+      ansible.builtin.shell: |
+        oc debug node/{{ target_master }} --as-root=true -- \
+          sh -c "chroot /host /usr/local/bin/cluster-backup.sh {{ host_backup_dir }}"
+      register: backup_output
+      changed_when: true
+
+    - name: Display backup script log output
+      ansible.builtin.debug:
+        var: backup_output.stdout_lines
+
+    - name: Summary of success
+      ansible.builtin.debug:
+        msg:
+          - "Success: etcd database snapshot successfully created!"
+          - "Location on master host node: {{ host_backup_dir }}"
