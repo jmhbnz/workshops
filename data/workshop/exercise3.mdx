@@ -32,7 +32,7 @@ Enter the following values then click **Create**:
 - **Source control url:** `https://github.com/jmhbnz/workshops`
 
 <Zoom>
-![cluster](/workshops/static/images/ocp-aap/aap-project.png)
+![Project creation](/workshops/static/images/ocp-aap/aap-project.png)
  *Creating a project*
 </Zoom>
 
@@ -43,7 +43,7 @@ The source control revision refers to the commit hash that the project is curren
 Projects can be configured to automatically sync when job templates using that project are run, or sync on a defined schedule.
 
 <Zoom>
-![cluster](/workshops/static/images/ocp-aap/aap-project-sync.png)
+![Project sync](/workshops/static/images/ocp-aap/aap-project-sync.png)
  *Project sync status*
 </Zoom>
 
@@ -74,7 +74,7 @@ Enter the following values then click **Create job template** once more:
 - **Credentials:** `OpenShift Credential`
 
 <Zoom>
-![cluster](/workshops/static/images/ocp-aap/aap-template.png)
+![Template created](/workshops/static/images/ocp-aap/aap-template.png)
  *Job template created*
 </Zoom>
 
@@ -84,6 +84,24 @@ Enter the following values then click **Create job template** once more:
 Immediately after creating a job template Sarah gives it a test by launching it.
 
 Click the blue **Launch template** button in the top right corner.
+
+After completing, review the logs for the completed job. You should see an etcd backup being successfully created on a master node.
+
+```text
+TASK [Summary of success] ******************************************************  10:57:08 pm
+ok: [localhost] => {
+"msg": [
+"Success: etcd database snapshot successfully created!",
+"Location on master host node: /home/core/assets/backup/backup-20260629T105652"
+]
+}
+```
+
+<Zoom>
+![Template results](/workshops/static/images/ocp-aap/aap-results.png)
+ *Job template run results*
+</Zoom>
+
 
 
 
