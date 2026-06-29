@@ -50,6 +50,31 @@ Projects can be configured to automatically sync when job templates using that p
 
 ## 3.2 - Creating a job template
 
+By creating a project Sarah has told Ansible Automation Platform where some of her ansible content lives in git.
 
+Sarah has previously distilled the Red Hat [etcd backup documentation](https://docs.redhat.com/en/documentation/openshift_container_platform/4.21/html/etcd/backing-up-and-restoring-etcd-data#backing-up-etcd-data_etcd-backup) into an ansible playbook. 
 
+The playbook is live here: [https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/etcd-backup.yaml](https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/etcd-backup.yaml). Take some time to review this before we proceed.
+
+To be able to run this playbook from Ansible Automation Platform we need to create a **Job Template** which will define which playbook is being run and what parameters it will be run with.
+
+Let's create one now using the web interface.
+
+Click on **Automation Execution** in the left menu, then click on **Templates**.
+
+On the template list view click on the blue **Create template** button and then click **Create job template**.
+
+Enter the following values then click **Create job template** once more:
+
+- **Name:** `acme-ocp-etcd-backup`
+- **Inventory:** `Demo Inventory`
+- **Project:** `acme-ocp-ansible`
+- **Playbook:** `data/workshop/playbooks/etcd-backup.yaml`
+- **Execution environment:** `Control Plane Execution Environment`
+- **Credentials:** `OpenShift Credential`
+
+<Zoom>
+![cluster](/workshops/static/images/ocp-aap/aap-template.png)
+ *Job template created*
+</Zoom>
 
