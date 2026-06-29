@@ -1,5 +1,5 @@
 ---
-- name: Openshift etcd backup
+- name: Automate openshift etcd backup
   hosts: localhost
   gather_facts: true
   vars:
@@ -23,7 +23,7 @@
 
     - name: Execute etcd backup script via node debug breakout
       ansible.builtin.shell: |
-        oc debug node/{{ target_master }} --as-root=true -- \
+        oc --server="$K8S_AUTH_HOST" --token="$K8S_AUTH_API_KEY" --insecure-skip-tls-verify=true debug node/{{ target_master }} --as-root=true -- \
           sh -c "chroot /host /usr/local/bin/cluster-backup.sh {{ host_backup_dir }}"
       register: backup_output
       changed_when: true
