@@ -2,10 +2,122 @@
 title: Building a healthcheck workflow
 exercise: 4
 date: '2026-06-24'
-tags: ['ansible', 'automation', 'openshift', 'healthchecks']
+tags: ['ansible', 'automation', 'openshift', healthchecks', 'workflow']
 draft: false
 authors: ['default']
 summary: "Creating our first workflow job template! 🚀"
 ---
 
-TODO: Introduce the concept of workflows, made up of composable playbooks. Workflow will use existing pre-created playbooks the do basic cluster healthchecks, odf healthchecks etc. Something you might run before and after a cluster upgrade for example.
+With etcd backups safely scheduled, Sarah wants to tie multiple operations together. Before running backups or changes, she wants to ensure the cluster infrastructure and storage layers are fully operational.
+
+> **Background:** A **Workflow job template** links multiple job templates together. They allow you to create conditional pipelines that execute different paths based on the success or failure of previous steps, all managed as a single object inside Ansible Automation Platform.
+
+![Sarah workflow environment](/workshops/static/images/ocp-aap/sarah-workflow.png)
+
+
+## 4.1 - Creating the storage health job template
+
+Sarah needs to create a new job template for the OpenShift Data Foundation health check before constructing the workflow. The playbook is already stored in git at `data/workshop/playbooks/odf-healthcheck.yaml`.
+
+Let's create this job template now using the web interface.
+
+Click on **Automation Execution** in the left menu, then click on **Templates**.
+
+On the template list view click on the blue **Create template** button and then click **Create job template**.
+
+Enter the following values then click **Create job template**:
+
+- **Name:** `acme-ocp-odf-healthcheck`
+- **Inventory:** `Demo Inventory`
+- **Project:** `acme-ocp-ansible`
+- **Playbook:** `data/workshop/playbooks/odf-healthcheck.yaml`
+- **Execution environment:** `Control Plane Execution Environment`
+- **Credentials:** `OpenShift Credential`
+
+<Zoom>
+![Odf template creation](/workshops/static/images/ocp-aap/aap-odf-template.png)
+ *Creating the storage health template*
+</Zoom>
+
+
+## 4.2 - Creating the workflow template
+
+Now that the individual components exist, Sarah can create the master workflow container that will orchestrate them.
+
+Click on **Templates** in the left menu once more.
+
+Click on the blue **Create template** button and select **Create workflow job template**.
+
+Enter the following values then click **Create workflow job template**:
+
+- **Name:** `acme-ocp-cluster-health-workflow`
+- **Organization:** `Default`
+- **Inventory:** `Demo Inventory`
+
+<Zoom>
+![Workflow template created](/workshops/static/images/ocp-aap/aap-workflow-template.png)
+ *Creating the workflow template*
+</Zoom>
+
+
+## 4.3 - Designing the workflow path
+
+After saving the workflow template, the **Visualizer** interface opens automatically. This is where Sarah maps out the sequence of execution.
+
+Click the blue **Add step** button in the visualizer canvas to add the first node.
+
+Set the node type to **Job Template**, select `acme-ocp-odf-healthcheck`, then click **Next**, then **Finish**.
+
+<Zoom>
+![Workflow template add step](/workshops/static/images/ocp-aap/aap-workflow-template-2.png)
+ *Adding a step to the workflow*
+</Zoom>
+
+
+Hover over the newly created node, right click and select the **+ Add step and link** option.
+
+<Zoom>
+![Workflow template add step](/workshops/static/images/ocp-aap/aap-workflow-template-3.png)
+ *Adding a step to the workflow*
+</Zoom>
+
+In the Add step pane, select our etcd backup job template and set the **Status** to `Run on success`. This ensures the second playbook only runs if the storage checks pass perfectly.
+
+Click **Next**, then **Finish**. We should now have a basic two stage workflow.
+
+Click the blue **Save** button in the top left.
+
+<Zoom>
+![Workflow template visualizer](/workshops/static/images/ocp-aap/aap-workflow-template-4.png)
+ *Finished two step workflow*
+</Zoom>
+
+## 4.4 - Launching the workflow pipeline
+
+With the sequence mapped out, Sarah triggers the pipeline to view the unified execution logs.
+
+Click the blue **Launch template** button.
+
+The interface will switch to the tracking view, showing the status of each job in real time as the pipeline coordinates the execution across the cluster infrastructure.
+
+<Zoom>
+![Workflow template running](/workshops/static/images/ocp-aap/aap-workflow-running.png)
+ *Running workflow*
+</Zoom>
+
+When the job completes you will see a summary and elapsed time for each node in the workflow.
+
+```text
+Identity: acme-ocp-cluster-health-pipeline
+Status: Successful
+Total nodes: 2
+
+Node 1: acme-ocp-odf-healthcheck -> Success
+Node 2: acme-ocp-etcd-backup     -> Success
+```
+
+Sarah now has a multi step health and backup workflow up and running! 
+
+> **Note:** This is straightforward, simplified example for the purposes of the workshop. Production workflows often have branching conditional flows handling failures and validation along with integrating with external off-cluster systems
+
+You can now move on to [Exercise 5](/workshop/exercise5) to learn about event drive workflows.
