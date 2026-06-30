@@ -1,0 +1,62 @@
+---
+- name: Openshift data foundation health check
+  hosts: localhost
+  gather_facts: true
+
+  tasks:
+    - name: Fetch storage cluster details
+      kubernetes.core.k8s_info:
+        api_version: ocs.openshift.io/v1
+        kind: StorageCluster
+        namespace: openshift-storage
+      register: storage_cluster
+
+    - name: Verify storage cluster is in ready phase
+      ansible.builtin.fail:
+        msg: "Storage cluster operator layer is not in a ready state."
+      when: storage_cluster.resources[0].status.phase != "Ready"
+
+    - name: Fetch underlying ceph cluster health details
+      kubernetes.core.k8s_info:
+        api_version: ceph.rook.io/v1
+        kind: CephCluster
+        namespace: openshift-storage
+      register: ceph_cluster
+
+    - name: Verify ceph storage health is not in error state
+      ansible.builtin.fail:
+        msg: "Ceph storage fabric is reporting an error state."
+      when: ceph_cluster.resources[0].status.ceph.health == "HEALTH_ERR"
+
+    - name: Verify ceph storage health is not reporting warnings
+      ansible.builtin.fail:
+        msg: "Ceph storage fabric is reporting a warning state. Check capacity and disk utilization."
+      when: ceph_cluster.resources[0].status.ceph.health == "HEALTH_WARN"
+
+    - name: Fetch multi-cloud object gateway details
+      kubernetes.core.k8s_info:
+        api_version: noobaa.io/v1alpha1
+        kind: NooBaa
+        namespace: openshift-storage
+      register: noobaa_cluster
+
+    - name: Verify object gateway is in ready phase
+      ansible.builtin.fail:
+        msg: "Noobaa object storage service is not in a ready state."
+      when: noobaa_cluster.resources[0].status.phase != "Ready"
+
+    - name: Fetch storage cluster service version details
+      kubernetes.core.k8s_info:
+        api_version: operators.coreos.com/v1alpha1
+        kind: ClusterServiceVersion
+        namespace: openshift-storage
+      register: odf_csv
+
+    - name: Verify storage operator installation phase
+      ansible.builtin.fail:
+        msg: "Storage cluster service version operator installation is not successful."
+      when: odf_csv.resources[0].status.phase != "Succeeded"
+
+    - name: Display comprehensive storage health summary
+      ansible.builtin.debug:
+        msg: "Success: all openshift data foundation storage layers, operators, fabrics, and gateways are fully operational."
