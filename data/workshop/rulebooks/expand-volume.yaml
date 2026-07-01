@@ -1,0 +1,18 @@
+---
+- name: Listen for storage alerts from alertmanager
+  hosts: all
+  sources:
+    - ansible.eda.webhook:
+        host: 0.0.0.0
+        port: 5000
+  rules:
+    - name: Match volume filling alert
+      condition: event.payload.alerts[0].labels.alertname == "AcmeVolumeFillingUp"
+      action:
+        run_job_template:
+          name: acme-ocp-expand-volume
+          organization: Default
+          job_args:
+            extra_vars:
+              alert_pvc_name: "{{ event.payload.alerts[0].labels.persistentvolumeclaim }}"
+              alert_pvc_namespace: "{{ event.payload.alerts[0].labels.namespace }}"
