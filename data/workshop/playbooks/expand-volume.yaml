@@ -1,0 +1,22 @@
+---
+- name: Expand pvc
+  hosts: localhost
+  gather_facts: false
+
+  tasks:
+    - name: Expand target persistent volume claim request size
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: PersistentVolumeClaim
+          metadata:
+            name: "{{ alert_pvc_name }}"
+            namespace: "{{ alert_pvc_namespace }}"
+          spec:
+            resources:
+              requests:
+                storage: 2Gi
+
+    - name: Display storage adjustment summary
+      ansible.builtin.debug:
+        msg: "Success: persistent volume claim {{ alert_pvc_name }} successfully expanded to prevent outage."
