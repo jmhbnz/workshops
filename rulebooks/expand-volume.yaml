@@ -7,7 +7,7 @@
         port: 5000
   rules:
     - name: Match volume filling alert
-      condition: event.payload.alerts[0].labels.alertname == "AcmeVolumeFillingUp"
+      condition: event.payload.alerts[0].labels.alertname == "PersistentVolumeUsageCritical"
       action:
         run_job_template:
           name: acme-ocp-expand-volume
