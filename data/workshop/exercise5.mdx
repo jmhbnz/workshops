@@ -2,10 +2,123 @@
 title: Event driven automation
 exercise: 5
 date: '2026-06-25'
-tags: ['ansible', 'automation', 'openshift']
+tags: ['ansible', 'automation', 'openshift', 'eda']
 draft: false
 authors: ['default']
 summary: "How can we respond to cluster events automatically?"
 ---
 
-TODO: Wire up a pre-created or mostly pre-created EDA workflow that responds to a type of basic event in OpenShift. Attendees trigger the event by doing something in OpenShift and see AAP automatically respond via EDA.
+With the ACME health check pipelines established, Sarah wants to handle a common day-2 operational issue: applications running out of disk space because she's tired of being paged out for this when on call! 😩
+
+![Sarah paged out](/workshops/static/images/ocp-aap/sarah-callout.png)
+
+Instead of being called out and needing to expand storage, she wants configure the platform to automatically expand persistent volumes using Event-Driven Ansible (EDA) when a Prometheus monitoring alert fires due to storage reaching a particular threshold.
+
+Of course a manual incident still needs to be raised in ServiceNow so the team responsible for the service can look into the root cause and take action, but Sarah is determined to put an end to being called out for this issue when more storage can be easily provisioned automatically and teams can look at the issue later during business hours.
+
+> **Background:** [Event-Driven Ansible](https://www.ansible.com/use-cases/event-driven-automation) (EDA) can ingest real-time events from external sources like OpenShift's Prometheus Alertmanager stack. When an alert fires indicating a volume is reaching capacity, EDA intercepts the alert payload, processes the metadata, and immediately fires a playbook to resize the target volume before an outage occurs.
+
+
+## 5.1 - Creating the application workload
+
+To build a self-healing loop for a storage emergency, Sarah first needs to provision a mock application environment that utilizes a persistent volume claim (PVC) inside the cluster.
+
+Let's stand up this environment now.
+
+Click the **+ Quick Create** button in the top right corner of the OpenShift web console, then click **Import YAML**
+
+Copy the content below to deploy the sample workload and then click **Create**.
+
+```yaml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: production
+
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: acme-db-pvc
+  namespace: production
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: acme-database
+  namespace: production
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: acme-database
+  template:
+    metadata:
+      labels:
+        app: acme-database
+    spec:
+      containers:
+        - name: database
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          command: ["/bin/sh", "-c", "while true; do sleep 30; done"]
+          volumeMounts:
+            - name: data-volume
+              mountPath: /var/lib/data
+          resources:
+            limits:
+              cpu: "100m"
+              memory: "128Mi"
+      volumes:
+        - name: data-volume
+          persistentVolumeClaim:
+            claimName: acme-db-pvc
+```
+
+<Zoom>
+![Application creation](/workshops/static/images/ocp-aap/ocp-import.png)
+ *Importing sample application*
+</Zoom>
+
+
+Verify that the storage binds successfully and the database pod transitions into a healthy state by clicking **Storage** on the left hand menu, then click **PersistentVolumeClaims**.
+
+Ensure the `production` namespace is selected from the **Project** dropdown.
+
+Examing the `acme-db-pvc` volume we created we should see this is `Bound` to a running pod, with a starting capacity of `1Gi`.
+
+<Zoom>
+![Volume initial state](/workshops/static/images/ocp-aap/pvc-start.png)
+ *Bound 1Gi volume*
+</Zoom>
+
+
+## 5.2 - Creating an aap token
+
+The event driven automation workflow Sarah is going to create is going to execute a job template within Ansible Automation Platform to remediate the storage issue.
+
+To enable this, we're going to need to give the event driven automation a token to use to authenticate back to the platform and trigger the remediation job template.
+
+Let's build this credential inside the web interface.
+
+First, navigate to the main **Ansible Automation Platform** web console.
+
+Click on **Access** in the left menu, click **API Tokens**, then click **Create Token**. 
+
+Enter `eda` for the token name, and ensure the **Scope** is set to `Write`, then click **Create token**.
+
+<Zoom>
+![Create aap token](/workshops/static/images/ocp-aap/token-creation.png)
+ *Creating an aap token*
+</Zoom>
+
+**IMPORTANT** On the window that pops up after saving, ensure you copy and note down the token that is generated.
+
+
