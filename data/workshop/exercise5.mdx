@@ -122,3 +122,29 @@ Enter `eda` for the token name, and ensure the **Scope** is set to `Write`, then
 **IMPORTANT** On the window that pops up after saving, ensure you copy and note down the token that is generated.
 
 
+## 5.3 - Creating an eda project
+
+Like standard playbook based job template automation, event driven ansible works off a foundational concept of **Projects** which point to a git source control repository. However instead of pointing to a repository with **Playbooks**, an eda project points to a repository containing **Rulebooks**.
+
+Let's create the event driven ansible project now, using the Ansible Web Console.
+
+Click on **Automation Decisions** in the left menu, then click on **Projects**.
+
+Click on the blue **Create project** button
+
+Enter the following details in the form, then click **Create project** once more.
+
+- **Name:** `acme-ocp-ansible`
+- **Source control url:** `https://github.com/jmhbnz/workshops`
+
+<Zoom>
+![Create eda project](/workshops/static/images/ocp-aap/eda-project.png)
+ *Creating an eda project*
+</Zoom>
+
+
+
+
+
+
+
