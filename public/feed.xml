@@ -1,9 +1,9 @@
 
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>Red Hat OpenShift Security Workshop</title>
+      <title>Red Hat OpenShift Automation Workshop</title>
       <link>https://jmhbnz.github.io/workshops/workshop</link>
-      <description>Red Hat OpenShift Security Workshop</description>
+      <description>Red Hat OpenShift Automation Workshop</description>
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
@@ -38,6 +38,36 @@
     <pubDate>Tue, 23 Jun 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
     <category>ansible</category><category>automation</category><category>openshift</category><category>etcd</category><category>backups</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise4</guid>
+    <title>Building a healthcheck workflow</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise4</link>
+    <description>Creating our first workflow job template! 🚀</description>
+    <pubDate>Wed, 24 Jun 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>openshift</category><category>healthchecks'</category><category>workflow</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise5</guid>
+    <title>Event driven automation</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise5</link>
+    <description>How can we respond to cluster events automatically?</description>
+    <pubDate>Thu, 25 Jun 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>openshift</category><category>eda</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/exercise6</guid>
+    <title>Optional - ServiceNow automation</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/exercise6</link>
+    <description>How can we respond to cluster events automatically?</description>
+    <pubDate>Fri, 26 Jun 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>openshift</category>
   </item>
 
     </channel>
