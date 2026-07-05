@@ -121,10 +121,26 @@ Enter `eda` for the token name, and ensure the **Scope** is set to `Write`, then
 
 **IMPORTANT** On the window that pops up after saving, ensure you copy and note down the token that is generated.
 
+With the token copied down, click on **Automation Decisions**, then click **Infrastructure**.
+
+Click on **Credentials**, followed by the blue **Create credential** button.
+
+Enter the following values, replacing `<variables>` as appropriate:
+
+- **Name:** `acme-controller-token`
+- **Credential type:** `Red Hat Ansible Automation Platform`
+- **Red Hat Ansible Automation Platform:** `<your aap url>/api/controller`
+- **Oauth token:** `<your aap token>`
+
+<Zoom>
+![Create eda credential](/workshops/static/images/ocp-aap/credential-creation.png)
+ *Creating an aap eda credentiala*
+</Zoom>
+
 
 ## 5.3 - Creating an eda project
 
-Like standard playbook based job template automation, event driven ansible works off a foundational concept of **Projects** which point to a git source control repository. However instead of pointing to a repository with **Playbooks**, an eda project points to a repository containing **Rulebooks**.
+Like standard playbook based job template automation, event driven ansible works off a foundational concept of **Projects** which point to a git source control repository. However instead of pointing to a repository with **Playbooks**, an eda project points to a repository containing [**Rulebooks**](https://docs.ansible.com/projects/rulebook).
 
 Let's create the event driven ansible project now, using the Ansible Web Console.
 
@@ -143,8 +159,21 @@ Enter the following details in the form, then click **Create project** once more
 </Zoom>
 
 
+## 5.4 - Creating an eda decision environment
 
+Sarah now needs to create a decision environment for her rulebook to execute in. Decision environments are a container image to run Ansible rulebooks.
 
+Let's create one now. Click on **Automation Decisions** in the left menu, then click **Decision Environments**.
 
+Click the blue **Create decision environment** button, then enter the following values:
 
+- **Name:** `Control Plane Decision Environment`
+- **Image:** `registry.redhat.io/ansible-automation-platform-27/de-supported-rhel9:latest`
+- **Pull:** `Only pull the image if not present`
 
+Click **Create decision environment**.
+
+<Zoom>
+![Create eda decision env](/workshops/static/images/ocp-aap/eda-decision-env.png)
+ *Creating an eda decision environment*
+</Zoom>
