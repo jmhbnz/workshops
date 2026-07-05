@@ -215,7 +215,85 @@ ansible_rulebook.app - INFO - Starting rules
 
 The runner container is now healthy and actively listening for data packets on internal port `5000`.
 
+Take a moment explore the rulebook Sarah wrote earlier, notice how we are listing for alerts matching `PersistentVolumeUsageCritical`. When we identify one we will run the `acme-ocp-expand-volume` job template, passing through some parameters for the volume claim name and namespace.
 
-## 5.6 - Configuring openshift alerting
+```yaml
+---
+- name: Listen for storage alerts from alertmanager
+  hosts: all
+  sources:
+    - ansible.eda.webhook:
+        host: 0.0.0.0
+        port: 5000
+  rules:
+    - name: Match volume filling alert
+      condition: event.payload.alerts[0].labels.alertname == "PersistentVolumeUsageCritical"
+      action:
+        run_job_template:
+          name: acme-ocp-expand-volume
+          organization: Default
+          job_args:
+            extra_vars:
+              alert_pvc_name: "{{ event.payload.alerts[0].labels.persistentvolumeclaim }}"
+              alert_pvc_namespace: "{{ event.payload.alerts[0].labels.namespace }}"
+```
 
-With some foundations in place within ansible, let's
+
+## 5.6 - Expansion job template
+
+We'll now create the `acme-ocp-expand-volume` job template our rulebook expects so when we observe the alert firing, we can take immediate automated remedial action.
+
+Click on **Automation Execution** in the left menu, then click **Templates**.
+
+Click the blue **Create template** button, then click **Create job template**.
+
+Enter the following values, then click **Create job template**:
+
+- **Name:** `acme-ocp-expand-volume`
+- **Inventory:** `Demo Inventory`
+- **Project:** `acme-ocp-ansible`
+- **Playbook:** `data/workshop/playbooks/expand-volume.yaml`
+- **Execution environment:** `Control Plane Execution Environment`
+- **Credentials:** `OpenShift Credential`
+
+<Zoom>
+![Create expansion job template](/workshops/static/images/ocp-aap/aap-template-2.png)
+ *Creating volume expansion job template*
+</Zoom>
+
+
+## 5.7 - Configuring openshift alerting
+
+With all the foundations in place within ansible, Sarah moves on to configuring OpenShift alerting to ensure alerts will be forward to the newly established event driven ansible listener.
+
+Let's create an `AlertmanagerConfig` now.
+
+Click the **+ Quick Create** button in the top right corner of the OpenShift web console, then click **Import YAML**
+
+Copy the content below to deploy the sample workload and then click **Create**.
+
+```yaml
+apiVersion: monitoring.coreos.com/v1alpha1
+kind: AlertmanagerConfig
+metadata:
+  name: eda-storage-routing
+  namespace: production
+spec:
+  route:
+    receiver: eda-webhook-receiver
+    groupBy: ['alertname']
+    matchers:
+      - name: alertname
+        value: PersistentVolumeUsageCritical
+  receivers:
+    - name: eda-webhook-receiver
+      webhookConfigs:
+        - url: http://acme-ocp-volume-expansion.aap.svc.cluster.local:5000/endpoint
+```
+
+<Zoom>
+![Create alertmanager config](/workshops/static/images/ocp-aap/ocp-alertmanager.png)
+ *Creating alertmanager config*
+</Zoom>
+
+
