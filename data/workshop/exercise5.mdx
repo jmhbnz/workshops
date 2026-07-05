@@ -177,3 +177,45 @@ Click **Create decision environment**.
 ![Create eda decision env](/workshops/static/images/ocp-aap/eda-decision-env.png)
  *Creating an eda decision environment*
 </Zoom>
+
+
+## 5.5 - Rulebook activiation
+
+With valid gateway credentials saved, Sarah can now spin up the background event listener. This pod executes a rulebook that actively listens for incoming webhooks and then decides what action to take.
+
+Let's create the activation now using the web interface.
+
+Click on **Rulebook Activations** in the left menu, then click **Create rulebook activation**.
+
+Enter the following values then click **Create**:
+
+- **Name:** `acme-ocp-volume-expansion`
+- **Project:** `acme-ocp-ansible`
+- **Rulebook:** `rulebooks/expand-volume.yaml`
+- **Decision Environment:** `Control Plane Decision Environment`
+- **Credential:** `acme-controller-token`
+
+<Zoom>
+![Rulebook Activation](/workshops/static/images/ocp-aap/eda-activation.png)
+ *Creating the rulebook activation*
+</Zoom>
+
+Click on your newly created activation and select the **History** tab. Reviewing your running rulebook activation instance you should see a successful initialization:
+
+```text
+ansible_rulebook.app - INFO - Starting worker mode
+ansible_rulebook.websocket - INFO - websocket ws://aap-eda-daphne:8001/api/eda/ws/ansible-rulebook
+ansible_rulebook.websocket - INFO - attempt websocket connection
+ansible_rulebook.websocket - INFO - workload websocket connected
+ansible_rulebook.job_template_runner - INFO - Attempting to connect to Controller https://aap-aap.apps.cluster-d9tnj.dynamic2.redhatworkshops.io/api/controller/
+ansible_rulebook.app - INFO - AAP Version 4.8.1
+ansible_rulebook.app - INFO - Starting sources
+ansible_rulebook.app - INFO - Starting rules
+```
+
+The runner container is now healthy and actively listening for data packets on internal port `5000`.
+
+
+## 5.6 - Configuring openshift alerting
+
+With some foundations in place within ansible, let's
