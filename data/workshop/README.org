@@ -138,3 +138,24 @@ EOF
 #+begin_example
 subscription.operators.coreos.com/ansible-automation-platform-operator configured
 #+end_example
+
+
+* Enable user workload monitoring
+
+To wire up event driven ansible to alertmanager we need to enable user workload monitoring and more specifically user alert manager configuration in advance of running the workshop.
+
+#+NAME: Enable user workload monitoring
+#+begin_src bash
+cat <<EOF | oc apply --filename -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: cluster-monitoring-config
+  namespace: openshift-monitoring
+data:
+  config.yaml: |
+    enableUserWorkload: true
+    alertmanagerMain:
+      enableUserAlertmanagerConfig: true
+EOF
+#+end_src
