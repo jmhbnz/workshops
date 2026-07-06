@@ -110,7 +110,7 @@ Let's build this credential inside the web interface.
 
 First, navigate to the main **Ansible Automation Platform** web console.
 
-Click on **Access** in the left menu, click **API Tokens**, then click **Create Token**. 
+Click on **Access Management** in the left menu, click **API Tokens**, then click **Create Token**. 
 
 Enter `eda` for the token name, and ensure the **Scope** is set to `Write`, then click **Create token**.
 
@@ -203,19 +203,15 @@ Enter the following values then click **Create**:
 Click on your newly created activation and select the **History** tab. Reviewing your running rulebook activation instance you should see a successful initialization:
 
 ```text
-ansible_rulebook.app - INFO - Starting worker mode
-ansible_rulebook.websocket - INFO - websocket ws://aap-eda-daphne:8001/api/eda/ws/ansible-rulebook
-ansible_rulebook.websocket - INFO - attempt websocket connection
-ansible_rulebook.websocket - INFO - workload websocket connected
-ansible_rulebook.job_template_runner - INFO - Attempting to connect to Controller https://aap-aap.apps.cluster-d9tnj.dynamic2.redhatworkshops.io/api/controller/
-ansible_rulebook.app - INFO - AAP Version 4.8.1
-ansible_rulebook.app - INFO - Starting sources
-ansible_rulebook.app - INFO - Starting rules
+Creating Job
+Log tracking id: 3dafc2c3-d719-45ee-9a9a-5dd9f4eea266
+Image URL is registry.redhat.io/ansible-automation-platform-27/de-supported-rhel9:latest
+Job activation-job-1-1 is running
 ```
 
 The runner container is now healthy and actively listening for data packets on internal port `5000`.
 
-Take a moment explore the rulebook Sarah wrote earlier, notice how we are listing for alerts matching `PersistentVolumeUsageCritical`. When we identify one we will run the `acme-ocp-expand-volume` job template, passing through some parameters for the volume claim name and namespace.
+Take a moment explore the rulebook Sarah wrote earlier, notice how we are listing for alerts matching `PersistentVolumeUsageCritical`. When we identify one we will run the `acme-ocp-expand-volume` job template, which will automatically receive the event payload as a variable.
 
 ```yaml
 ---
@@ -232,10 +228,6 @@ Take a moment explore the rulebook Sarah wrote earlier, notice how we are listin
         run_job_template:
           name: acme-ocp-expand-volume
           organization: Default
-          job_args:
-            extra_vars:
-              alert_pvc_name: "{{ event.payload.alerts[0].labels.persistentvolumeclaim }}"
-              alert_pvc_namespace: "{{ event.payload.alerts[0].labels.namespace }}"
 ```
 
 
@@ -255,13 +247,14 @@ Enter the following values, then click **Create job template**:
 - **Playbook:** `data/workshop/playbooks/expand-volume.yaml`
 - **Execution environment:** `Control Plane Execution Environment`
 - **Credentials:** `OpenShift Credential`
+- **Extra variables:** Tick `Prompt on launch`
 
 <Zoom>
 ![Create expansion job template](/workshops/static/images/ocp-aap/aap-template-2.png)
  *Creating volume expansion job template*
 </Zoom>
 
-Feel free to take a moment to reivew the `expand-volume.yaml` rememdiation playbook: https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/expand-volume.yaml. This has intentionally been kept simplistic for quick readability during the workshop.
+Feel free to take a moment to reivew the `expand-volume.yaml` rememdiation playbook: [https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/expand-volume.yaml](https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/expand-volume.yaml). This has intentionally been kept simplistic for quick readability during the workshop.
 
 
 ## 5.7 - Configuring openshift alerting
@@ -321,7 +314,7 @@ Copy and run the following command in the terminal: `dd if=/dev/zero of=/var/lib
 
 ## 5.9 - Confirming the result
 
-After a short wait, the `PersistentVolumeUsageCritical` will begin firing within the cluster. Ansible will be notifed. Our automatic remediation job template will be run, and the volume will be increased in size.
+Within a couple of minutes, the `PersistentVolumeUsageCritical` will begin firing within the cluster. Ansible will then be notifed. Our automatic remediation job template will be run, and the volume will be increased in size.
 
 Navigate back to your volume to confirm it is now 2Gi.
 
@@ -330,3 +323,4 @@ Navigate back to your volume to confirm it is now 2Gi.
  *Volume expanded*
 </Zoom>
 
+Congratulations you have now wired up OpenShift alertmanager to Event Driven Ansible. You can now move on to [Exercise 6](/workshop/exercise6) to learn about automating service management platforms.
