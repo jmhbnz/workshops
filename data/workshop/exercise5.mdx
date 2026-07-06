@@ -261,6 +261,8 @@ Enter the following values, then click **Create job template**:
  *Creating volume expansion job template*
 </Zoom>
 
+Feel free to take a moment to reivew the `expand-volume.yaml` rememdiation playbook: https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/expand-volume.yaml. This has intentionally been kept simplistic for quick readability during the workshop.
+
 
 ## 5.7 - Configuring openshift alerting
 
@@ -296,4 +298,35 @@ spec:
  *Creating alertmanager config*
 </Zoom>
 
+
+## 5.8 - Triggering the event
+
+With event driven ansible configured, and openshift alerting wired up Sarah is ready to give the workflow a try.
+
+We can run a quick bash command within our demo workload pod to fill up the storage volume and trigger the `PersistentVolumeUsageCritical` alert our event driven ansible listener is waiting for.
+
+Start by clicking **Workloads** in the OpenShift left menu, then click **Pods**.
+
+Ensure the `production` project is selected from the project dropdown at the top.
+
+Click in to your `acme-database` pod, then click the **Terminal** tab at the top.
+
+Copy and run the following command in the terminal: `dd if=/dev/zero of=/var/lib/data/dump.img bs=1M count=850` which will create an 850Mb file on the 1Gi volume, enough to trigger the alert.
+
+<Zoom>
+![Run pod command](/workshops/static/images/ocp-aap/pod-command.png)
+ *Running command within pod*
+</Zoom>
+
+
+## 5.9 - Confirming the result
+
+After a short wait, the `PersistentVolumeUsageCritical` will begin firing within the cluster. Ansible will be notifed. Our automatic remediation job template will be run, and the volume will be increased in size.
+
+Navigate back to your volume to confirm it is now 2Gi.
+
+<Zoom>
+![Volume resized](/workshops/static/images/ocp-aap/pvc-expanded.png)
+ *Volume expanded*
+</Zoom>
 
