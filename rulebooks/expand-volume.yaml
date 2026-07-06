@@ -12,7 +12,6 @@
         run_job_template:
           name: acme-ocp-expand-volume
           organization: Default
-          job_args:
-            extra_vars:
-              alert_pvc_name: "{{ event.payload.alerts[0].labels.persistentvolumeclaim }}"
-              alert_pvc_namespace: "{{ event.payload.alerts[0].labels.namespace }}"
+          extra_vars:
+            alert_pvc_name: "{{ event.payload.alerts[0].labels.persistentvolumeclaim }}"
+            alert_pvc_namespace: "{{ event.payload.alerts[0].labels.namespace }}"
