@@ -10,8 +10,8 @@
           apiVersion: v1
           kind: PersistentVolumeClaim
           metadata:
-            name: "{{ alert_pvc_name }}"
-            namespace: "{{ alert_pvc_namespace }}"
+            name: "{{ ansible_eda.event.payload.alerts[0].labels.persistentvolumeclaim }}"
+            namespace: "{{ ansible_eda.event.payload.alerts[0].labels.namespace }}"
           spec:
             resources:
               requests:
