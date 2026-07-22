@@ -64,10 +64,10 @@
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise6</guid>
     <title>Optional - ServiceNow automation</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise6</link>
-    <description>How can we respond to cluster events automatically?</description>
+    <description>How can we integrate with service management platforms?</description>
     <pubDate>Fri, 26 Jun 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>openshift</category>
+    <category>ansible</category><category>automation</category><category>openshift</category><category>servicenow</category>
   </item>
 
     </channel>
