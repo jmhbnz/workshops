@@ -51,10 +51,10 @@ In the OpenShift Web Console, navigate to **Workloads** --> **Pods** and ensure 
 
 You should see three running pods: `message-broker`, `socketio-server`, and `edge-server`.
 
-<Zoom>
+
 ![vulnerable-pods-running](/workshops/static/images/fsi-security/vulnerable-pods-running.png)
 *Vulnerable application pods running*
-</Zoom>
+
 
 
 ## 4.3 Trigger the exploit
@@ -162,17 +162,17 @@ oc --namespace $NAMESPACE rollout status deploy/socketio-server
 
 If we return to the OpenShift Web Console now, looking at the pod creation column you'll see a fresh `socketio-server` pod deployed.
 
-<Zoom>
+
 ![hardened-socket-io](/workshops/static/images/fsi-security/hardened-image-running.png)
 *Hardened socketio-server image running*
-</Zoom>
+
 
 We can also check the image in use by clicking on the pod name and scrolling down to the **Containers** section. You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 
-<Zoom>
+
 ![new-container-image](/workshops/static/images/fsi-security/hardened-image.png)
 *Hardened socketio-server image*
-</Zoom>
+
 
 We can also verify the new pod is running the hardened image with the command line:
 
@@ -213,7 +213,7 @@ We hardened the application runtime, but the message broker is still running the
 
 Can you find an image at [images.redhat.com](https://images.redhat.com) that you could use for the Redis container?
 
-<Zoom>
+
 ![images](/workshops/static/images/fsi-security/hummingbird-images.png)
 *Red Hat Hardened Images*
-</Zoom>
+

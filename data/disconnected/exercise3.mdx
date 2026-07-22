@@ -46,11 +46,11 @@ aws ec2 run-instances --image-id $(cat ami.txt) \
   --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/launch-bastion-ec2.gif)      | 
 |:-----------------------------------------------------------------------------:|
 | *Launching bastion ec2 instance*                                              |
-</Zoom>
+
 
 
 ## 3.2 - Accessing the high side
@@ -86,11 +86,11 @@ Finally - Let's now connect all the way through to our **High side** bastion ðŸš
 ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "ssh -t -i disco_key ec2-user@$HIGHSIDE_BASTION_IP"
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/connect-bastion-ec2.gif)     | 
 |:-----------------------------------------------------------------------------:|
 | *Connecting to our bastion ec2 instance*                                      |
-</Zoom>
+
 
 
 ## 3.3 - Sneakernetting content to the high side
@@ -110,10 +110,10 @@ With the mount in place we can exit back to our base web terminal and send over 
 ssh -t -i disco_key ec2-user@$PREP_SYSTEM_IP "rsync -avP -e 'ssh -i disco_key' /mnt/high-side ec2-user@$HIGHSIDE_BASTION_IP:/mnt"
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/sneakernet-transfer.gif)     | 
 |:-----------------------------------------------------------------------------:|
 | *Initiating the sneakernet transfer via rsync*                                |
-</Zoom>
+
 
 Once your transfer has finished pushing you are finished with exercise 3, well done! ðŸŽ‰

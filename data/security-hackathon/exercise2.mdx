@@ -34,11 +34,11 @@ With the operator installed and healthy we now need to deploy an instance of **C
 
 Angie has shared a high level design with you that states the Central resources need to be deployed to the `prd-acme-rhacs` namespace.
 
-<Zoom>
+
 |![central architecture](/workshops/static/images/security/central.png)                   | 
 |:-----------------------------------------------------------------------------:|
 | *Architecture for Red Hat Advanced Cluster Security*                          |
-</Zoom>
+
 
 After deploying Central ensure you can log in to the web console using the automatically generated credentials.
 
@@ -56,11 +56,11 @@ You remember from the documentation that before you install the `SecuredCluster`
 
 Angie would prefer to use the **Operator** method for these tasks as she explains having repressed memories of trying to find indentation issues in helm chart templates and never ever wanting to touch helm ever again.
 
-<Zoom>
+
 |![cluster](/workshops/static/images/security/init-bundle.png)                            | 
 |:-----------------------------------------------------------------------------:|
 | *Create an init bundle in Red Hat Advanced Cluster Security*                  |
-</Zoom>
+
 
 Documentation you may find helpful is:
 
@@ -79,11 +79,11 @@ Documentation you may find helpful is:
 
 - https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.5/html-single/installing/index#installing-sc-operator
 
-<Zoom>
+
 |![secured cluster](/workshops/static/images/security/secured-cluster.png)                | 
 |:-----------------------------------------------------------------------------:|
 | *Secured cluster list in Red Hat Advanced Cluster Security*                   |
-</Zoom>
+
 
 > **Hint** If your SecuredCluster pods are in the right namespace and are not all starting successfully this can commonly occur because you have missed appending the `:443` to your central endpoint in the `SecuredCluster` resource.
 

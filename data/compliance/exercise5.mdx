@@ -38,11 +38,11 @@ Complete the steps below to create your scan schedule:
 6. On the profile screen tick `ocp4-moderate` and `ocp4-moderate-node`, then click **Next**.
 7. Click **Next** once more on the **Reports** screen and the click **Save**.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/compliance/compliance-scan-results.gif)             |
 |:-----------------------------------------------------------------------------:|
 | *Creating a compliance scan schedule in Red Hat Advanced Cluster Security*    |
-</Zoom>
+
 
 After creating the scan schedule results will be shortly available in the RHACS console. While we wait for the automatically triggered initial scan to complete, let's use the `oc` cli to review the `ScanSetting` that was created behind the scenes when we created the **Scan Schedule** in the RHACS dashboard.
 
@@ -95,17 +95,17 @@ Once your cluster scan completes return to your vnc browser tab with the Red Hat
 
 Navigate to **Compliance** > **Coverage** and review the overall result for the `ocp4-moderate` and `ocp4-moderate-node` profiles. The results should look something similar to the examples below:
 
-<Zoom>
+
 |![workshop](/workshops/static/images/compliance/compliance-scan-results-1.png)           |
 |:-----------------------------------------------------------------------------:|
 | *Compliance scan results in Red Hat Advanced Cluster Security*                |
-</Zoom>
 
-<Zoom>
+
+
 |![workshop](/workshops/static/images/compliance/compliance-scan-results-2.png)           |
 |:-----------------------------------------------------------------------------:|
 | *Compliance scan results in Red Hat Advanced Cluster Security*                |
-</Zoom>
+
 
 Your cluster should come out compliant with ~65% of the `ocp4-moderate` profile and ~93% of the `ocp4-moderate-node` profile. Not a bad start, let's review an example of an individual result now.
 
@@ -116,11 +116,11 @@ Reviewing the detailed results any checks that are not passing will either be ca
 
 Looking at the `ocp4-moderate` results for our `hub` cluster. A good example of a `Manual` check is `ocp4-moderate-accounts-restrict-service-account-tokens`. Let's get an overview of the check, the rationale and our instructions to address it manually by clicking into that check in the list, and opening the **Details** tab. You can jump directly to it with this url: https://central-acs-central.apps.disco.lab/main/compliance/coverage/profiles/ocp4-moderate/checks/ocp4-moderate-accounts-restrict-service-account-tokens?detailsTab=Details
 
-<Zoom>
+
 |![workshop](/workshops/static/images/compliance/compliance-scan-results-3.png)           |
 |:-----------------------------------------------------------------------------:|
 | *Compliance scan result details in Red Hat Advanced Cluster Security*         |
-</Zoom>
+
 
 We can see in this example it's essentially a judgement call. Our instructions are:
 
@@ -135,11 +135,11 @@ A default policy is available out of the box called **Pod Service Account Token 
 3. Have a read of the policy details, then scroll down to review the **Scope exclusions**. You will see Red Hat has already done some work for you to define some standard OpenShift cluster control plane deployments which do need the token mounted and are safely & intentionally excluded from the policy to save you time.
 4. The policy should already be enabled so let's click on **Violations** in the left hand menu to review any current instances where this policy is currently being violated. You should have one entry in the list for the `kube-rbac-proxy`. This is actually a standard openshift pod in the `openshift-machine-config-operator` namespace, and does actually require the api token mounted, so we could safely add this deployment to our policy exclusions.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/compliance/rhacs-violation-exclude.gif)             |
 |:-----------------------------------------------------------------------------:|
 | *Reviewing a policy & policy violations in Red Hat Advanced Cluster Security* |
-</Zoom>
+
 
 At this point as a platform engineer we have some flexibility about how we handle this particular compliance check, one option would be to switch the **Pod Service Account Token Automatically Mounted** policy to `Inform & enforce` mode, to prevent any future deployments to any cluster in your fleet secured by RHACS from having this common misconfiguration. As a result of implementing this mitigation you could consider adjusting the compliance profile to remove or change the priority of this `Manual` check as desired. Refer to https://docs.openshift.com/container-platform/4.14/security/compliance_operator/co-scans/compliance-operator-tailor.html
 

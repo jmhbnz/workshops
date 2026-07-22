@@ -21,11 +21,11 @@ This application consists of:
 2. Linux Container running a .NET Core backend service, which is using a database.
 3. Linux Container running a MSSql database 🤯.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/windows/mixed-workloads.png)              | 
 |:-----------------------------------------------------------------------------:|
 | *Mixed workload architecture diagram*                                         |
-</Zoom>
+
 
 
 ## 4.1 Add helm repository
@@ -45,11 +45,11 @@ Follow the steps below to add the repository:
 
 This will allow us to deploy any helm charts available in this repository.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/windows/add-helm-repo.gif)                | 
 |:-----------------------------------------------------------------------------:|
 | *Creating a project and adding a helm repository*                             |
-</Zoom>
+
 
 
 ## 4.2 Deploy candystore helm chart
@@ -60,11 +60,11 @@ With our helm chart repository added, let's deploy our application! This is as s
 2. Click on **Netcandystore** and then click **Create**.
 3. Review the chart settings and click **Create** once more.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/windows/deploy-application.gif)           | 
 |:-----------------------------------------------------------------------------:|
 | *Create mixed archiecture application via helm*                               |
-</Zoom>
+
 
 > Note: The application can take a few minutes to complete deploying, time for another coffee ☕.
 
@@ -81,10 +81,10 @@ We can verify our Windows Container is running by:
 
 > Note: You may need to change from `https://` to `http://` in your browser address bar when opening the application URL as some browsers now automatically attempt to redirect to HTTPS, however this application route is currently only served as HTTP.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/windows/confirm-application.gif)          | 
 |:-----------------------------------------------------------------------------:|
 | *Confirm Windows container status*                                            |
-</Zoom>
+
 
 Congratulations! You've taken an existing OpenShift 4 cluster, set it up for running Windows workloads, then deployed a Windows app 🎉.

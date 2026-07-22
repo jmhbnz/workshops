@@ -27,11 +27,11 @@ With IPsec enabled, you can encrypt internal pod-to-pod cluster traffic on the O
 
 You confirm the required mode with Angie & Brent as `Full` and then run the `oc patch` command to get the job done after giving Angie a heads up there will be some brief disruption on the cluster while the change is rolled out.
 
-<Zoom>
+
 |![ipsec architecture](/workshops/static/images/security/ipsec.png)                       | 
 |:-----------------------------------------------------------------------------:|
 | *Encryption implications when enabling pod-to-pod IPSec*                      |
-</Zoom>
+
 
 Documentation you may find helpful is:
 
@@ -50,11 +50,11 @@ You can also verify ipsec status using the following command:
 oc --namespace openshift-ovn-kubernetes rsh ovnkube-node-<XXXXX> ovn-nbctl --no-leader-only get nb_global . ipsec
 ```
 
-<Zoom>
+
 |![cluster network](/workshops/static/images/security/cluster-network.png)                |
 |:-----------------------------------------------------------------------------:|
 | *Cluster operators administration*                                            |
-</Zoom>
+
 
 
 ## 3.3 - Check your work

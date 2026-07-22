@@ -37,11 +37,11 @@ SG_ID=$(aws ec2 describe-security-groups --filters "Name=tag:Name,Values=disco-s
 echo "Security group id is: ${SG_ID}"
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/security-group.gif)          | 
 |:-----------------------------------------------------------------------------:|
 | *Creating aws ec2 security group*                                             |
-</Zoom>
+
 
 
 ## 2.2 - Opening ssh port ingress
@@ -54,11 +54,11 @@ We will want to login to our soon to be created **Low side** aws ec2 instance re
 aws ec2 authorize-security-group-ingress --group-id $SG_ID --protocol tcp --port 22 --cidr 0.0.0.0/0
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/ssh-port-ingress.gif)          | 
 |:-----------------------------------------------------------------------------:|
 | *Opening ssh port ingress*                                                    |
-</Zoom>
+
 
 
 ## 2.3 - Create prep system instance
@@ -80,11 +80,11 @@ aws ec2 run-instances --image-id "ami-092b43193629811af" \
   --block-device-mappings "DeviceName=/dev/sdh,Ebs={VolumeSize=50}"
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/launch-prep-ec2.gif)         | 
 |:-----------------------------------------------------------------------------:|
 | *Launching a prep rhel8 ec2 instance*                                         |
-</Zoom>
+
 
 
 ## 2.4 - Connecting to the low side
@@ -102,11 +102,11 @@ echo $PREP_SYSTEM_IP
 ssh -i disco_key ec2-user@$PREP_SYSTEM_IP
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/connect-prep-ec2.gif)        | 
 |:-----------------------------------------------------------------------------:|
 | *Connecting to the prep rhel8 ec2 instance*                                   |
-</Zoom>
+
 
 
 ## 2.5 - Downloading required tools
@@ -160,11 +160,11 @@ tar -xzf openshift-installer.tar.gz openshift-install
 rm -f openshift-installer.tar.gz
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/download-tools.gif)       | 
 |:-----------------------------------------------------------------------------:|
 | *Downloading required tools with curl*                                        |
-</Zoom>
+
 
 
 ## 2.6 - Mirroring content to disk

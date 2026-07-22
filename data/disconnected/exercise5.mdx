@@ -16,11 +16,11 @@ By default, the installation program acts as an installation wizard, prompting y
 
 We'll then customize the `install-config.yaml` file that is produced to specify advanced configuration for our disconnected installation. The installation program then provisions the underlying infrastructure for the cluster. Here's a diagram describing the inputs and outputs of the installation configuration process:
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/install-overview.png)        | 
 |:-----------------------------------------------------------------------------:|
 | *Installation overview*                                                       |
-</Zoom>
+
 
 > Note: You may notice that nodes are provisioned through a process called Ignition. This concept is out of scope for this workshop, but if you're interested to learn more about it, you can read up on it in the documentation [here](https://docs.openshift.com/container-platform/4.14/installing/index.html#about-rhcos).
 
@@ -199,11 +199,11 @@ We're ready to run the install! Let's kick off the cluster installation by copyi
 /mnt/high-side/openshift-install create cluster --log-level=DEBUG
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/install-cluster.gif)         | 
 |:-----------------------------------------------------------------------------:|
 | *Installation overview*                                                       |
-</Zoom>
+
 
 The installation process should take about 30 minutes. If you've done everything correctly, you should see something like the example below at the conclusion:
 

@@ -58,11 +58,11 @@ INFO[2023-07-06 15:43:41] Quay installed successfully, config data is stored in 
 INFO[2023-07-06 15:43:41] Quay is available at https://ip-10-0-51-47.ec2.internal:8443 with credentials (init, discopass) 
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/registry-install.gif)        | 
 |:-----------------------------------------------------------------------------:|
 | *Running the mirror-registry installer*                                       |
-</Zoom>
+
 
 
 ## 4.3 Logging into the mirror registry
@@ -93,10 +93,10 @@ And now we fire up the mirror process to push our content from disk into the reg
 oc mirror --from=/mnt/high-side/mirror_seq1_000000.tar --dest-skip-tls docker://$(hostname):8443
 ```
 
-<Zoom>
+
 |![workshop](/workshops/static/images/disconnected/registry-push.gif)           | 
 |:-----------------------------------------------------------------------------:|
 | *Running the oc mirror process to push content to our registry*               |
-</Zoom>
+
 
 Once your content has finished pushing you are finished with exercise 4, well done! 🎉

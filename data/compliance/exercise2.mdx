@@ -14,11 +14,11 @@ During this workshop we want to secure the cluster with Red Hat Advanced Cluster
 
 To install and configure these features we first need to mirror some additional content into our disconnected environment, let's get started.
 
-<Zoom>
+
 |![workshop](/workshops/static/images/compliance/workshop-environment.svg)                |
 |:-----------------------------------------------------------------------------:|
 | *Workshop environment summary*                                                |
-</Zoom>
+
 
 
 ## 2.1 - Open a terminal on your low side
@@ -219,10 +219,10 @@ Once the updates are applied we can then check that our new operators are availa
 6. Log in when prompted with the username **kubeadmin** and the kubeadmin password listed in your environment spreadsheet (you can also find this password in your highside bastion ssh session by running `cat /mnt/high-side-data/auth/kubeadmin-password`). Note that to paste in the web based vnc session you need to use the left hand panel to pass the clipboard content through to the session.
 7. Navigate to **Operators** on the left menu, and then click **OperatorHub**, you should see the newly mirrored operators are now available in your disconnected cluster!
 
-<Zoom>
+
 |![workshop](/workshops/static/images/compliance/check-operators.gif)                     |
 |:-----------------------------------------------------------------------------:|
 | *Check disconnected operator hub*                                             |
-</Zoom>
+
 
 If your mirroring has completed successfully you are ready to move on to exercise 3 and install the three new operators 🎉

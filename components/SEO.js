@@ -67,7 +67,7 @@ export const TagSEO = ({ title, description }) => {
   )
 }
 
-export const BlogSEO = ({ authorDetails, title, summary, date, lastmod, url, images = [] }) => {
+export const BlogSEO = ({ title, summary, date, lastmod, url, images = [] }) => {
   const router = useRouter()
   const publishedAt = new Date(date).toISOString()
   const modifiedAt = new Date(lastmod || date).toISOString()
@@ -85,21 +85,6 @@ export const BlogSEO = ({ authorDetails, title, summary, date, lastmod, url, ima
     }
   })
 
-  let authorList
-  if (authorDetails) {
-    authorList = authorDetails.map((author) => {
-      return {
-        '@type': 'Person',
-        name: author.name,
-      }
-    })
-  } else {
-    authorList = {
-      '@type': 'Person',
-      name: siteMetadata.author,
-    }
-  }
-
   const structuredData = {
     '@context': 'https://schema.org',
     '@type': 'Article',
@@ -111,7 +96,6 @@ export const BlogSEO = ({ authorDetails, title, summary, date, lastmod, url, ima
     image: featuredImages,
     datePublished: publishedAt,
     dateModified: modifiedAt,
-    author: authorList,
     publisher: {
       '@type': 'Organization',
       name: siteMetadata.author,

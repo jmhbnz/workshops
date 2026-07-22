@@ -33,17 +33,17 @@ Let's review the audit logs, specifically for pods within your allocated `paymen
 
 Open a **Web Terminal** session using the **>_** button in the top right of the OpenShift Web Console.
 
-<Zoom>
+
 ![web-terminal-button](/workshops/static/images/fsi-security/web-terminal-button.png)
 *Launch an OpenShift Web Terminal*
-</Zoom>
+
 
 Ensure your `payment-gateway-x` project is selected, then click **Start**.
 
-<Zoom>
+
 ![web-terminal-project](/workshops/static/images/fsi-security/web-terminal-project.png)
 *Select OpenShift Web Terminal project*
-</Zoom>
+
 
 Run the bash script below which uses `oc adm` to query the audit logs held on our control nodes specifically for `exec` events occurring in the namespace of interest.
 
@@ -136,24 +136,24 @@ After identifying the leaked credential Morgan and Sarah agree to isolate the wo
 
 Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider.
 
-<Zoom>
+
 ![rhacs-auth](/workshops/static/images/fsi-security/rhacs-auth.png)
 *Red Hat Advanced Cluster Security authentication provider*
-</Zoom>
+
 
 Navigate to **Network Graph** on the left menu, then filter to your `payment-gateway-x` namespace and the `payment-gateway` deployment using the dropdown filters at the top of the page.
 
-<Zoom>
+
 ![rhacs-filters](/workshops/static/images/fsi-security/rhacs-filters.png)
 *Red Hat Advanced Cluster Security network graph filters*
-</Zoom>
+
 
 Before applying any policy Morgan asks Sarah to confirm what she is seeing in the firewall dashboard for the external IP's that the `payment-gateway` container is making connections to. We can view this within the **Network Graph** by clicking on the **External Entities IP** icon:
 
-<Zoom>
+
 ![rhacs-externalip](/workshops/static/images/fsi-security/rhacs-externalip.png)
 *View external connections within Red Hat Advanced Cluster Security*
-</Zoom>
+
 
 
 ## 2.4 - Isolate the workload
@@ -188,10 +188,10 @@ spec:
   egress: []
 ```
 
-<Zoom>
+
 ![apply-networkpolicy](/workshops/static/images/fsi-security/apply-networkpolicy.png)
 *Apply Kubernetes network policy*
-</Zoom>
+
 
 With the breached workload now isolated, and no further egress traffic possible Morgan advises Sarah to take a quick break and then jump back online to assist her with some forensic evidence gathering.
 

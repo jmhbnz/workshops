@@ -24,12 +24,6 @@ export async function getStaticProps({ params }) {
   const prev = allPosts[postIndex - 1] || null
   const next = allPosts[postIndex + 1] || null
   const post = await getFileBySlug('workshop', params.slug.join('/'))
-  const authorList = post.frontMatter.authors || ['default']
-  const authorPromise = authorList.map(async (author) => {
-    const authorResults = await getFileBySlug('authors', [author])
-    return authorResults.frontMatter
-  })
-  const authorDetails = await Promise.all(authorPromise)
 
   // rss
   if (allPosts.length > 0) {
@@ -37,10 +31,10 @@ export async function getStaticProps({ params }) {
     fs.writeFileSync('./public/feed.xml', rss)
   }
 
-  return { props: { post, authorDetails, prev, next } }
+  return { props: { post, prev, next } }
 }
 
-export default function Workshop({ post, authorDetails, prev, next }) {
+export default function Workshop({ post, prev, next }) {
   const { mdxSource, toc, frontMatter } = post
 
   return (
@@ -51,7 +45,6 @@ export default function Workshop({ post, authorDetails, prev, next }) {
           toc={toc}
           mdxSource={mdxSource}
           frontMatter={frontMatter}
-          authorDetails={authorDetails}
           prev={prev}
           next={next}
         />
