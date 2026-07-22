@@ -34,10 +34,10 @@ Enter the following values then click **Create job template**:
 - **Execution environment:** `Control Plane Execution Environment`
 - **Credentials:** `OpenShift Credential`
 
-<Zoom>
+
 ![Odf template creation](/workshops/static/images/ocp-aap/aap-odf-template.png)
  *Creating the storage health template*
-</Zoom>
+
 
 
 ## 4.2 - Creating the workflow template
@@ -54,10 +54,10 @@ Enter the following values then click **Create workflow job template**:
 - **Organization:** `Default`
 - **Inventory:** `Demo Inventory`
 
-<Zoom>
+
 ![Workflow template created](/workshops/static/images/ocp-aap/aap-workflow-template.png)
  *Creating the workflow template*
-</Zoom>
+
 
 
 ## 4.3 - Designing the workflow path
@@ -68,18 +68,18 @@ Click the blue **Add step** button in the visualizer canvas to add the first nod
 
 Set the node type to **Job Template**, select `acme-ocp-odf-healthcheck`, then click **Next**, then **Finish**.
 
-<Zoom>
+
 ![Workflow template add step](/workshops/static/images/ocp-aap/aap-workflow-template-2.png)
  *Adding a step to the workflow*
-</Zoom>
+
 
 
 Hover over the newly created node, right click and select the **+ Add step and link** option.
 
-<Zoom>
+
 ![Workflow template add step](/workshops/static/images/ocp-aap/aap-workflow-template-3.png)
  *Adding a step to the workflow*
-</Zoom>
+
 
 In the Add step pane, select our etcd backup job template and set the **Status** to `Run on success`. This ensures the second playbook only runs if the storage checks pass perfectly.
 
@@ -87,10 +87,10 @@ Click **Next**, then **Finish**. We should now have a basic two stage workflow.
 
 Click the blue **Save** button in the top left.
 
-<Zoom>
+
 ![Workflow template visualizer](/workshops/static/images/ocp-aap/aap-workflow-template-4.png)
  *Finished two step workflow*
-</Zoom>
+
 
 ## 4.4 - Launching the workflow pipeline
 
@@ -100,10 +100,10 @@ Click the blue **Launch workflow** button.
 
 The interface will switch to the tracking view, showing the status of each job in real time as the pipeline coordinates the execution across the cluster infrastructure.
 
-<Zoom>
+
 ![Workflow template running](/workshops/static/images/ocp-aap/aap-workflow-running.png)
  *Running workflow*
-</Zoom>
+
 
 When the job completes you can explore each node in the workflow to see the output logs and elapsed time for each node in the workflow.
 

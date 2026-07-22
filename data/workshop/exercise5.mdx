@@ -82,10 +82,10 @@ spec:
             claimName: acme-db-pvc
 ```
 
-<Zoom>
+
 ![Application creation](/workshops/static/images/ocp-aap/ocp-import.png)
  *Importing sample application*
-</Zoom>
+
 
 
 Verify that the storage binds successfully and the database pod transitions into a healthy state by clicking **Storage** on the left hand menu, then click **PersistentVolumeClaims**.
@@ -94,10 +94,10 @@ Ensure the `production` namespace is selected from the **Project** dropdown.
 
 Examing the `acme-db-pvc` volume we created we should see this is `Bound` to a running pod, with a starting capacity of `1Gi`.
 
-<Zoom>
+
 ![Volume initial state](/workshops/static/images/ocp-aap/pvc-start.png)
  *Bound 1Gi volume*
-</Zoom>
+
 
 
 ## 5.2 - Creating an aap token
@@ -114,10 +114,10 @@ Click on **Access Management** in the left menu, click **API Tokens**, then clic
 
 Enter `eda` for the token name, and ensure the **Scope** is set to `Write`, then click **Create token**.
 
-<Zoom>
+
 ![Create aap token](/workshops/static/images/ocp-aap/token-creation.png)
  *Creating an aap token*
-</Zoom>
+
 
 **IMPORTANT** On the window that pops up after saving, ensure you copy and note down the token that is generated.
 
@@ -132,10 +132,10 @@ Enter the following values, replacing `<variables>` as appropriate:
 - **Red Hat Ansible Automation Platform:** `<your aap url>/api/controller`
 - **Oauth token:** `<your aap token>`
 
-<Zoom>
+
 ![Create eda credential](/workshops/static/images/ocp-aap/credential-creation.png)
  *Creating an aap eda credentiala*
-</Zoom>
+
 
 
 ## 5.3 - Creating an eda project
@@ -153,10 +153,10 @@ Enter the following details in the form, then click **Create project** once more
 - **Name:** `acme-ocp-ansible`
 - **Source control url:** `https://github.com/jmhbnz/workshops`
 
-<Zoom>
+
 ![Create eda project](/workshops/static/images/ocp-aap/eda-project.png)
  *Creating an eda project*
-</Zoom>
+
 
 
 ## 5.4 - Creating an eda decision environment
@@ -173,10 +173,10 @@ Click the blue **Create decision environment** button, then enter the following 
 
 Click **Create decision environment**.
 
-<Zoom>
+
 ![Create eda decision env](/workshops/static/images/ocp-aap/eda-decision-env.png)
  *Creating an eda decision environment*
-</Zoom>
+
 
 
 ## 5.5 - Rulebook activiation
@@ -195,10 +195,10 @@ Enter the following values then click **Create**:
 - **Decision Environment:** `Control Plane Decision Environment`
 - **Credential:** `acme-controller-token`
 
-<Zoom>
+
 ![Rulebook Activation](/workshops/static/images/ocp-aap/eda-activation.png)
  *Creating the rulebook activation*
-</Zoom>
+
 
 Click on your newly created activation and select the **History** tab. Reviewing your running rulebook activation instance you should see a successful initialization:
 
@@ -249,10 +249,10 @@ Enter the following values, then click **Create job template**:
 - **Credentials:** `OpenShift Credential`
 - **Extra variables:** Tick `Prompt on launch`
 
-<Zoom>
+
 ![Create expansion job template](/workshops/static/images/ocp-aap/aap-template-2.png)
  *Creating volume expansion job template*
-</Zoom>
+
 
 Feel free to take a moment to reivew the `expand-volume.yaml` rememdiation playbook: [https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/expand-volume.yaml](https://github.com/jmhbnz/workshops/blob/main/data/workshop/playbooks/expand-volume.yaml). This has intentionally been kept simplistic for quick readability during the workshop.
 
@@ -286,10 +286,10 @@ spec:
         - url: http://acme-ocp-volume-expansion.aap.svc.cluster.local:5000/endpoint
 ```
 
-<Zoom>
+
 ![Create alertmanager config](/workshops/static/images/ocp-aap/ocp-alertmanager.png)
  *Creating alertmanager config*
-</Zoom>
+
 
 
 ## 5.8 - Triggering the event
@@ -306,10 +306,10 @@ Click in to your `acme-database` pod, then click the **Terminal** tab at the top
 
 Copy and run the following command in the terminal: `dd if=/dev/zero of=/var/lib/data/dump.img bs=1M count=850` which will create an 850Mb file on the 1Gi volume, enough to trigger the alert.
 
-<Zoom>
+
 ![Run pod command](/workshops/static/images/ocp-aap/pod-command.png)
  *Running command within pod*
-</Zoom>
+
 
 
 ## 5.9 - Confirming the result
@@ -318,9 +318,9 @@ Within a couple of minutes, the `PersistentVolumeUsageCritical` will begin firin
 
 Navigate back to your volume to confirm it is now 2Gi.
 
-<Zoom>
+
 ![Volume resized](/workshops/static/images/ocp-aap/pvc-expanded.png)
  *Volume expanded*
-</Zoom>
+
 
 Congratulations you have now wired up OpenShift alertmanager to Event Driven Ansible. You can now move on to [Exercise 6](/workshop/exercise6) to learn about automating service management platforms.
