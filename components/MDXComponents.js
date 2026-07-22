@@ -29,9 +29,6 @@ const MDXParagraph = ({ children }) => {
 
 export const MDXComponents = {
   p: MDXParagraph,
-  ul: ({ children, ...props }) => <ul {...props}>{children}</ul>,
-  ol: ({ children, ...props }) => <ol {...props}>{children}</ol>,
-  li: ({ children, ...props }) => <li {...props}>{children}</li>,
   Image,
   img: ZoomableImage,
   TOCInline,
