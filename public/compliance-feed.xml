@@ -1,0 +1,94 @@
+
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>Red Hat OpenShift Automation Workshop</title>
+      <link>https://jmhbnz.github.io/workshops/workshop</link>
+      <description>Red Hat OpenShift Automation Workshop</description>
+      <language>en-us</language>
+      <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
+      <webMaster>jablair@redhat.com (Red Hat)</webMaster>
+      <lastBuildDate>Thu, 22 Aug 2024 00:00:00 GMT</lastBuildDate>
+      <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
+      
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise1</guid>
+    <title>Understanding our lab environment</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise1</link>
+    <description>Let&#39;s get familiar with our lab setup.</description>
+    <pubDate>Thu, 22 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ssh</category><category>novnc</category><category>workshop</category><category>setup</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise2</guid>
+    <title>Mirror required content</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise2</link>
+    <description>You want features? Mirror them in!🪞</description>
+    <pubDate>Fri, 23 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>oc-mirror</category><category>mirror-registry</category><category>openshift</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise3</guid>
+    <title>Install operators on a disconnected cluster</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise3</link>
+    <description>Operators?!? 🤔 - Think app store for Kubernetes 🌟</description>
+    <pubDate>Tue, 27 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>operators</category><category>operator-hub</category><category>disconnected</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise4</guid>
+    <title>Deploy advanced cluster security</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise4</link>
+    <description>Time to up our security &amp; compliance game! 🔒</description>
+    <pubDate>Sat, 31 Aug 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>rhacs</category><category>container</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise5</guid>
+    <title>Running a cluster compliance scan</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise5</link>
+    <description>Let&#39;s check our cluster compliance against NIST 800-53 👀</description>
+    <pubDate>Sun, 01 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>compliance</category><category>nist-800-53</category><category>scanning</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise6</guid>
+    <title>Retrieving raw compliance results</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise6</link>
+    <description>Need to integrate results with another platform? No problem!</description>
+    <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>compliance</category><category>nist-800-53</category><category>scanning</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise7</guid>
+    <title>Bonus - Making the most of rhacs</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise7</link>
+    <description>Optional challenge - if you have time</description>
+    <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>rhacs</category><category>container</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/compliance/exercise8</guid>
+    <title>Bonus - Installing red hat developer hub</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/compliance/exercise8</link>
+    <description>Upping our dx in a disconnected environment</description>
+    <pubDate>Mon, 02 Sep 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>backstage</category><category>developer-hub</category><category>operator</category>
+  </item>
+
+    </channel>
+  </rss>

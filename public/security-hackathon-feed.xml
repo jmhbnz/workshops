@@ -1,0 +1,84 @@
+
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>Red Hat OpenShift Automation Workshop</title>
+      <link>https://jmhbnz.github.io/workshops/workshop</link>
+      <description>Red Hat OpenShift Automation Workshop</description>
+      <language>en-us</language>
+      <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
+      <webMaster>jablair@redhat.com (Red Hat)</webMaster>
+      <lastBuildDate>Mon, 14 Oct 2024 00:00:00 GMT</lastBuildDate>
+      <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
+      
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise1</guid>
+    <title>Understanding our hackathon environment</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise1</link>
+    <description>Let&#39;s get familiar with our hackathon setup.</description>
+    <pubDate>Mon, 14 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise2</guid>
+    <title>Laying the foundations for cluster security</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise2</link>
+    <description>Can&#39;t have security without a security platform</description>
+    <pubDate>Thu, 17 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise3</guid>
+    <title>Encrypting cluster internal network traffic</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise3</link>
+    <description>Is OpenShift secure by default?</description>
+    <pubDate>Fri, 18 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category><category>ipsec</category><category>encryption</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise4</guid>
+    <title>Securing vulnerable workloads</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise4</link>
+    <description>How do we deal with vulnerable workloads we can&#39;t patch?</description>
+    <pubDate>Sat, 19 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>security</category><category>cve management</category><category>rhacs</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise5</guid>
+    <title>Understanding cluster compliance</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise5</link>
+    <description>Let&#39;s apply an industry benchmark!</description>
+    <pubDate>Wed, 23 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>compliance</category><category>nist</category><category>rhacs</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise6</guid>
+    <title>Inspecting audit logs</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise6</link>
+    <description>Ahh the classic who dunnit!?!??</description>
+    <pubDate>Thu, 31 Oct 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>audit</category><category>logging</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise7</guid>
+    <title>Bonus challenge - Supply chain shmozzle</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/security-hackathon/exercise7</link>
+    <description>Time to sign your life away...</description>
+    <pubDate>Fri, 08 Nov 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>supply chain</category><category>rhtas</category>
+  </item>
+
+    </channel>
+  </rss>

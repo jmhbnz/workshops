@@ -1,0 +1,74 @@
+
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>Red Hat OpenShift Automation Workshop</title>
+      <link>https://jmhbnz.github.io/workshops/workshop</link>
+      <description>Red Hat OpenShift Automation Workshop</description>
+      <language>en-us</language>
+      <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
+      <webMaster>jablair@redhat.com (Red Hat)</webMaster>
+      <lastBuildDate>Sun, 14 Apr 2024 00:00:00 GMT</lastBuildDate>
+      <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
+      
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario1</guid>
+    <title>Understanding the hackathon environment</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario1</link>
+    <description>Let&#39;s get underway with the hackathon.</description>
+    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario2</guid>
+    <title>What about my legacy technical debt?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario2</link>
+    <description>Will OpenShift Virtualisation run Acme virtual machines?</description>
+    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario3</guid>
+    <title>But can it do live migration?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario3</link>
+    <description>Will OpenShift Virtualisation live migrate a virtual machine?</description>
+    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario4</guid>
+    <title>What about balancing vm workloads?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario4</link>
+    <description>How do we optimally balance vm workloads across an OpenShift cluster?</description>
+    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario5</guid>
+    <title>How do I resize virtual machine disks again?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario5</link>
+    <description>Persistent volume what??</description>
+    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario6</guid>
+    <title>Can I connect my pods to my virtual machine?</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/hackathon/scenario6</link>
+    <description>How do we make a virtual machine accessible over the OpenShift SDN</description>
+    <pubDate>Sun, 14 Apr 2024 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>openshift</category><category>virtualisation</category><category>kubernetes</category><category>kubevirt</category>
+  </item>
+
+    </channel>
+  </rss>

@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import PageTitle from '@/components/PageTitle'
 import generateRss from '@/lib/generate-rss'
 import { MDXLayoutRenderer } from '@/components/MDXComponents'
@@ -7,28 +8,45 @@ import { formatSlug, getAllFilesFrontMatter, getFileBySlug, getFiles } from '@/l
 const DEFAULT_LAYOUT = 'PostLayout'
 
 export async function getStaticPaths() {
-  const posts = getFiles('workshop')
-  return {
-    paths: posts.map((p) => ({
+  const dataDir = path.join(process.cwd(), 'data')
+  const categories = fs.readdirSync(dataDir).filter((file) =>
+    fs.statSync(path.join(dataDir, file)).isDirectory()
+  )
+
+  const paths = categories.flatMap((category) => {
+    const posts = getFiles(category)
+    return posts.map((p) => ({
       params: {
+        category,
         slug: formatSlug(p).split('/'),
       },
-    })),
+    }))
+  })
+
+  return {
+    paths,
     fallback: false,
   }
 }
 
 export async function getStaticProps({ params }) {
-  const allPosts = await getAllFilesFrontMatter('workshop')
-  const postIndex = allPosts.findIndex((post) => formatSlug(post.slug) === params.slug.join('/'))
-  const prev = allPosts[postIndex - 1] || null
-  const next = allPosts[postIndex + 1] || null
-  const post = await getFileBySlug('workshop', params.slug.join('/'))
+  const { category, slug } = params
+  const slugPath = slug.join('/')
 
-  // rss
+  const allPosts = await getAllFilesFrontMatter(category)
+  const postIndex = allPosts.findIndex((post) => formatSlug(post.slug) === slugPath)
+
+  const prevItem = allPosts[postIndex - 1] || null
+  const nextItem = allPosts[postIndex + 1] || null
+
+  const prev = prevItem ? { ...prevItem, slug: `${category}/${prevItem.slug}` } : null
+  const next = nextItem ? { ...nextItem, slug: `${category}/${nextItem.slug}` } : null
+
+  const post = await getFileBySlug(category, slugPath)
+
   if (allPosts.length > 0) {
     const rss = generateRss(allPosts)
-    fs.writeFileSync('./public/feed.xml', rss)
+    fs.writeFileSync(`./public/${category}-feed.xml`, rss)
   }
 
   return { props: { post, prev, next } }
