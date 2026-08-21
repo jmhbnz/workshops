@@ -14,60 +14,10 @@
     <guid>https://jmhbnz.github.io/workshops/workshop/exercise1</guid>
     <title>Getting started</title>
     <link>https://jmhbnz.github.io/workshops/workshop/exercise1</link>
-    <description>How to get started with the workshop</description>
+    <description>How to get started with the hackathon</description>
     <pubDate>Sun, 21 Jun 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>workshop</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise2</guid>
-    <title>Exploring the platform</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise2</link>
-    <description>Taking a look at ansible automation platform</description>
-    <pubDate>Mon, 22 Jun 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>operator</category><category>aap</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise3</guid>
-    <title>Automating etcd backups</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise3</link>
-    <description>Creating our first automation job! 🚀</description>
-    <pubDate>Tue, 23 Jun 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>openshift</category><category>etcd</category><category>backups</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise4</guid>
-    <title>Building a healthcheck workflow</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise4</link>
-    <description>Creating our first workflow job template! 🚀</description>
-    <pubDate>Wed, 24 Jun 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>openshift</category><category>healthchecks'</category><category>workflow</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise5</guid>
-    <title>Event driven automation</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise5</link>
-    <description>How can we respond to cluster events automatically?</description>
-    <pubDate>Thu, 25 Jun 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>openshift</category><category>eda</category>
-  </item>
-
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/exercise6</guid>
-    <title>Optional - ServiceNow automation</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/exercise6</link>
-    <description>How can we integrate with service management platforms?</description>
-    <pubDate>Fri, 26 Jun 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>openshift</category><category>servicenow</category>
+    <category>ansible</category><category>automation</category><category>hackathon</category>
   </item>
 
     </channel>
