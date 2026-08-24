@@ -42,7 +42,7 @@ export default function CategoryIndex({ posts, initialDisplayPosts, pagination, 
         posts={posts}
         initialDisplayPosts={initialDisplayPosts}
         pagination={pagination}
-        title={`All exercises (${category})`}
+        title={`All exercises`}
       />
     </>
   )

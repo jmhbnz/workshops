@@ -15,7 +15,7 @@ export default function Home({ categories }) {
       <div className="divide-y divide-gray-200 dark:divide-gray-700">
         <div className="pt-6 pb-8 space-y-2 md:space-y-5">
           <h1 className="text-3xl font-extrabold leading-9 tracking-tight text-gray-900 dark:text-gray-100 sm:text-4xl sm:leading-10 md:text-6xl md:leading-14">
-            Available Workshops
+            Available workshops
           </h1>
           <p className="text-lg leading-7 text-gray-500 dark:text-gray-400">
             {siteMetadata.description}
@@ -43,7 +43,7 @@ export default function Home({ categories }) {
                       className="text-primary-800 dark:text-primary-700 hover:text-primary-900 dark:hover:text-primary-400"
                       aria-label={`View ${title}`}
                     >
-                      View workshop &rarr;
+                      View event exercises &rarr;
                     </Link>
                   </div>
                 </div>

@@ -1,9 +1,9 @@
 
   <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
-      <title>Red Hat OpenShift Automation Workshop</title>
+      <title>Red Hat OpenShift Event Guides</title>
       <link>https://jmhbnz.github.io/workshops/workshop</link>
-      <description>Red Hat OpenShift Automation Workshop</description>
+      <description>Red Hat OpenShift Event Guides</description>
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
