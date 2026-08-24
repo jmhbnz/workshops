@@ -1,0 +1,24 @@
+
+  <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+    <channel>
+      <title>Red Hat OpenShift Event Guides</title>
+      <link>https://jmhbnz.github.io/workshops/workshop</link>
+      <description>Red Hat OpenShift Event Guides</description>
+      <language>en-us</language>
+      <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
+      <webMaster>jablair@redhat.com (Red Hat)</webMaster>
+      <lastBuildDate>Sun, 21 Jun 2026 00:00:00 GMT</lastBuildDate>
+      <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
+      
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise1</guid>
+    <title>Getting started</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise1</link>
+    <description>How to get started with the hackathon</description>
+    <pubDate>Sun, 21 Jun 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>hackathon</category>
+  </item>
+
+    </channel>
+  </rss>
