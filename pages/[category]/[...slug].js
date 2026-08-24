@@ -3,21 +3,18 @@ import path from 'path'
 import PageTitle from '@/components/PageTitle'
 import generateRss from '@/lib/generate-rss'
 import { MDXLayoutRenderer } from '@/components/MDXComponents'
-import { formatSlug, getAllFilesFrontMatter, getFileBySlug, getFiles } from '@/lib/mdx'
+import { formatSlug, getAllFilesFrontMatter, getFileBySlug, getFiles, getCategories } from '@/lib/mdx'
 
 const DEFAULT_LAYOUT = 'PostLayout'
 
 export async function getStaticPaths() {
-  const dataDir = path.join(process.cwd(), 'data')
-  const categories = fs.readdirSync(dataDir).filter((file) =>
-    fs.statSync(path.join(dataDir, file)).isDirectory()
-  )
+  const categories = getCategories()
 
-  const paths = categories.flatMap((category) => {
-    const posts = getFiles(category)
+  const paths = categories.flatMap((cat) => {
+    const posts = getFiles(cat.slug)
     return posts.map((p) => ({
       params: {
-        category,
+        category: cat.slug,
         slug: formatSlug(p).split('/'),
       },
     }))
