@@ -20,5 +20,35 @@
     <category>ansible</category><category>automation</category><category>hackathon</category>
   </item>
 
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise2</guid>
+    <title>Track 1 - Self healing security operations</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise2</link>
+    <description>Automatically responding to security alerts</description>
+    <pubDate>Tue, 25 Aug 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>hackathon</category><category>rhacs</category><category>security</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise3</guid>
+    <title>Track 2 - Automatic application crash analysis</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise3</link>
+    <description>Adding context for application incidents</description>
+    <pubDate>Wed, 26 Aug 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>hackathon</category><category>openshift</category><category>applications</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise4</guid>
+    <title>Track 3 - Managing allocated resources</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise4</link>
+    <description>Ensuring hygiene for ephemeral environments</description>
+    <pubDate>Thu, 27 Aug 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>hackathon</category><category>openshift</category><category>operations</category>
+  </item>
+
     </channel>
   </rss>
