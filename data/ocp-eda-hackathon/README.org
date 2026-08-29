@@ -159,3 +159,69 @@ EOF
 #+begin_example
 configmap/cluster-monitoring-config created
 #+end_example
+
+
+* Deploy rhacs
+
+For the security operations track we require advanced cluster security, let's deploy that now via the operator.
+
+** Install rhacs operator
+
+#+NAME: Install rhacs operator
+#+begin_src bash
+oc apply --filename rhacs/operator.yaml
+#+end_src
+
+#+RESULTS: Install rhacs operator
+#+begin_example
+namespace/rhacs-operator unchanged
+operatorgroup.operators.coreos.com/rhacs-operator unchanged
+subscription.operators.coreos.com/rhacs-operator unchanged
+#+end_example
+
+
+** Deploy rhacs central
+
+Once the operator is installed we can deploy ~central~.
+
+#+NAME: Deploy central
+#+begin_src bash
+oc apply --filename rhacs/central.yaml
+#+end_src
+
+#+RESULTS: Deploy central
+#+begin_example
+namespace/stackrox created
+central.platform.stackrox.io/stackrox-central-services created
+#+end_example
+
+
+** Log in to rhacs
+
+With central deployed, we can log in via the passthrough ~route~ with the default ~admin~ username and the password sourced from the generated ~secret~.
+
+#+NAME: Rhacs login
+#+begin_src bash
+#xdg-open "https://"$(oc get route --namespace stackrox central --output jsonpath='{.spec.host}')
+
+echo $(oc get secret --namespace stackrox central-htpasswd --output jsonpath='{.data.password}' | base64 --decode) | wl-copy
+#+end_src
+
+
+** Secure cluster
+
+With central deployed and running we can now deploy the stackrox secured cluster services.
+
+#+NAME: Secure cluster
+#+begin_src bash
+oc apply --filename rhacs/secured.yaml
+#+end_src
+
+#+RESULTS: Secure cluster
+#+begin_example
+serviceaccount/acs-cluster-registration unchanged
+clusterrole.rbac.authorization.k8s.io/acs-cluster-registration unchanged
+clusterrolebinding.rbac.authorization.k8s.io/acs-cluster-registration unchanged
+job.batch/acs-cluster-registration unchanged
+securedcluster.platform.stackrox.io/local created
+#+end_example
