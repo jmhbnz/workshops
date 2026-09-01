@@ -54,7 +54,7 @@
     "eslint-plugin-prettier": "^5.5.6",
     "globby": "16.2.4",
     "husky": "^9.1.7",
-    "inquirer": "^14.1.0",
+    "inquirer": "^14.2.0",
     "lint-staged": "^17.3.0",
     "next-remote-watch": "^2.0.0",
     "prettier": "^3.9.6",
