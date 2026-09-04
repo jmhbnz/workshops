@@ -1,0 +1,37 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core-banking-prod
+  labels:
+    security-tier: critical
+    fsi-compliance: pci-dss
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payment-processor
+  namespace: core-banking-prod
+  labels:
+    app: payment-processor
+    tier: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payment-processor
+  template:
+    metadata:
+      labels:
+        app: payment-processor
+        tier: api
+    spec:
+      containers:
+        - name: api-service
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          command: ["/bin/sh", "-c", "while true; do sleep 30; done"]
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "256Mi"

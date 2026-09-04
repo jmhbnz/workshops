@@ -20,6 +20,11 @@ oc login "${OCP_API_URL}" --username "${OCP_USERNAME}" --password "${OCP_PASSWOR
 #+begin_example
 WARNING: Using insecure TLS client config. Setting this option is not supported!
 
+Login successful.
+
+You have access to 87 projects, the list has been suppressed. You can list all projects with 'oc projects'
+
+Using project "default".
 #+end_example
 
 

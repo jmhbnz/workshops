@@ -11,86 +11,33 @@ summary: "Automatically responding to security alerts"
 
 In financial services environments, zero-day vulnerabilities and unexpected runtime process executions require immediate containment to stop lateral movement across cluster networks. SecOps teams cannot afford to wait for an engineer to review an alert at 3:00 AM when an unauthorized execution occurs inside a core transaction processing workload.
 
-![SecOps Automation](/workshops/static/images/ocp-aap/secops-flow.png)
+In this challenge track, your goal is to wire up Red Hat Advanced Cluster Security runtime policy violations directly into Event-Driven Ansible. When Advanced Cluster Security detects a policy violation such as a rogue shell execution Event Driven Ansible will immediately trigger an Ansible Playbook to isolate the compromised pod via a quarantine `NetworkPolicy`.
 
-In this challenge track, your goal is to wire up Red Hat Advanced Cluster Security (ACS) runtime policy violations directly into Event-Driven Ansible (EDA). When ACS detects a policy violation—such as a rogue shell execution or binary execution within a pod—EDA will intercept the notification payload and immediately trigger an Ansible Playbook to isolate the compromised pod via a quarantine `NetworkPolicy` and scale the deployment down while logging forensics.
-
-> **Challenge Objective:** Configure an end-to-end self-healing security loop. Intercept an ACS runtime alert, deploy network isolation, scale down the infected workload, and create an incident record.
-
-> **Background:** [Event-Driven Ansible](https://www.ansible.com/use-cases/event-driven-automation) (EDA) can ingest real-time events from external sources like OpenShift's Prometheus Alertmanager stack. When an alert fires indicating a volume is reaching capacity, EDA intercepts the alert payload, processes the metadata, and immediately fires a playbook to resize the target volume before an outage occurs.
+> **Background:** [Event Driven Ansible](https://www.ansible.com/use-cases/event-driven-automation) can ingest real-time events from external sources like OpenShift's Prometheus Alertmanager stack. When an alert fires, an ansible rulebook can evaluate the alert payload, and immediately run a remediation playbook.
 
 
-## 1.1 - Deploying the target application workload
+## 1.1 - Deploying a workload
 
-To simulate a breach, you must first provision a target banking API workload in a dedicated production namespace.
+Your first task for the challenge is a simple one, deploy the mock banking api workload located at [workload.yaml](https://github.com/jmhbnz/workshops/tree/main/data/ocp-eda-hackathon/workload/workload.yaml).
 
-Click the **+ Quick Create** button in the top right corner of the OpenShift web console, then click **Import YAML**.
+Once your application pods are successfully in the `Running` state move on to the next task.
 
-Copy the content below to deploy the sample application and click **Create**.
-
-```yaml
----
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: core-banking-prod
-  labels:
-    security-tier: critical
-    fsi-compliance: pci-dss
-
----
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: payment-processor
-  namespace: core-banking-prod
-  labels:
-    app: payment-processor
-    tier: api
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: payment-processor
-  template:
-    metadata:
-      labels:
-        app: payment-processor
-        tier: api
-    spec:
-      containers:
-        - name: api-service
-          image: [registry.access.redhat.com/ubi9/ubi-minimal:latest](https://registry.access.redhat.com/ubi9/ubi-minimal:latest)
-          command: ["/bin/sh", "-c", "while true; do sleep 30; done"]
-          resources:
-            limits:
-              cpu: "200m"
-              memory: "256Mi"
+```text
+NAME                                 READY   STATUS    RESTARTS   AGE
+payment-processor-58f965846b-4mr67   1/1     Running   0          1h
 ```
 
-Verify that the payment-processor pods transition into a Running state within the core-banking-prod project before proceeding.
+
+## 1.2 - Configuring ansible credentials
+
+When event driven ansible receives an event matching certain threat alert criteria we will configure it to automatically run a remediation playbook in response to isolate the workload.
+
+You need to explicitly allow this interaction by creating an API Token with `write` scope for Ansible Automation Platform, and then storing this as a credential within the Event Driven Ansible infrastructure configuration.
+
+![aap-credential](/workshops/static/images/ocp-eda/aap-credential.png)
 
 
-## 1.2 - Provisioning Ansible Automation Platform credentials
-
-EDA needs write access to Ansible Automation Platform (AAP) to invoke remediation playbooks upon receiving threat alerts.
-
-1. Navigate to the **Ansible Automation Platform** web interface.
-2. Go to **Access Management** > **API Tokens** > **Create Token**.
-3. Name the token `secops-eda-token`, select Scope `Write`, and click **Create token**.
-4. **Copy and save the generated token string immediately.**
-
-Next, store this token within the Automation Decisions console:
-
-1. Navigate to **Automation Decisions** > **Infrastructure** > **Credentials**.
-2. Click **Create credential** and fill out the fields:
-   * **Name:** `acme-secops-token`
-   * **Credential type:** `Red Hat Ansible Automation Platform`
-   * **Red Hat Ansible Automation Platform:** `<your_aap_url>/api/controller`
-   * **Oauth token:** `<your_copied_token>`
-
-
-## 1.3 - Deploying the SecOps decision environment & EDA project
+## 1.3 - Event driven ansible basics
 
 Create the EDA Project pointing to the threat response rulebooks.
 
