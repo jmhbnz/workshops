@@ -32,29 +32,24 @@ payment-processor-58f965846b-4mr67   1/1     Running   0          1h
 
 When event driven ansible receives an event matching certain threat alert criteria we will configure it to automatically run a remediation playbook in response to isolate the workload.
 
-You need to explicitly allow this interaction by creating an API Token with `write` scope for Ansible Automation Platform, and then storing this as a credential within the Event Driven Ansible infrastructure configuration.
+You second task for this challenge is to enable this interaction to occur securely by creating an API Token with `write` scope for Ansible Automation Platform, and then storing this as a credential within the Event Driven Ansible infrastructure configuration.
 
 ![aap-credential](/workshops/static/images/ocp-eda/aap-credential.png)
 
 
 ## 1.3 - Event driven ansible basics
 
-Create the EDA Project pointing to the threat response rulebooks.
+Within event driven ansible rulebooks within source control repositories are organized into logical collections called projects. Create a project pointing to rulebooks contained in `https://github.com/jmhbnz/workshops`. 
 
-1. Go to **Automation Decisions** > **Projects** > **Create project**.
-2. Set **Name** to `secops-remediation-rules`.
-3. Set **Source control url** to `https://github.com/jmhbnz/workshops`.
-4. Click **Create project**.
+Once your new project has `Completed` a sync successfully your task is to create a [Decision Environment](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.7/administer-assembly_eda_decision_environments). A decision environment is the container environment your rulebook will execute within.
 
-Next, create the Decision Environment (DE):
-
-1. Go to **Automation Decisions** > **Decision Environments** > **Create decision environment**.
-2. Set **Name** to `SecOps Threat Response Environment`.
-3. Set **Image** to `registry.redhat.io/ansible-automation-platform-27/de-supported-rhel9:latest`.
-4. Click **Create decision environment**.
+![ecosystem-catalog](/workshops/static/images/ocp-eda/ecosystem-catalog.png)
 
 
-## 1.4 - Configuring the rulebook activation
+## 1.4 - Configuring rulebook activation
+
+
+
 
 Create a Rulebook Activation that listens for HTTP POST webhooks emitted by Red Hat Advanced Cluster Security on port `5000`.
 
