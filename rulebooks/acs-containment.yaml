@@ -1,0 +1,15 @@
+---
+- name: Listen for acs threat notifications
+  hosts: all
+  sources:
+    - ansible.eda.webhook:
+        host: 0.0.0.0
+        port: 5000
+  rules:
+    - name: Match process execution alert on critical banking apps
+      condition: event.payload.alert.policy.name == "Unauthorized Process Execution"
+      action:
+        run_job_template:
+          name: acme-secops-isolate-workload
+          organization: Default
+          post_events: true
