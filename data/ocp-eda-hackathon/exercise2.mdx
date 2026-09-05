@@ -30,7 +30,7 @@ payment-processor-58f965846b-4mr67   1/1     Running   0          1h
 
 ## 1.2 - Configuring ansible credentials
 
-When event driven ansible receives an event matching certain threat alert criteria we will configure it to automatically run a remediation playbook in response to isolate the workload.
+When Event Driven Ansible receives an event matching certain threat alert criteria we will configure it to automatically run a remediation playbook in response to isolate the workload.
 
 You second task for this challenge is to enable this interaction to occur securely by creating an API Token with `write` scope for Ansible Automation Platform, and then storing this as a credential within the Event Driven Ansible infrastructure configuration.
 
@@ -39,48 +39,18 @@ You second task for this challenge is to enable this interaction to occur secure
 
 ## 1.3 - Event driven ansible basics
 
-Within event driven ansible rulebooks within source control repositories are organized into logical collections called projects. Create a project pointing to rulebooks contained in `https://github.com/jmhbnz/workshops`. 
+Within Event Driven Ansible, rulebooks within source control repositories are organized into logical collections called projects. Create a project pointing to rulebooks contained in `https://github.com/jmhbnz/workshops`. 
 
 Once your new project has `Completed` a sync successfully your task is to create a [Decision Environment](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.7/administer-assembly_eda_decision_environments). A decision environment is the container environment your rulebook will execute within.
 
 ![ecosystem-catalog](/workshops/static/images/ocp-eda/ecosystem-catalog.png)
 
 
-## 1.4 - Configuring rulebook activation
+## 1.4 - Listening for events
 
+Now it's time to tell Event Driven Ansible to listen for incoming events from Advanced Cluster Security. Your task is to configure `rulebook/acs-containment.yaml` to process incoming events on port `5000`.
 
-
-
-Create a Rulebook Activation that listens for HTTP POST webhooks emitted by Red Hat Advanced Cluster Security on port `5000`.
-
-Go to **Automation Decisions** > **Rulebook Activations** > **Create rulebook activation**.
-
-Enter the following details:
-* **Name:** `acs-runtime-threat-listener`
-* **Project:** `secops-remediation-rules`
-* **Rulebook:** `rulebooks/acs-containment.yaml`
-* **Decision Environment:** `SecOps Threat Response Environment`
-* **Credential:** `acme-secops-token`
-
-Below is the structure of the `acs-containment.yaml` rulebook evaluating incoming ACS payloads:
-
-```yaml
----
-- name: Listen for ACS threat notifications
-  hosts: all
-  sources:
-    - ansible.eda.webhook:
-        host: 0.0.0.0
-        port: 5000
-  rules:
-    - name: Match process execution alert on critical banking apps
-      condition: event.payload.alert.policy.name == "Unauthorized Process Execution"
-      action:
-        run_job_template:
-          name: acme-secops-isolate-workload
-          organization: Default
-          post_events: true
-```
+![rulebook-activation-docs](/workshops/static/images/ocp-eda/rulebook-activation-docs.png)
 
 
 ## 1.5 - Setting up the remediation job template
