@@ -64,22 +64,15 @@ Hint: Ensure the job template is configured to enable the playbook to be able to
 ![job-template-run](/workshops/static/images/ocp-eda/job-template-run.png)
 
 
-## 1.6 - Wiring Advanced Cluster Security (ACS) to EDA
+## 1.6 - Sending security events
 
-Now connect RHACS to route violations to the EDA webhook listener service.
+If you've made it this far great work! Your next task for this challenge is to configure Red Hat Advanced Cluster Security to send violation events to our newly created Event Driven Ansible listener.
 
-1. Log into the **Advanced Cluster Security** console.
-2. Platform Administration > **Integrations**.
-3. Scroll down to **Generic Webhook** and click **Create Integration**.
-4. Set the parameters:
-   * **Integration Name:** `EDA SecOps Webhook`
-   * **Endpoint:** `http://acs-runtime-threat-listener.aap.svc.cluster.local:5000/endpoint`
-5. Click **Test** to confirm connectivity, then click **Save**.
+Retrieve your Advanced Cluster Security central login credentials from their `secret` within OpenShift and set up the new webhook notifier integration within the Advanced Cluster Security web console which points to your event listener endpoint.
 
-![ACS Integration](/workshops/static/images/ocp-aap/acs-webhook-config.png)
+With this new webhook notifier integration created, assign it to the `Unauthorized Process Execution` policy within Red Hat Advanced Cluster Security.
 
-6. Go to **Policy Management** > **System Policies**.
-7. Locate or enable the **Unauthorized Process Execution** policy. Under **Policy Notifications**, toggle **EDA SecOps Webhook** to **ON**.
+![rhacs-integration](/workshops/static/images/ocp-eda/rhacs-integration.png)
 
 
 ## 1.7 - Challenge: Triggering the threat and validating zero trust
