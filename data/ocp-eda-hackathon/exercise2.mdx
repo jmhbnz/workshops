@@ -75,19 +75,20 @@ With this new webhook notifier integration created, assign it to the `Unauthoriz
 ![rhacs-integration](/workshops/static/images/ocp-eda/rhacs-integration.png)
 
 
-## 1.7 - Challenge: Triggering the threat and validating zero trust
+## 1.7 - Testing the process
 
-### The Sprint Challenge Tasks:
+It's time. We can now test out the process. With the `Unauthorized Process Execution` policy set to send violation events to Event Driven Ansible your task now is to prove the process works.
 
-1. **Trigger the Breach:** Execute an interactive shell or unauthorized binary command inside one of the `payment-processor` pods in the `core-banking-prod` namespace:
-   ```bash
-   oc exec -n core-banking-prod -it deploy/payment-processor -- /bin/sh -c "nc -l 4444"
-   ```
-2. **Verify Event Ingestion:** Confirm ACS triggers the runtime alert and posts the JSON alert payload to the EDA Rulebook Activation.
-3. **Validate Containment:** 
-   * Check AAP job runs to ensure `acme-secops-isolate-workload` executed successfully.
-   * Verify the creation of `eda-quarantine-deny-all` NetworkPolicy inside `core-banking-prod`.
-   * Confirm the deployment replicas drop or isolation policies prevent any inbound/outbound traffic from the compromised pod.
+Start by ensuring the [process baseline](https://docs.redhat.com/en/documentation/red_hat_advanced_cluster_security_for_kubernetes/4.11/html/operating/evaluate-security-risks#use-process-baselines_evaluate-security-risks) for your sample workload in OpenShift is `locked`.
 
-### Challenge Bonus Points (+15 Mins):
-Extend `playbooks/secops-quarantine.yaml` to automatically open a P1 Incident ticket in ServiceNow containing the container ID, pod name, and offending process path before network isolation takes effect.
+Once the lock is set, open up a terminal within the sample workload pod, and run a process that is not part of the baseline.
+
+![terminal-command](/workshops/static/images/ocp-eda/terminal-command.png)
+
+If everything is wired up correctly you should see:
+
+- A policy violation event recorded in Red Hat Advanced Cluster Security
+- A job template run in Event Driven Ansible
+- A `NetworkPolicy` successfully applied in OpenShift to isolate the workload
+
+If those three things are in place, congratulations you have completed this challenge track! You're now responding to security threats at machine speed, with all of the flexibility of the Ansible ecosystem, augmenting your OpenShift application platform! 🎉
