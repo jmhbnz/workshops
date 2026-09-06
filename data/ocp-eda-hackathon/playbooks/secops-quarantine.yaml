@@ -1,0 +1,38 @@
+---
+- name: Isolate compromised workload
+  hosts: localhost
+  gather_facts: false
+  vars:
+    target_namespace: "{{ event.payload.alert.deployment.namespace | default('core-banking-prod') }}"
+    target_deployment: "{{ event.payload.alert.deployment.name | default('payment-processor') }}"
+    target_app_label: "{{ event.payload.alert.deployment.labels.app | default('payment-processor') }}"
+    violation_process: "{{ event.payload.alert.violations[0].message | default('Unauthorized process execution detected') }}"
+
+  tasks:
+    - name: Display threat context from event payload
+      ansible.builtin.debug:
+        msg:
+          - "Threat Detected in Namespace: {{ target_namespace }}"
+          - "Target Deployment: {{ target_deployment }}"
+          - "Violation Details: {{ violation_process }}"
+
+    - name: Apply quarantine networkpolicy
+      kubernetes.core.k8s:
+        state: present
+        definition:
+          apiVersion: networking.k8s.io/v1
+          kind: NetworkPolicy
+          metadata:
+            name: eda-quarantine-deny-all
+            namespace: "{{ target_namespace }}"
+            labels:
+              app.kubernetes.io/managed-by: eda-ansible
+              security.acme.com/quarantine: "true"
+          spec:
+            podSelector:
+              matchLabels:
+                app: "{{ target_app_label }}"
+            policyTypes:
+              - Ingress
+              - Egress
+            egress: []   # Deny all outbound traffic
