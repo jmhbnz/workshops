@@ -53,36 +53,15 @@ Now it's time to tell Event Driven Ansible to listen for incoming events from Ad
 ![rulebook-activation-docs](/workshops/static/images/ocp-eda/rulebook-activation-docs.png)
 
 
-## 1.5 - Setting up the remediation job template
+## 1.5 - Taking action on events
 
-The EDA rulebook triggers a job template that dynamically applies a zero-trust `NetworkPolicy` to isolate the offending pod and scale down the deployment to prevent further exposure.
+As outlined in the challenge overview, our goal for this track is to automatically take machine speed action when a specific type of security event occurs. With our previous task complete Event Driven Ansible is already listening for these events, and as outlined in [`rulebook/acs-containment.yaml`](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/rulebooks/acs-containment.yaml) we will be using the `run_job_template` action to run a playbook in response to events matching our criteria.
 
-1. Navigate to **Automation Execution** > **Templates** > **Create job template**.
-2. Fill out the configuration:
-   * **Name:** `acme-secops-isolate-workload`
-   * **Inventory:** `Demo Inventory`
-   * **Project:** `secops-remediation-rules`
-   * **Playbook:** `playbooks/secops-quarantine.yaml`
-   * **Execution environment:** `Control Plane Execution Environment`
-   * **Credentials:** `OpenShift Credential`
-   * **Extra variables:** Ensure `Prompt on launch` is checked.
+For this task, configure an appropriate job template that will run the existing playbook [`secops-quarantine.yaml`](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/ocp-eda-hackathon/playbooks/secops-quarantine.yaml).
 
-The playbook target logic dynamically parses the payload to generate the following quarantine network policy:
+Hint: Ensure the job template is configured to enable the playbook to be able to receive variables from the incoming event, and take action within OpenShift.
 
-```yaml
-apiVersion: networking.k8s.io/v1
-kind: NetworkPolicy
-metadata:
-  name: eda-quarantine-deny-all
-  namespace: core-banking-prod
-spec:
-  podSelector:
-    matchLabels:
-      app: payment-processor
-  policyTypes:
-    - Ingress
-    - Egress
-```
+![job-template-run](/workshops/static/images/ocp-eda/job-template-run.png)
 
 
 ## 1.6 - Wiring Advanced Cluster Security (ACS) to EDA
