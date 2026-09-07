@@ -135,9 +135,7 @@ EOF
 #+end_src
 
 #+RESULTS: Patch aap subscription
-#+begin_example
-subscription.operators.coreos.com/ansible-automation-platform-operator configured
-#+end_example
+: subscription.operators.coreos.com/ansible-automation-platform-operator configured
 
 
 * Enable user workload monitoring

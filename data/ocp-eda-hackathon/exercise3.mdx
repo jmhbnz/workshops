@@ -17,13 +17,15 @@ In this challenge track, your goal is to wire up alerts for a crash looping appl
 
 ## 1.1 - Deploying a workload
 
-Your first task for the challenge is a simple one, deploy the crashlooping workload located at [workload.yaml](https://github.com/jmhbnz/workshops/tree/main/data/ocp-eda-hackathon/workload/workload.yaml).
+Your first task for the challenge is a simple one, deploy the crashlooping workload located at [crashing-workload.yaml](https://github.com/jmhbnz/workshops/tree/main/data/ocp-eda-hackathon/workload/crashing-workload.yaml).
 
-Once your application pods are successfully in the `Running` state move on to the next task.
+Reviewing the yaml, you'll notice this example workload is intentionally configured to automatically crash, with some specific log messages output. Don't worry about analysing this now, we'll configure a model to provide crash analysis context later in this challenge.
+
+Once your application pods are successfully deployed, move on to the next task.
 
 ```text
-NAME                                 READY   STATUS    RESTARTS   AGE
-payment-processor-58f965846b-4mr67   1/1     Running   0          1h
+NAME                                     READY   STATUS   RESTARTS   AGE
+swift-payment-gateway-76877b886c-hp67b   0/1     Error    0          6s
 ```
 
 

@@ -1,0 +1,57 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core-banking-prod
+  labels:
+    security-tier: critical
+    fsi-compliance: pci-dss
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: swift-payment-gateway
+  namespace: core-banking-prod
+  labels:
+    app: swift-payment-gateway
+    tier: payment-core
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: swift-payment-gateway
+  template:
+    metadata:
+      labels:
+        app: swift-payment-gateway
+        tier: payment-core
+    spec:
+      containers:
+        - name: gateway-service
+          image: registry.access.redhat.com/ubi9/ubi-minimal:latest
+          command:
+            - /bin/sh
+            - -c
+            - |
+              cat << 'EOF'
+              {"timestamp":"2026-09-15T09:14:58.102Z","level":"INFO","thread":"main","logger":"c.a.f.s.SwiftGatewayApplication","message":"Starting SwiftGatewayApplication v3.1.0 on swift-payment-gateway-7f89d4b5b-x92kl with PID 1"}
+              {"timestamp":"2026-09-15T09:14:59.230Z","level":"INFO","thread":"main","logger":"c.a.f.s.config.VaultConfig","message":"Authenticating with HashiCorp Vault at https://vault.internal.bank.nz:8200 via Kubernetes auth method"}
+              {"timestamp":"2026-09-15T09:15:00.012Z","level":"DEBUG","thread":"vault-auth-1","logger":"c.a.f.s.client.VaultClient","message":"POST /v1/auth/kubernetes/login HTTP/1.1 - Status: 403 Forbidden"}
+              {"timestamp":"2026-09-15T09:15:00.015Z","level":"WARN","thread":"vault-auth-1","logger":"c.a.f.s.client.VaultClient","message":"Vault auth attempt 1 failed: {\"errors\":[\"service account token validation failed: claim \\\"aud\\\" mismatch: expected [vault], got [https://kubernetes.default.svc]\"]}"}
+              {"timestamp":"2026-09-15T09:15:02.020Z","level":"WARN","thread":"vault-auth-1","logger":"c.a.f.s.client.VaultClient","message":"Retrying Vault authentication (attempt 2/3)..."}
+              {"timestamp":"2026-09-15T09:15:02.105Z","level":"DEBUG","thread":"vault-auth-1","logger":"c.a.f.s.client.VaultClient","message":"POST /v1/auth/kubernetes/login HTTP/1.1 - Status: 403 Forbidden"}
+              {"timestamp":"2026-09-15T09:15:04.110Z","level":"ERROR","thread":"main","logger":"com.zaxxer.hikari.HikariDataSource","message":"HikariPool-1 - Exception during pool initialization."}
+              com.zaxxer.hikari.pool.HikariPool$PoolInitializationException: Failed to initialize pool: Dynamic DB credentials not supplied by SecretProvider.
+                  at com.zaxxer.hikari.util.PropertyElf.setTargetFromProperties(PropertyElf.java:57)
+                  at com.zaxxer.hikari.HikariConfig.validate(HikariConfig.java:1091)
+                  at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:81)
+                  at com.acme.financial.swift.config.DatabaseConfig.dataSource(DatabaseConfig.java:44)
+                  at com.acme.financial.swift.config.DatabaseConfig$$EnhancerBySpringCGLIB$$3b2e10a2.CGLIB$dataSource$0(<generated>)
+              {"timestamp":"2026-09-15T09:15:04.118Z","level":"ERROR","thread":"main","logger":"org.springframework.boot.SpringApplication","message":"Application run failed","exception":"org.springframework.beans.factory.BeanCreationException: Error creating bean with name 'entityManagerFactory' defined in class path resource [org/springframework/boot/autoconfigure/orm/jpa/HibernateJpaConfiguration.class]: Invocation of init method failed"}
+              EOF
+              exit 1
+          resources:
+            limits:
+              cpu: "200m"
+              memory: "256Mi"
