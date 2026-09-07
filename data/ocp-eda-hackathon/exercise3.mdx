@@ -8,3 +8,23 @@ authors: ['default']
 summary: "Adding context for application incidents"
 ---
 
+With the advent of generative large language models, enriching events with additional, high quality context automatically is trivial with Event Driven Ansible.
+
+In this challenge track, your goal is to wire up alerts for a crash looping application into Event-Driven Ansible. Event Driven Ansible will be configured to retrieve some details about the application and provide this context to a model endpoint for automated analysis. The resulting enriched alert can then be routed to the right place, with the right context.
+
+> **Background:** [Event Driven Ansible](https://www.ansible.com/use-cases/event-driven-automation) can ingest real-time events from external sources like OpenShift's Prometheus Alertmanager stack. When an alert fires, an ansible rulebook can evaluate the alert payload, and immediately run a required playbook.
+
+
+## 1.1 - Deploying a workload
+
+Your first task for the challenge is a simple one, deploy the crashlooping workload located at [workload.yaml](https://github.com/jmhbnz/workshops/tree/main/data/ocp-eda-hackathon/workload/workload.yaml).
+
+Once your application pods are successfully in the `Running` state move on to the next task.
+
+```text
+NAME                                 READY   STATUS    RESTARTS   AGE
+payment-processor-58f965846b-4mr67   1/1     Running   0          1h
+```
+
+
+
