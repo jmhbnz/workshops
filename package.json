@@ -1,17 +1,12 @@
 {
   "name": "workshops",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
   "scripts": {
-    "start": "next-remote-watch ./data",
     "dev": "next dev --webpack",
     "build": "next build --webpack",
     "export": "next export",
-    "deploy": "gh-pages -d out -t true",
-    "analyze": "cross-env ANALYZE=true next build",
-    "lint": "eslint --fix pages components lib layouts scripts",
-    "prepare": "husky",
-    "spell": "cspell data/workshop/*"
+    "deploy": "gh-pages -d out -t true"
   },
   "dependencies": {
     "@fontsource-variable/inter": "^5.3.0",
@@ -28,10 +23,10 @@
     "next-themes": "^0.4.6",
     "postcss": "^8.5.26",
     "preact": "^10.29.8",
+    "prop-types": "^15.8.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "react-medium-image-zoom": "^5.4.9",
-    "reading-time": "1.5.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-citation": "^2.3.2",
     "rehype-katex": "^7.0.1",
@@ -46,28 +41,11 @@
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
-    "cross-env": "^10.1.0",
     "dedent": "^1.7.2",
-    "eslint": "^9.39.2",
-    "eslint-config-next": "16.3.4",
-    "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-prettier": "^5.5.6",
     "globby": "16.2.4",
-    "husky": "^9.1.7",
     "inquirer": "^14.2.0",
-    "lint-staged": "^17.4.1",
     "next-remote-watch": "^2.0.0",
-    "prettier": "^3.9.6",
-    "prettier-plugin-tailwindcss": "^0.8.1",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3"
-  },
-  "lint-staged": {
-    "*.+(js|jsx|ts|tsx)": [
-      "eslint --fix"
-    ],
-    "*.+(js|jsx|ts|tsx|json|css|md|mdx)": [
-      "prettier --write"
-    ]
   }
 }
