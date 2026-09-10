@@ -21,7 +21,7 @@
     "mdx-bundler": "^10.1.1",
     "next": "^16.3.4",
     "next-themes": "^0.4.6",
-    "postcss": "^8.5.26",
+    "postcss": "^8.5.28",
     "preact": "^10.29.8",
     "prop-types": "^15.8.1",
     "react": "19.2.8",
@@ -43,7 +43,7 @@
     "@svgr/webpack": "^8.1.0",
     "dedent": "^1.7.2",
     "globby": "16.2.4",
-    "inquirer": "^14.2.0",
+    "inquirer": "^14.2.1",
     "next-remote-watch": "^2.0.0",
     "socket.io": "^4.8.3",
     "socket.io-client": "^4.8.3"
