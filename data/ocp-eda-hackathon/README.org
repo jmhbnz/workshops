@@ -22,7 +22,7 @@ WARNING: Using insecure TLS client config. Setting this option is not supported!
 
 Login successful.
 
-You have access to 83 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 87 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
 Using project "default".
 #+end_example
@@ -232,3 +232,39 @@ clusterrolebinding.rbac.authorization.k8s.io/acs-cluster-registration created
 job.batch/acs-cluster-registration created
 securedcluster.platform.stackrox.io/local created
 #+end_example
+
+
+* Create model token
+
+Hackathon challenge track two requires interaction with an llm model endpoint.
+
+Provision a subscription for ~deepseek-r1-distill-qwen-14b~ via [[https://maas-rhdp-frontend.apps.maas.redhatworkshops.io][Red Hat Model As a Service]] and store the value in ~.env~ before running the secret creation below.
+
+#+NAME: Create llm token secret
+#+begin_src bash
+source .env
+cat << EOF | oc apply --filename -
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llm-token
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: llm-token
+  namespace: llm-token
+type: Opaque
+stringData:
+  api_token: "${MAAS_TOKEN}"
+EOF
+#+end_src
+
+#+RESULTS: Create llm token secret
+#+begin_example
+namespace/llm-token created
+secret/llm-token created
+#+end_example
+

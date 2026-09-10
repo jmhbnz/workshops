@@ -58,6 +58,6 @@ Now it's time to tell Event Driven Ansible to listen for incoming events from Op
 
 With Event Driven Ansible now listening for crash events, your next task is to configure the Job Template that will execute when `KubePodCrashLooping` triggers.
 
-For this task, configure an appropriate job template that will run the existing playbook [`acme-ai-crash-analysis.yaml`](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/ocp-eda-hackathon/playbooks/crash-analysis.yaml).
+For this task, configure an appropriate job template that will run the existing playbook [`crash-analysis.yaml`](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/ocp-eda-hackathon/playbooks/crash-analysis.yaml).
 
 Hint: The playbook extracts recent pod container logs from OpenShift, wraps them into a prompt query, and sends an API call to a model endpoint to analyze the failure context. Ensure the job template will have appropriate credentials to complete these tasks.
