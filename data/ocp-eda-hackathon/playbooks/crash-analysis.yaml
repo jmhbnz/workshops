@@ -1,0 +1,44 @@
+---
+- name: Analyse crashing application
+  hosts: localhost
+  gather_facts: false
+  vars:
+    # Extract target pod & namespace from event payload with fallback defaults for testing
+    target_pod: "{{ event.payload.alerts[0].labels.pod | default('swift-payment-gateway') }}"
+    target_namespace: "{{ event.payload.alerts[0].labels.namespace | default('core-banking-prod') }}"
+    target_alert: "{{ event.payload.alerts[0].labels.alertname | default('KubePodCrashLooping') }}"
+    
+    # Model endpoint configuration
+    rhoai_llm_endpoint: "{{ rhoai_endpoint | default('https://maas-rhdp.apps.maas.redhatworkshops.io/v1/chat/completions') }}"
+    llm_model: "{{ model_name | default('deepseek-r1-distill-qwen-14b') }}"
+
+  tasks:
+    - name: Retrieve llm token from secret
+      kubernetes.core.k8s_info:
+        kind: Secret
+        name: "llm-token"
+        namespace: "llm-token"
+      register: rhoai_secret_info
+
+    - name: Fail if token not found
+      ansible.builtin.fail:
+        msg: "Secret llm-token not found."
+      when: rhoai_secret_info.resources | length == 0
+
+    - name: Extract and decode the llm token
+      ansible.builtin.set_fact:
+        rhoai_api_token: "{{ rhoai_secret_info.resources[0].data.api_token | b64decode }}"
+
+    - name: Fetch recent container logs from crashing pod
+      kubernetes.core.k8s_log:
+        namespace: "{{ target_namespace }}"
+        label_selectors:
+          - "app=swift-payment-gateway"
+        tail_lines: 50
+      register: pod_logs_result
+      ignore_errors: true
+
+    - name: Set log facts
+      ansible.builtin.set_fact:
+        captured_logs: "{{ pod_logs_result.log | default('No logs retrieved or pod failed to start.') }}"
+
