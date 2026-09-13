@@ -17,7 +17,7 @@ In this challenge track, your goal is to wire up alerts for a crash looping appl
 
 ## 2.1 - Deploying a workload
 
-Your first task for the challenge is a simple one, deploy the crashlooping workload located at [crashing-workload.yaml](https://github.com/jmhbnz/workshops/tree/main/data/ocp-eda-hackathon/workload/crashing-workload.yaml).
+Your first task for the challenge is a simple one, deploy the crashlooping workload located at [crashing-workload.yaml](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/ocp-eda-hackathon/workload/crashing-workload.yaml).
 
 Reviewing the yaml, you'll notice this example workload is intentionally configured to automatically crash, with some specific log messages output. Don't worry about analysing this now, we'll configure a model to provide crash analysis context later in this challenge.
 
@@ -61,3 +61,13 @@ With Event Driven Ansible now listening for crash events, your next task is to c
 For this task, configure an appropriate job template that will run the existing playbook [`crash-analysis.yaml`](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/ocp-eda-hackathon/playbooks/crash-analysis.yaml).
 
 Hint: The playbook extracts recent pod container logs from OpenShift, wraps them into a prompt query, and sends an API call to a model endpoint to analyze the failure context. Ensure the job template will have appropriate credentials to complete these tasks.
+
+![template-prompt](/workshops/static/images/ocp-eda/template-prompt.png)
+
+
+## 2.6 - Sending events from alertmanager
+
+Great progress, with the configuration for Event Driven Ansible in place we can now create the `PromethusRule` that will raise an Alert in Alertmanager when a pod in the `core-banking-prod` namespace has a status of `CrashLoopBackOff`.
+
+![alert-rule](/workshops/static/images/ocp-eda/alert-rule.png)
+
