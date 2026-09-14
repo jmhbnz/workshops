@@ -83,8 +83,12 @@ With your alerting rules in place, the last task for this challenge is to create
 
 ## 2.8 - Test it out!
 
-At this point, all that is left is to test out the integration. Use the same pod replica count approach from 2.6 to re-trigger your alert and then keep an eye on Ansible Automation Controller.  You should see jobs being fired which are gathering information about the crashing application, and automatically diagnosing the crash with a large language model.
+At this point, all that is left is to test out the integration. Use the same pod replica count approach from 2.6 to re-trigger your alert and then keep an eye on Ansible Automation Controller.
 
-![alertmanager-config](/workshops/static/images/ocp-eda/alertmanager-config.png)
+After a brief wait for your alert to fire you should see jobs being launched which are gathering information about the crashing application, and automatically diagnosing the crash with a large language model.
+
+Congratulations, you've completed this challenge track by successfully created a pipeline to automatically enrich alerts with extremely valuable context which could be updated directly in to incident management tools to help teams address application issues rapidly! 🎉
+
+![crash-enrichment](/workshops/static/images/ocp-eda/crash-enrichment.png)
 
 
