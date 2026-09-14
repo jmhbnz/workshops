@@ -65,9 +65,26 @@ Hint: The playbook extracts recent pod container logs from OpenShift, wraps them
 ![template-prompt](/workshops/static/images/ocp-eda/template-prompt.png)
 
 
-## 2.6 - Sending events from alertmanager
+## 2.6 - Creating an alerting rule
 
-Great progress, with the configuration for Event Driven Ansible in place we can now create the `PromethusRule` that will raise an Alert in Alertmanager when a pod in the `core-banking-prod` namespace has a status of `CrashLoopBackOff`.
+Great progress, with the configuration for Event Driven Ansible in place we can now create the `PrometheusRule` that will raise an Alert in Alertmanager on OpenShift when a pod in the `core-banking-prod` namespace has a status of `CrashLoopBackOff`.
+
+Hint: Try scaling down your pod count to `0` for the crashlooping application, then scaling it back up and checking if the alert is firing correctly within OpenShift.
 
 ![alert-rule](/workshops/static/images/ocp-eda/alert-rule.png)
+
+
+## 2.7 - Sending alerts to ansible
+
+With your alerting rules in place, the last task for this challenge is to create an `AlertmanagerConfig` resource which will add your Event Driven Ansible service as a webhook receiver so that whenever the alert fires, Alertmanager on OpenShift will send the notification to our Event Driven Ansible listener.
+
+![alertmanager-config](/workshops/static/images/ocp-eda/alertmanager-config.png)
+
+
+## 2.8 - Test it out!
+
+At this point, all that is left is to test out the integration. Use the same pod replica count approach from 2.6 to re-trigger your alert and then keep an eye on Ansible Automation Controller.  You should see jobs being fired which are gathering information about the crashing application, and automatically diagnosing the crash with a large language model.
+
+![alertmanager-config](/workshops/static/images/ocp-eda/alertmanager-config.png)
+
 

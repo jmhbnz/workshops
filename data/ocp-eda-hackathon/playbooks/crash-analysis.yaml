@@ -37,8 +37,56 @@
         tail_lines: 50
       register: pod_logs_result
       ignore_errors: true
-
+ 
     - name: Set log facts
       ansible.builtin.set_fact:
         captured_logs: "{{ pod_logs_result.log | default('No logs retrieved or pod failed to start.') }}"
 
+    - name: Query model for root cause analysis
+      ansible.builtin.uri:
+        url: "{{ rhoai_llm_endpoint }}"
+        method: POST
+        status_code: [200]
+        headers:
+          Content-Type: "application/json"
+          Authorization: "Bearer {{ rhoai_api_token }}"
+        body_format: json
+        body:
+          model: "{{ llm_model }}"
+          temperature: 0.2
+          messages:
+            - role: system
+              content: >
+                You are an expert OpenShift SRE assistant. Analyze microservice failure logs and output:
+                [PRIMARY DIAGNOSIS]: High level issue summary.
+                [ROOT CAUSE IDENTIFIED]: Exact underlying error, token mismatch, or component issue.
+                [RECOMMENDED REMEDIATION STEPS]: Actionable fix steps.
+            - role: user
+              content: >
+                Alert '{{ target_alert }}' fired for deployment in namespace '{{ target_namespace }}'.
+                
+                Captured pod logs:
+                ---
+                {{ captured_logs }}
+                ---
+                
+                Diagnose the root cause and provide remediation recommendations.
+        timeout: 60
+      register: ai_response
+      ignore_errors: true
+      
+    - name: Extract model response
+      ansible.builtin.set_fact:
+        ai_analysis_text: "{{ ai_response.json.choices[0].message.content | default('LLM inference request failed or timed out.') }}"
+
+    - name: Print AI Agent Incident Analysis Summary
+      ansible.builtin.debug:
+        msg: |
+          ================================================================================
+                              AI AGENT INCIDENT ANALYSIS SUMMARY                          
+          ================================================================================
+          [ALERT NAME]: {{ target_alert }}
+          [WORKLOAD]:   {{ target_pod }} (Namespace: {{ target_namespace }})
+
+          {{ ai_analysis_text }}
+          ================================================================================
