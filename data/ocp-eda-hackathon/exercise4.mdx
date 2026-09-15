@@ -73,11 +73,11 @@ Great progress, with the configuration for Event Driven Ansible in place we can 
 
 ## 3.7 - Test it out!
 
-At this point, all that is left is to test out the integration. Use the same pod replica count approach from 2.6 to re-trigger your alert and then keep an eye on Ansible Automation Controller.
+At this point, all that is left is to test out the integration. Use a bash command to fill up 85% of the disk space in the `1Gi` volume, and then keep an eye on Ansible Automation Controller.
 
-After a brief wait for your alert to fire you should see jobs being launched which are gathering information about the crashing application, and automatically diagnosing the crash with a large language model.
+After a brief wait for your alert to fire you should see a job being launched which will automatically resize the volume.
 
-Congratulations, you've completed this challenge track by successfully created a pipeline to automatically enrich alerts with extremely valuable context which could be updated directly in to incident management tools to help teams address application issues rapidly! 🎉
+Congratulations, you've completed this challenge track by successfully created a pipeline to automatically scale pvc size, no more after hours callouts and toil! 🎉
 
-![crash-enrichment](/workshops/static/images/ocp-eda/crash-enrichment.png)
+![pvc-resized](/workshops/static/images/ocp-aap/pvc-expanded.png)
 
