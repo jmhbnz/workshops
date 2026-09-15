@@ -22,7 +22,7 @@ WARNING: Using insecure TLS client config. Setting this option is not supported!
 
 Login successful.
 
-You have access to 87 projects, the list has been suppressed. You can list all projects with 'oc projects'
+You have access to 88 projects, the list has been suppressed. You can list all projects with 'oc projects'
 
 Using project "default".
 #+end_example
@@ -103,7 +103,7 @@ apiVersion: config.openshift.io/v1
 kind: ClusterVersion
 metadata:
   name: version
- spec:
+spec:
   channel: stable-4.21
   desiredUpdate:
     image: quay.io/openshift-release-dev/ocp-release@sha256:7224f77afb20aedaf82bfc13ca11699689bd5b06795d6d1740dbd4c265150c44
@@ -135,7 +135,9 @@ EOF
 #+end_src
 
 #+RESULTS: Patch aap subscription
-: subscription.operators.coreos.com/ansible-automation-platform-operator configured
+#+begin_example
+subscription.operators.coreos.com/ansible-automation-platform-operator configured
+#+end_example
 
 
 * Enable user workload monitoring

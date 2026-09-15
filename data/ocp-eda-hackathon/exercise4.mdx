@@ -1,6 +1,6 @@
 ---
 title: Track 3 - Automated cluster operations
-exercise: 4
+exercise: 3
 date: '2026-08-27'
 tags: ['ansible', 'automation', 'hackathon', 'openshift', 'operations']
 draft: false
@@ -15,4 +15,69 @@ Of course an incident still needs to be raised in a service management platform 
 
 > **Background:** [Event-Driven Ansible](https://www.ansible.com/use-cases/event-driven-automation) (EDA) can ingest real-time events from external sources like OpenShift's Prometheus Alertmanager stack. When an alert fires indicating a volume is reaching capacity, EDA intercepts the alert payload, processes the metadata, and immediately fires a playbook to resize the target volume before an outage occurs.
 
+
+## 3.1 - Deploying a workload
+
+Your first task for the challenge is a simple one, deploy the sample workload with persistent storage located at [pvc-workload.yaml](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/ocp-eda-hackathon/workload/pvc-workload.yaml).
+
+Reviewing the yaml, you'll notice this example workload has a `1Gi` persistent storage volume.
+
+Once your application pods are successfully deployed, move on to the next task.
+
+```text
+NAME                             READY   STATUS    RESTARTS   AGE
+acme-database-57775fbdb5-j6zn9   1/1     Running   0          13s
+```
+
+
+## 3.2 - Configuring ansible credentials
+
+When Event Driven Ansible receives a storage volume alert, it will launch a playbook job template in Ansible Automation Platform to automatically resize the volume.
+
+You second task for this challenge is to enable this interaction to occur securely by creating an API Token with `write` scope for Ansible Automation Platform, and then storing this as a credential within the Event Driven Ansible infrastructure configuration.
+
+![aap-credential](/workshops/static/images/ocp-eda/aap-credential.png)
+
+
+## 3.3 - Event driven ansible basics
+
+Within Event Driven Ansible, rulebooks within source control repositories are organized into logical collections called projects. Create a project pointing to rulebooks contained in `https://github.com/jmhbnz/workshops`. 
+
+Once your new project has `Completed` a sync successfully your task is to create a [Decision Environment](https://docs.redhat.com/en/documentation/red_hat_ansible_automation_platform/2.7/administer-assembly_eda_decision_environments). A decision environment is the container environment your rulebook will execute within.
+
+![ecosystem-catalog](/workshops/static/images/ocp-eda/ecosystem-catalog.png)
+
+
+## 3.4 - Listening for events
+
+Now it's time to tell Event Driven Ansible to listen for incoming events from OpenShift Alertmanager. Your task is to configure `rulebook/expand-volume.yaml` to process incoming events on port `5000`.
+
+![rulebook-activation-docs](/workshops/static/images/ocp-eda/rulebook-activation-docs.png)
+
+
+## 3.5 - Taking action on events
+
+With Event Driven Ansible now listening for storage volume events, your next task is to configure the Job Template that will execute when `PersistentVolumeUsageCritical` occurs.
+
+For this task, configure an appropriate job template that will run the existing playbook [`expand-volume.yaml`](https://raw.githubusercontent.com/jmhbnz/workshops/refs/heads/main/data/openshift-eda/playbooks/expand-volume.yaml).
+
+![template-prompt](/workshops/static/images/ocp-eda/template-prompt.png)
+
+
+## 3.6 - Creating an alerting rule
+
+Great progress, with the configuration for Event Driven Ansible in place we can now create the `AlertmanagerConfig` that will route `PersistentVolumeUsageCritical` alerts on OpenShift to our Event Driven Ansible listener.
+
+![alertmanager-config](/workshops/static/images/ocp-eda/alertmanager-config.png)
+
+
+## 3.7 - Test it out!
+
+At this point, all that is left is to test out the integration. Use the same pod replica count approach from 2.6 to re-trigger your alert and then keep an eye on Ansible Automation Controller.
+
+After a brief wait for your alert to fire you should see jobs being launched which are gathering information about the crashing application, and automatically diagnosing the crash with a large language model.
+
+Congratulations, you've completed this challenge track by successfully created a pipeline to automatically enrich alerts with extremely valuable context which could be updated directly in to incident management tools to help teams address application issues rapidly! 🎉
+
+![crash-enrichment](/workshops/static/images/ocp-eda/crash-enrichment.png)
 

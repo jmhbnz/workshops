@@ -7,19 +7,9 @@
       <language>en-us</language>
       <managingEditor>jablair@redhat.com (Red Hat)</managingEditor>
       <webMaster>jablair@redhat.com (Red Hat)</webMaster>
-      <lastBuildDate>Sun, 21 Jun 2026 00:00:00 GMT</lastBuildDate>
+      <lastBuildDate>Tue, 25 Aug 2026 00:00:00 GMT</lastBuildDate>
       <atom:link href="https://jmhbnz.github.io/workshops/feed.xml" rel="self" type="application/rss+xml"/>
       
-  <item>
-    <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise1</guid>
-    <title>Getting started</title>
-    <link>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise1</link>
-    <description>How to get started with the hackathon</description>
-    <pubDate>Sun, 21 Jun 2026 00:00:00 GMT</pubDate>
-    <author>jablair@redhat.com (Red Hat)</author>
-    <category>ansible</category><category>automation</category><category>hackathon</category>
-  </item>
-
   <item>
     <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise2</guid>
     <title>Track 1 - Self healing security operations</title>
@@ -38,6 +28,16 @@
     <pubDate>Wed, 26 Aug 2026 00:00:00 GMT</pubDate>
     <author>jablair@redhat.com (Red Hat)</author>
     <category>ansible</category><category>automation</category><category>hackathon</category><category>openshift</category><category>applications</category>
+  </item>
+
+  <item>
+    <guid>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise4</guid>
+    <title>Track 3 - Automated cluster operations</title>
+    <link>https://jmhbnz.github.io/workshops/workshop/ocp-eda-hackathon/exercise4</link>
+    <description>Automated disk capacity management</description>
+    <pubDate>Thu, 27 Aug 2026 00:00:00 GMT</pubDate>
+    <author>jablair@redhat.com (Red Hat)</author>
+    <category>ansible</category><category>automation</category><category>hackathon</category><category>openshift</category><category>operations</category>
   </item>
 
     </channel>
