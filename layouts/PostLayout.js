@@ -5,13 +5,13 @@ import { BlogSEO } from '@/components/SEO'
 import siteMetadata from '@/data/siteMetadata'
 import ScrollTopAndComment from '@/components/ScrollTopAndComment'
 
-export default function PostLayout({ frontMatter, next, prev, children }) {
+export default function PostLayout({ frontMatter, next, prev, children, category }) {
   const { slug, title, exercise } = frontMatter
 
   return (
     <SectionContainer>
       <BlogSEO
-        url={`${siteMetadata.siteUrl}/workshop/${slug}`}
+        url={`${siteMetadata.siteUrl}/${slug}`}
         {...frontMatter}
       />
 
@@ -45,7 +45,7 @@ export default function PostLayout({ frontMatter, next, prev, children }) {
                         Previous Exercise
                       </h2>
                       <div className="text-primary-800 hover:text-primary-900 dark:hover:text-primary-400">
-                        <Link href={`/workshop/${prev.slug}`}>
+                        <Link href={`/${prev.slug}`}>
                           ← {prev.title}
                         </Link>
                       </div>
@@ -58,7 +58,7 @@ export default function PostLayout({ frontMatter, next, prev, children }) {
                         Next Exercise
                       </h2>
                       <div className="text-primary-800 hover:text-primary-900 dark:hover:text-primary-400">
-                        <Link href={`/workshop/${next.slug}`}>
+                        <Link href={`/${next.slug}`}>
                           {next.title} →
                         </Link>
                       </div>
@@ -67,7 +67,7 @@ export default function PostLayout({ frontMatter, next, prev, children }) {
 
                   <div className="pt-4">
                     <Link
-                      href="/workshop"
+                      href={`/${category}`}
                       className="text-primary-800 hover:text-primary-900 dark:hover:text-primary-400"
                     >
                       ← Back to exercise list

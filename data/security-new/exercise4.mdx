@@ -74,13 +74,13 @@ Now let's grab the route URLs for the application, and download the pre-built ex
 ```bash
 export EDGE_URL=$(oc --namespace $NAMESPACE get route edge-server --output jsonpath='{.spec.host}')
 export SOCKETIO_URL=$(oc --namespace $NAMESPACE get route socketio-server --output jsonpath='{.spec.host}')
-curl -sSfL https://raw.githubusercontent.com/jmhbnz/workshops/main/data/workshop/setup/exercise4/exploit/payload.bin -o /tmp/payload.bin
+curl -sSfL https://raw.githubusercontent.com/jmhbnz/workshops/main/data/security-new/setup/exercise4/exploit/payload.bin -o /tmp/payload.bin
 ```
 
 Now deliver the exploit payload to the edge server webhook:
 
 ```bash
-curl -X POST "https://${EDGE_URL}/webhook" \
+curl -k -X POST "https://${EDGE_URL}/webhook" \
   -H "Content-Type: application/octet-stream" \
   -H "X-Channel: socketio" \
   --data-binary @/tmp/payload.bin
@@ -91,7 +91,7 @@ You should see a JSON response confirming the payload was delivered and received
 Now check whether the exploit succeeded. The Socket.IO server exposes an `/evidence` endpoint that reads the evidence file:
 
 ```bash
-curl -sf "https://${SOCKETIO_URL}/evidence"
+curl -k -sf "https://${SOCKETIO_URL}/evidence"
 ```
 
 If the exploit worked, you'll see output like:
@@ -102,7 +102,7 @@ If the exploit worked, you'll see output like:
 
 **The Socket.IO server has been compromised.** An attacker delivered arbitrary code through a pickle payload from outside the cluster. The server had no way to distinguish it from a legitimate inter-server message.
 
-> Take a minute to review the exploit source at [`exploit/poc.py`](https://github.com/jmhbnz/workshops/blob/main/data/workshop/setup/exercise4/exploit/poc.py) and the vulnerable server at [`socketio-server/server.py`](https://github.com/jmhbnz/workshops/blob/main/data/workshop/setup/exercise4/socketio-server/server.py). The server code itself looks completely normal. The vulnerability is in the `python-socketio` library's use of `pickle.loads()`.
+> Take a minute to review the exploit source at [`exploit/poc.py`](https://github.com/jmhbnz/workshops/blob/main/data/security-new/setup/exercise4/exploit/poc.py) and the vulnerable server at [`socketio-server/server.py`](https://github.com/jmhbnz/workshops/blob/main/data/workshop/setup/exercise4/socketio-server/server.py). The server code itself looks completely normal. The vulnerability is in the `python-socketio` library's use of `pickle.loads()`.
 
 
 ## 4.4 Harden the image
@@ -149,7 +149,7 @@ oc --namespace $NAMESPACE exec deploy/socketio-server -- rm -f /tmp/evidence/pwn
 Now let's address the exploit directly. Apply the hardened Socket.IO server deployment, which uses the Red Hat Hardened Images distroless Python image:
 
 ```bash
-curl --silent --fail --location "https://raw.githubusercontent.com/jmhbnz/workshops/main/data/workshop/setup/exercise4/k8s/socketio-server-hardened.yaml" \
+curl -k --silent --fail --location "https://raw.githubusercontent.com/jmhbnz/workshops/main/data/security-new/setup/exercise4/k8s/socketio-server-hardened.yaml" \
   | sed "s/\${SUFFIX}/${SUFFIX}/g; s/\${NAMESPACE}/${NAMESPACE}/g" \
   | oc apply --filename -
 ```
@@ -188,7 +188,7 @@ You should see `quay.io/smileyfritz/socketio-server:0.1.0-hardened`.
 Re-run the exploit against the hardened server. The edge server and Redis still relay the payload as before:
 
 ```bash
-curl -X POST "https://${EDGE_URL}/webhook" \
+curl -k -X POST "https://${EDGE_URL}/webhook" \
   -H "Content-Type: application/octet-stream" \
   -H "X-Channel: socketio" \
   --data-binary @/tmp/payload.bin
@@ -197,7 +197,7 @@ curl -X POST "https://${EDGE_URL}/webhook" \
 Now check the `/evidence` endpoint:
 
 ```bash
-curl -sf "https://${SOCKETIO_URL}/evidence"
+curl -k -sf "https://${SOCKETIO_URL}/evidence"
 ```
 
 This time the response will be empty — **no evidence file was created** ⛔. The exploit payload called `subprocess.call(["/bin/bash", ...])` and there is no `/bin/bash` in the Red Hat Hardened Images distroless image. The pickle deserialization still triggered, but the code execution failed.

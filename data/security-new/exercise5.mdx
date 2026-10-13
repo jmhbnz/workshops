@@ -26,7 +26,7 @@ We'll use the `payment-gateway` pod from our incident scenario. Run the followin
 Remember to set your `namespace:` in the command below before executing it within your web terminal.
 
 ```bash
-oc --namespace payment-gateway-x exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Arbitrary process execution successful'"
+oc --namespace payment-gateway-x exec -it deploy/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Arbitrary process execution successful'"
 ```
 
 You should see output confirming the shell ran successfully, displaying the user and hostname inside the container. This is exactly the kind of capability a threat actor exploits after gaining initial access. Once they can execute arbitrary processes, they can download toolkits, exfiltrate data, or establish persistence.
@@ -46,7 +46,7 @@ While the baseline is **unlocked**, RHACS continues to add newly observed proces
 
 This gives platform and security teams an extremely powerful runtime control, based on behavioural analysis: even if a vulnerability allows remote code execution, RHACS will detect and alert on the anomalous process that the exploit attempts to run.
 
-Let's see this in action. Let's return to the [RHACS web console](https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/) and navigate to **Risk** from the left-hand menu. Search for the `payment-gateway` pod.
+Let's see this in action. Let's return to the [RHACS web console](https://central-stackrox.apps.cluster1.sandbox2392.opentlc.com/) and navigate to **Risk** from the left-hand menu. Search for the `payment-gateway` pod.
 
 Click on the pod to open its risk details, then select the **Process Discovery** tab. You'll see the list of processes that RHACS has observed running in the container.
 
@@ -80,7 +80,7 @@ Here's a view of a locked process baseline:
 With the baseline locked, let's prove it works. Run the same exec command we used earlier:
 
 ```bash
-oc --namespace payment-gateway-x exec -it pod/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
+oc --namespace payment-gateway-x exec -it deploy/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
 ```
 
 The command itself will still execute (RHACS is **detecting**, not **blocking** by default), but now navigate back to the RHACS web console and check the **Violations** page from the left-hand menu.
@@ -103,7 +103,7 @@ You should see a new violation: **Unauthorized Process Execution** for the `paym
 
 Locking baselines one deployment at a time through the web console is fine for a targeted change, but ACME has hundreds of deployments. Morgan wants every workload in the `payment-gateway` namespace locked down before end of day.
 
-Fortunately, RHACS exposes a full [REST API](https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/main/apidocs) that we can use to automate this. The API includes a [bulk lock endpoint](https://github.com/stackrox/stackrox/blob/master/proto/api/v1/process_baseline_service.proto) that can lock all process baselines for a given cluster and namespace in a single call.
+Fortunately, RHACS exposes a full [REST API](https://central-stackrox.apps.cluster1.sandbox2392.opentlc.com/main/apidocs) that we can use to automate this. The API includes a [bulk lock endpoint](https://github.com/stackrox/stackrox/blob/master/proto/api/v1/process_baseline_service.proto) that can lock all process baselines for a given cluster and namespace in a single call.
 
 First, generate an API token in the RHACS web console:
 
@@ -116,7 +116,7 @@ Now set your environment variables:
 
 ```bash
 export ROX_API_TOKEN="<your-token-here>"
-export ROX_CENTRAL_ADDRESS="central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com:443"
+export ROX_CENTRAL_ADDRESS="central-stackrox.apps.cluster1.sandbox2392.opentlc.com:443"
 ```
 
 We need the cluster ID for the bulk lock request. Retrieve it with:

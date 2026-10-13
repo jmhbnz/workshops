@@ -4,7 +4,7 @@ const siteMetadata = {
   headerTitle: 'Red Hat',
   description: 'Red Hat OpenShift Event Guides',
   language: 'en-us',
-  siteUrl: 'https://jmhbnz.github.io/workshops',
+  siteUrl: 'https://shaneboulden.github.io/workshops',
   siteRepo: 'https://github.com/jmhbnz/workshops',
   siteLogo: '/static/images/redhat.png',
   image: '/static/images/avatar.png',

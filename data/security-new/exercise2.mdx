@@ -19,7 +19,7 @@ Sarah threw open her laptop and immediately connected to the bank's VPN, trying 
 
 ## 2.1 - Identify the compromised credentials
 
-Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
+Now online and frantically loading the [OpenShift Web Console](https://console-openshift-console.apps.cluster1.sandbox2392.opentlc.com/) for the `acme-prd` cluster Sarah keeps Morgan updated with her progress.
 
 > **Sarah**: Ok I'm logged in, do you want me to kill the pod? What do we do??
 
@@ -52,11 +52,27 @@ namespace=$(oc project --short)
 
 for master in $(oc get nodes --selector node-role.kubernetes.io/master --output name); do
   echo "=== Searching logs on ${master} ==="
-  oc adm node-logs "${master}" --path=kube-apiserver/audit.log \
-    | jq --arg ns "${namespace}" 'first(select(.objectRef.namespace == $ns
-          and .objectRef.name == "payment-gateway"
-          and .verb == "create"
-          and .objectRef.subresource == "exec"))'
+
+  # Get list of audit log files, sorted newest first (current audit.log first, then rotated)
+  log_files=$(oc adm node-logs "${master}" --path=kube-apiserver/ 2>/dev/null | grep -E '^audit.*\.log$' | sort -r)
+
+  # Add current audit.log first, then take next 2 rotated logs
+  for log_file in audit.log $(echo "$log_files" | grep -E '^audit-' | head -2); do
+    echo "Checking ${log_file}..."
+    result=$(oc adm node-logs "${master}" --path=kube-apiserver/${log_file} 2>/dev/null \
+      | jq --arg ns "${namespace}" 'select(.objectRef.namespace == $ns
+            and (.objectRef.name | startswith("payment-gateway"))
+            and .verb == "get"
+            and .stage == "ResponseStarted"
+            and .objectRef.subresource == "exec")' 2>/dev/null \
+      | head -50)
+
+    if [ -n "$result" ]; then
+      echo "Found in ${log_file}:"
+      echo "$result"
+      break
+    fi
+  done
 done
 ```
 
@@ -132,7 +148,7 @@ After running the command you should see a log entry similar to the one below.  
 
 ## 2.3 - Reviewing outbound traffic
 
-After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/main/network-graph) to review network traffic and draft the new network policy.
+After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-stackrox.apps.cluster1.sandbox2392.opentlc.com/main/network-graph) to review network traffic and draft the new network policy.
 
 Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider.
 
@@ -218,7 +234,7 @@ Feel free to take a moment to explore the files that were just created on disk w
 
 ![support-case](/workshops/static/images/fsi-security/sarah-support.png)
 
-Well done, with the breach investigated and contained you're ready to move on to forensic analysis in [Exercise 3](/workshop/exercise3)! 🎉
+Well done, with the breach investigated and contained you're ready to move on to forensic analysis in [Exercise 3](/security-new/exercise3)! 🎉
 
 ## Stretch activity
-Can you see any alerts in (Red Hat Advanced Cluster Security for Kubernetes (RHACS))[https://central-stackrox.apps.cluster-sr857.sr857.sandbox1037.opentlc.com/] that provide detection of the breach?
+Can you see any alerts in [Red Hat Advanced Cluster Security for Kubernetes (RHACS)](https://central-stackrox.apps.cluster1.sandbox2392.opentlc.com/main/violations/) that provide detection of the breach?

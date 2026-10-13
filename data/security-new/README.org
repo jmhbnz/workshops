@@ -432,8 +432,8 @@ echo "Applying template for each attendee"
 for i in $(seq 1 30); do
 
   # Clean up any pre-existing exploited pod
-  oc delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --grace-period=0 --force 2>/dev/null || true
-  oc wait --for=delete pod -l app=payment-gateway --namespace="payment-gateway-${i}" --timeout=30s 2>/dev/null || true
+  oc delete deploy -l app=payment-gateway --namespace="payment-gateway-${i}" 2>/dev/null || true
+  oc wait --for=delete deploy -l app=payment-gateway --namespace="payment-gateway-${i}" --timeout=30s 2>/dev/null || true
 
   # Hydrate the new pod and supporting resources
   oc process --filename setup/app-template.yaml --param SUFFIX=$i | oc apply --filename -
@@ -450,7 +450,7 @@ for i in $(seq 1 30); do
   token=$(oc create token cicd-pipeline-runner-sa --namespace "${namespace}")
 
   # Executing the exploit payload dynamically using explicit parameter names
-  oc exec pod/payment-gateway \
+  oc exec deploy/payment-gateway \
     --namespace "${namespace}" \
     --token "${token}" \
     --container httpd \

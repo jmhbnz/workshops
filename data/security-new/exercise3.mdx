@@ -52,13 +52,14 @@ Initiate a checkpoint by copying and running the following script in your OpenSh
 
 ```bash
 NODE_NAME=$(oc get pods -l app=payment-gateway -o jsonpath='{.items[0].spec.nodeName}')
+POD_NAME=$(oc get pods -l app=payment-gateway -o jsonpath='{.items[0].metadata.name}')
 CURRENT_NS=$(oc project --short)
 
 echo "==> Triggering fresh CRIU checkpoint on node: $NODE_NAME..."
 
 API_RESPONSE=$(curl --silent --insecure \
   --header "Authorization: Bearer $(oc whoami --show-token)" \
-  --request POST "$(oc whoami --show-server)/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/${CURRENT_NS}/payment-gateway/httpd")
+  --request POST "$(oc whoami --show-server)/api/v1/nodes/${NODE_NAME}/proxy/checkpoint/${CURRENT_NS}/${POD_NAME}/httpd")
 
 TARBALL_PATH=$(echo "$API_RESPONSE" | jq -r '.items[0] // empty')
 
@@ -77,6 +78,9 @@ oc debug node/"$NODE_NAME" --to-namespace="$CURRENT_NS" -- \
 
 echo "==> Success! Verifying saved forensic artifact in /tmp/:"
 ls -lah "/tmp/$CHECKPOINT_FILE"
+
+echo "==> Storing Checkpoint file location to \$CHECKPOINT_FILE_LOCATION"
+CHECKPOINT_FILE_LOCATION="/tmp/$CHECKPOINT_FILE"
 ```
 
 After a short wait you should see that a checkpoint has been created.
@@ -118,7 +122,7 @@ echo "checkpointctl inspect /tmp/\$CHECKPOINT_FILE"
 Once `checkpointctl` is installed in your web terminal run the command below to inspect the process tree of your checkpoint(s).
 
 ```bash
-checkpointctl inspect --ps-tree-env /tmp/checkpoint-payment-gateway_payment-gateway*
+checkpointctl inspect --ps-tree-env $CHECKPOINT_FILE_LOCATION
 ```
 
 You should see a summary of the process tree that was running inside the container at the point in time the checkpoint was taken, an example is below. Of interest from a forensics perspective is the process with id `235` which is running a bash script `exfil.sh`.
@@ -164,4 +168,4 @@ If you want to dive deeper into the world of volatile memory forensics and runti
 
 For practical hands-on security analysis, look into the [Volatility Framework](https://volatilityfoundation.org), the industry-standard memory forensics platform, as well as the [CNCF Kubernetes Security Specialist](https://www.cncf.io/training/certification/cks) (CKS) learning tracks, which frequently cover container runtime security, node isolation, and live incident response strategies.
 
-Feel free to take some time now exploring those resources. When you are ready let's move on to [Exercise 4](/workshop/exercise4)!
+Feel free to take some time now exploring those resources. When you are ready let's move on to [Exercise 4](/security-new/exercise4)!

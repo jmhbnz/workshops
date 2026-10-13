@@ -16,19 +16,26 @@ objects:
     metadata:
       name: payment-gateway-${SUFFIX}
 
-  - apiVersion: v1
-    kind: Pod
+  - apiVersion: apps/v1
+    kind: Deployment
     metadata:
       name: payment-gateway
       namespace: payment-gateway-${SUFFIX}
-      labels:
-        app: payment-gateway
     spec:
-      containers:
-        - name: httpd
-          image: 'image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest'
-          ports:
-            - containerPort: 8080
+      replicas: 1
+      selector:
+        matchLabels:
+          app: payment-gateway
+      template:
+        metadata:
+          labels:
+            app: payment-gateway
+        spec:
+          containers:
+            - name: httpd
+              image: 'image-registry.openshift-image-registry.svc:5000/openshift/httpd:latest'
+              ports:
+                - containerPort: 8080
 
   - apiVersion: v1
     kind: ServiceAccount
