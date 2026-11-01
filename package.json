@@ -37,7 +37,7 @@
     "remark-math": "^6.0.0",
     "sharp": "^0.35.5",
     "tailwindcss": "^4.3.3",
-    "unist-util-visit": "^5.1.0"
+    "unist-util-visit": "^5.2.0"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",
