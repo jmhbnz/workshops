@@ -3,4 +3,5 @@ out
 .next
 .husky
 operatorgroup.yaml
+*credentials.txt
 .env
