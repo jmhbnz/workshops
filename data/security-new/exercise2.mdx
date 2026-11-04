@@ -48,7 +48,7 @@ Ensure your `payment-gateway-x` project is selected, then click **Start**.
 Run the bash script below which uses `oc adm` to query the audit logs held on our control nodes specifically for `exec` events occurring in the namespace of interest.
 
 ```bash
-namespace=$(oc project --short)
+namespace=$(oc get project | grep payment | awk '{print $1}')
 
 for master in $(oc get nodes --selector node-role.kubernetes.io/master --output name); do
   echo "=== Searching logs on ${master} ==="
@@ -150,8 +150,7 @@ After running the command you should see a log entry similar to the one below.  
 
 After identifying the leaked credential Morgan and Sarah agree to isolate the workload to prevent any further connectivity with external sources. Sarah loads up the [Red Hat Advanced Cluster Security Dashboard](https://central-reencrypt-stackrox.apps.ocp.nx5jq.sandbox3235.opentlc.com/main/network-graph) to review network traffic and draft the new network policy.
 
-Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider.
-
+Log in to the Red Hat Advanced Cluster Security dashboard using the username `acmd-prd` authentication provider. Select the `htpasswd` login option and enter the environment username and password allocated to you.
 
 ![rhacs-auth](/workshops/static/images/fsi-security/rhacs-auth.png)
 *Red Hat Advanced Cluster Security authentication provider*
@@ -225,7 +224,7 @@ Let's return to our web terminal and run the following command to retrieve the a
 ```bash
 oc adm must-gather \
   --image=quay.io/openshift/origin-must-gather:latest \
-  --run-namespace="$(oc project --short)" \
+  --run-namespace="$(oc get project | grep payment | awk '{print $1}')" \
   --dest-dir=/tmp/incident-artifacts \
   -- /usr/bin/gather_audit_logs
 ```

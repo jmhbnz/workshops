@@ -53,7 +53,7 @@ Initiate a checkpoint by copying and running the following script in your OpenSh
 ```bash
 NODE_NAME=$(oc get pods -l app=payment-gateway -o jsonpath='{.items[0].spec.nodeName}')
 POD_NAME=$(oc get pods -l app=payment-gateway -o jsonpath='{.items[0].metadata.name}')
-CURRENT_NS=$(oc project --short)
+CURRENT_NS=$(oc get project | grep payment | awk '{print $1}')
 
 echo "==> Triggering fresh CRIU checkpoint on node: $NODE_NAME..."
 
@@ -97,29 +97,7 @@ After a short wait you should see that a checkpoint has been created.
 
 > **Morgan:** Perfect!  We can use the `checkpointctl` tool to take a look at it.
 
-Run the script below in your web terminal to make the `checkpointctl` binary available.
-
-```bash
-echo "==> Fetching precompiled checkpointctl toolkit..."
-curl --silent --fail --location \
-  'https://raw.githubusercontent.com/jmhbnz/checkpointctl/main/bin/checkpointctl' \
-  --output /tmp/checkpointctl
-
-chmod +x /tmp/checkpointctl
-mkdir -p $HOME/bin
-mv /tmp/checkpointctl $HOME/bin/checkpointctl
-export PATH=$HOME/bin:$PATH
-
-echo "==> Toolkit loaded successfully!"
-checkpointctl
-
-echo "--------------------------------------------------------"
-echo "==> To inspect your captured memory dump, run:"
-echo "checkpointctl inspect /tmp/\$CHECKPOINT_FILE"
-```
-
-
-Once `checkpointctl` is installed in your web terminal run the command below to inspect the process tree of your checkpoint(s).
+The `checkpointctl` has been pre-installed in your web terminal. Run the command below to inspect the process tree of your checkpoint(s).
 
 ```bash
 checkpointctl inspect --ps-tree-env $CHECKPOINT_FILE_LOCATION
