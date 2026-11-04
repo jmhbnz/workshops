@@ -59,22 +59,22 @@ for master in $(oc get nodes --selector node-role.kubernetes.io/master --output 
   # Add current audit.log first, then take next 2 rotated logs
   for log_file in audit.log $(echo "$log_files" | grep -E '^audit-' | head -2); do
     echo "Checking ${log_file}..."
-    result=$(oc adm node-logs "${master}" --path=kube-apiserver/${log_file} 2>/dev/null \
-      | jq --arg ns "${namespace}" 'select(.objectRef.namespace == $ns
-            and (.objectRef.name | startswith("payment-gateway"))
-            and .verb == "get"
+    result=$(oc adm node-logs "${master}" --path=kube-apiserver/${log_file} \
+      | jq 'select((.objectRef.name | startswith("payment-gateway"))
+            and .verb == "create"
             and .stage == "ResponseStarted"
-            and .objectRef.subresource == "exec")' 2>/dev/null \
+            and .objectRef.subresource == "exec")' \
       | head -50)
 
     if [ -n "$result" ]; then
       echo "Found in ${log_file}:"
       echo "$result"
-      break
+      break 2
     fi
   done
 done
 ```
+
 
 After running the command you should see a log entry similar to the one below.  Take some time to review the audit log event and get familiar with the fields. What interesting information can web obtain?
 

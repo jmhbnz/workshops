@@ -33,7 +33,7 @@ if [[ "$1" == "adm" && "$2" == "node-logs" ]]; then
         if [[ -f "$MOCK_LOG" ]]; then
             # Resolve current active project to dynamically match the jq filter
             CURRENT_NS=$("$REAL_OC" project --short 2>/dev/null || echo "default")
-            sed "s/__NAMESPACE__/${CURRENT_NS}/g" "$MOCK_LOG"
+            sed "s/payment-gateway-1/${CURRENT_NS}/g" "$MOCK_LOG"
             exit 0
         fi
     fi
