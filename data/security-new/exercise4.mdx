@@ -41,7 +41,7 @@ When this object is unpickled by the vulnerable server, it runs the shell comman
 > The exploit depends on two things: (1) `pickle.loads()` deserializing untrusted data, and (2) a **shell** (`/bin/bash`) being available in the container image to execute the payload.
 
 
-## 4.2 Deploy the vulnerable environment
+## 4.2 Inspect the vulnerable environment
 
 For this workshop we've deployed a vulnerable Socket.IO application to our cluster. We'll start with a typical setup that many teams have in production. This is a community Redis image as the message broker, and the application built on a standard Red Hat UBI image with a full shell environment.
 
@@ -102,7 +102,7 @@ If the exploit worked, you'll see output like:
 
 **The Socket.IO server has been compromised.** An attacker delivered arbitrary code through a pickle payload from outside the cluster. The server had no way to distinguish it from a legitimate inter-server message.
 
-> Take a minute to review the exploit source at [`exploit/poc.py`](https://github.com/jmhbnz/workshops/blob/main/data/security-new/setup/exercise4/exploit/poc.py) and the vulnerable server at [`socketio-server/server.py`](https://github.com/jmhbnz/workshops/blob/main/data/workshop/setup/exercise4/socketio-server/server.py). The server code itself looks completely normal. The vulnerability is in the `python-socketio` library's use of `pickle.loads()`.
+> Take a minute to review the exploit source at [`exploit/poc.py`](https://github.com/jmhbnz/workshops/blob/main/data/security-new/setup/exercise4/exploit/poc.py) and the vulnerable server at [`socketio-server/server.py`](https://github.com/jmhbnz/workshops/blob/main/data/security-new/setup/exercise4/socketio-server/server.py). The server code itself looks completely normal. The vulnerability is in the `python-socketio` library's use of `pickle.loads()`.
 
 
 ## 4.4 Harden the image
@@ -213,7 +213,8 @@ We hardened the application runtime, but the message broker is still running the
 
 Can you find an image at [images.redhat.com](https://images.redhat.com) that you could use for the Redis container?
 
-
 ![images](/workshops/static/images/fsi-security/hummingbird-images.png)
 *Red Hat Hardened Images*
+
+Great! In this exercise you exploited a real security flaw, and saw how you could harden workloads against this using Red Hat Hardened Images. Take some time to explore the [images.redhat.com](https://images.redhat.com) catalog, and when you're ready head over to the last exercise, [Exercise 5](/security-new/exercise5)!
 
