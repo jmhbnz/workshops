@@ -1,0 +1,44 @@
+{
+  "kind": "Event",
+  "apiVersion": "audit.k8s.io/v1",
+  "level": "Metadata",
+  "auditID": "706e66a9-8f01-4d5b-a342-7242fb0ef00b",
+  "stage": "ResponseStarted",
+  "requestURI": "/api/v1/namespaces/payment-gateway-1/pods/payment-gateway/exec?command=sh&command=-c&command=%0A++++++export+C2_SERVER%3D%22198.51.100.42%22%0A++++++export+CODENAME%3D%22SHADOW_PIVOT%22%0A++++++export+ENV_MARKER%3D%22ACME_SECRET_KEY_EXFIL_TEST_9921%22%0A++++++mkdir+-p+%2Ftmp%2F.hidden_toolkit%0A++++++echo+%22while+true%3B+do+sleep+60%3B+done%22+%3E+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++chmod+%2Bx+%2Ftmp%2F.hidden_toolkit%2Fexfil.sh%0A++++++%2Ftmp%2F.hidden_toolkit%2Fexfil.sh+%3E+%2Fdev%2Fnull+2%3E%261+%26%0A++++&container=httpd&stderr=true&stdout=true",
+  "verb": "create",
+  "user": {
+    "username": "system:serviceaccount:payment-gateway-1:cicd-pipeline-runner-sa",
+    "uid": "305c20f0-e448-43b8-8260-44feedb88601",
+    "groups": [
+      "system:serviceaccounts",
+      "system:serviceaccounts:payment-gateway-1",
+      "system:authenticated"
+    ],
+    "extra": {
+      "authentication.kubernetes.io/credential-id": [
+        "JTI=e4fc9219-a80c-44ff-bee8-fe8eb1d04786"
+      ]
+    }
+  },
+  "sourceIPs": [
+    "100.64.0.5"
+  ],
+  "userAgent": "oc/4.21.15 (linux/amd64) kubernetes/9d9df34",
+  "objectRef": {
+    "resource": "pods",
+    "namespace": "payment-gateway-1",
+    "name": "payment-gateway",
+    "apiVersion": "v1",
+    "subresource": "exec"
+  },
+  "responseStatus": {
+    "metadata": {},
+    "code": 101
+  },
+  "requestReceivedTimestamp": "2026-05-17T14:01:47.504612Z",
+  "stageTimestamp": "2026-05-17T14:01:47.535669Z",
+  "annotations": {
+    "authorization.k8s.io/decision": "allow",
+    "authorization.k8s.io/reason": "RBAC: allowed by RoleBinding \"workshop-sa-exec-binding/payment-gateway-1\" of Role \"container-executor\" to ServiceAccount \"cicd-pipeline-runner-sa/payment-gateway-1\""
+  }
+}

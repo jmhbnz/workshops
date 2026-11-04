@@ -169,7 +169,7 @@ echo "Waiting for all payment-gateway pods to initialize..."
 oc wait --for=condition=Ready pods --selector app=payment-gateway --all-namespaces --timeout=90s
 
 echo "Simulating live 'oc exec' intrusion across environments..."
-for i in $(seq 1 30); do
+for i in $(seq 1 130); do
   namespace="payment-gateway-$i"
 
   # Request a short lived token for our new cicd service account in this namespace
@@ -305,56 +305,41 @@ clusterrolebinding.rbac.authorization.k8s.io/kube-apiserver-checkpoints created
 #+end_example
 
 
-* Store checkpointctl in a bucket
+* Customize default web terminal image
 
-#+NAME: Create bucket
+We are going to customize the web terminal that participants will use in order to make the lab more deterministic and responsive. Specifically the exercise for querying cluster audit logs on master nodes, which has issues due to short log retention times and placing high load on masters.
+
+We can simply patch the default Web Terminal ~DevWorkspaceTemplate~ to use our custom image which includes a shim for the ~oc adm node-logs~ commands we use to return a deterministic cached response to make the workshop more reliable.
+
+#+NAME: Customize web terminal operator
 #+begin_src bash
 cat << EOF | oc apply --filename -
-apiVersion: objectbucket.io/v1alpha1
-kind: ObjectBucketClaim
+apiVersion: workspace.devfile.io/v1alpha2
+kind: DevWorkspaceTemplate
 metadata:
-  name: workshop-assets
-  namespace: openshift-storage
+  annotations:
+    web-terminal.redhat.com/unmanaged-state: 'true'
+  name: web-terminal-tooling
+  namespace: openshift-operators
 spec:
-  generateBucketName: workshop-assets
-  storageClassName: openshift-storage.noobaa.io
+  components:
+  - name: web-terminal-tooling
+    container:
+      args:
+        - tail
+        - -f
+        - /dev/null
+      cpuLimit: 400m
+      cpuRequest: 100m
+      image: quay.io/rh_ee_jablair/web-terminal/web-terminal-tooling-rhel9-shim:latest
+      memoryLimit: 4Gi
+      memoryRequest: 512Mi
+      mountSources: false
+      sourceMapping: /projects
 EOF
 #+end_src
 
-#+RESULTS: Create bucket
+#+RESULTS: Customize web terminal operator
 #+begin_example
-#+end_example
-
-
-Once the bucket exists we need to compile ~checkpointctl~ statically via ~make release~ on the source and upload the resulting binary to the bucket.
-
-We can then generate a share link for the binary which needs to be updated into the lab instructions.
-
-
-* Increase audit log retention
-
-We are querying audit logs directly off control nodes, so we need to crank up the retention on the main ~audit.log~ file so events stick around.
-
-We'll change from the default 10 100mb files to 3 2048mb files.
-
-#+NAME: Increase audit log retention
-#+begin_src bash
-cat <<EOF | oc apply -f -
-apiVersion: operator.openshift.io/v1
-kind: KubeAPIServer
-metadata:
-  name: cluster
-spec:
-  unsupportedConfigOverrides:
-    apiServerArguments:
-      audit-log-maxsize:
-        - "2048"
-      audit-log-maxbackup:
-        - "3"
-EOF
-#+end_src
-
-#+RESULTS: Increase audit log retention
-#+begin_example
-kubeapiserver.operator.openshift.io/cluster configured
+devworkspacetemplate.workspace.devfile.io/web-terminal-tooling configured
 #+end_example

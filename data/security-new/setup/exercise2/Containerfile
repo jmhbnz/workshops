@@ -1,0 +1,17 @@
+FROM registry.redhat.io/web-terminal/web-terminal-tooling-rhel9@sha256:0b7f24a14929daef656fbbdb70e55238924057a9cb52234a5fcca8a287e9d0e3
+
+USER root
+
+RUN mv /usr/bin/oc /usr/bin/oc.real
+
+# Copy the shim script and deterministic response file
+COPY oc-shim.sh /usr/bin/oc
+COPY audit.log /opt/workshop/audit.log
+
+# Fix perms for arbitrary uid
+RUN chmod 755 /usr/bin/oc /usr/bin/oc.real && \
+    mkdir -p /opt/workshop && \
+    chmod 755 /opt/workshop && \
+    chmod 644 /opt/workshop/audit.log
+
+USER 1001
