@@ -4,4 +4,5 @@ out
 .husky
 operatorgroup.yaml
 *credentials.txt
+must-gather.tar.gz
 .env
