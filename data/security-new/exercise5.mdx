@@ -81,7 +81,7 @@ Here's a view of a locked process baseline:
 With the baseline locked, let's prove it works. Run the same exec command we used earlier:
 
 ```bash
-oc --namespace payment-gateway-x exec -it deploy/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
+oc --namespace $(oc get project | grep payment | awk '{print $1}') exec -it deploy/payment-gateway -- /bin/bash -c "whoami && hostname && echo 'Can I still do this?'"
 ```
 
 The command itself will still execute (RHACS is **detecting**, not **blocking** by default), but now navigate back to the RHACS web console and check the **Violations** page from the left-hand menu.
