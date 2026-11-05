@@ -7,6 +7,7 @@ RUN mv /usr/bin/oc /usr/bin/oc.real
 # Copy the shim script and deterministic response file
 COPY oc-shim.sh /usr/bin/oc
 COPY audit.log /opt/workshop/audit.log
+COPY must-gather.tar.gz /opt/workshop/must-gather.tar.gz
 
 # Add precompiled checkpointctl to path
 ADD https://raw.githubusercontent.com/jmhbnz/checkpointctl/main/bin/checkpointctl /usr/local/bin/checkpointctl
@@ -15,6 +16,6 @@ ADD https://raw.githubusercontent.com/jmhbnz/checkpointctl/main/bin/checkpointct
 RUN chmod 755 /usr/bin/oc /usr/bin/oc.real /usr/local/bin/checkpointctl && \
     mkdir -p /opt/workshop && \
     chmod 755 /opt/workshop && \
-    chmod 644 /opt/workshop/audit.log
+    chmod 644 /opt/workshop/audit.log /opt/workshop/must-gather.tar.gz
 
 USER 1001
