@@ -79,20 +79,23 @@ else
 fi
 
 echo "Configuring OAuth to use htpasswd identity provider..."
-oc apply -f - <<EOF
-apiVersion: config.openshift.io/v1
-kind: OAuth
-metadata:
-  name: cluster
-spec:
-  identityProviders:
-  - name: htpasswd
-    mappingMethod: claim
-    type: HTPasswd
-    htpasswd:
-      fileData:
-        name: ${SECRET_NAME}
-EOF
+NEW_IDPS=$(oc get oauth cluster -o json | jq -c --arg secret "${SECRET_NAME}" '
+  (.spec.identityProviders // [])
+  | map(select(.name != "htpasswd"))
+  + [{
+      "name": "htpasswd",
+      "mappingMethod": "claim",
+      "type": "HTPasswd",
+      "htpasswd": {
+        "fileData": {
+          "name": $secret
+        }
+      }
+    }]
+')
+
+oc patch oauth cluster --type=merge -p "{\"spec\": {\"identityProviders\": ${NEW_IDPS}}}"
+
 
 echo "Waiting for oauth-openshift pods to restart..."
 oc rollout status deployment/oauth-openshift -n openshift-authentication --timeout=120s || true
